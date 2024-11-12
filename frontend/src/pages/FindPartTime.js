@@ -194,17 +194,15 @@ const FindPartTime = () => {
           </button>
         </div>
 
-        {/* Listings section */}
         <div className="w-full lg:w-3/4 pl-6 flex flex-col">
           {filteredListings.length > 0 ? (
             filteredListings.map((listing, index) => (
               <div
                 key={index}
                 className="w-full mb-6 cursor-pointer"
-                onClick={() => handleListingClick(listing)} // Tıklama işlemi
+                onClick={() => handleListingClick(listing)}
               >
                 <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-6">
-                  {/* Listing details (center) */}
                   <div className="flex flex-col justify-center w-full space-y-2">
                     <h3 className="text-xl font-semibold text-gray-800">
                       {listing.name}
