@@ -12,35 +12,31 @@ const Navbar = () => {
         <div className="text-3xl font-bold tracking-wider">
           <Link to="/">
             {" "}
-            {/* Logo'ya tıklandığında ana sayfaya yönlendirecek */}
             <img src={Logo} alt="Dormitory Logo" className="h-10" />
           </Link>
         </div>
 
         <div className="hidden md:flex space-x-8">
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/">Home</Link> {/* Home bağlantısı */}
+            <Link to="/">Home</Link>
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
             <Link to="/find-dorms">Find Dorms & Roommates</Link>{" "}
-            {/* Kendi sayfanızın linkini buraya ekleyin */}
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
             <Link to="/find-intern">Find Intern</Link>{" "}
-            {/* Kendi sayfanızın linkini buraya ekleyin */}
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
             <Link to="/find-part-time">Find Part Time</Link>{" "}
-            {/* Kendi sayfanızın linkini buraya ekleyin */}
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/about">About Us</Link> {/* About Us bağlantısı */}
+            <Link to="/about">About Us</Link>
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/contact">Contact</Link> {/* Contact bağlantısı */}
+            <Link to="/contact">Contact</Link>
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/login">Login</Link> {/* Login bağlantısı */}
+            <Link to="/login">Login</Link>
           </div>
         </div>
 

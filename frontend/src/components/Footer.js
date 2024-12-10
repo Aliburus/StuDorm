@@ -31,10 +31,8 @@ const Footer = () => {
           </a>
         </div>
 
-        {/* Sosyal Medya Iconları */}
         <div className="mt-6">
           <div className="flex justify-center space-x-6">
-            {/* Instagram Linki */}
             <IconButton
               component="a"
               href="https://www.instagram.com/"
@@ -43,10 +41,8 @@ const Footer = () => {
               className="bg-yellow-500 p-2 rounded-full hover:bg-yellow-400"
             >
               <InstagramIcon fontSize="large" style={{ color: "white" }} />{" "}
-              {/* Beyaz renk ekleniyor */}
             </IconButton>
 
-            {/* WhatsApp Linki */}
             <IconButton
               component="a"
               href="https://wa.me/"
@@ -55,7 +51,6 @@ const Footer = () => {
               className="bg-green-500 p-2 rounded-full hover:bg-green-400"
             >
               <WhatsAppIcon fontSize="large" style={{ color: "white" }} />{" "}
-              {/* Beyaz renk ekleniyor */}
             </IconButton>
           </div>
           <div className="mt-6">

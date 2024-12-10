@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // useNavigate hook'u eklendi
-import Navbar from "../components/Navbar"; // Navbar bileşeniniz
-import Footer from "../components/Footer"; // Footer bileşeniniz
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const FindPartTime = () => {
   const [listings, setListings] = useState([]);
@@ -10,9 +10,8 @@ const FindPartTime = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [filteredListings, setFilteredListings] = useState([]);
 
-  const navigate = useNavigate(); // useNavigate hook'u kullanılıyor
+  const navigate = useNavigate();
 
-  // Mock data for categories, provinces, and districts
   const categories = [
     { name: "Eğitim" },
     { name: "Satış" },
@@ -32,7 +31,6 @@ const FindPartTime = () => {
     Izmir: ["Konak", "Bornova"],
   };
 
-  // Sample listing data
   const sampleListings = [
     {
       name: "Özel Ders Öğretmeni",
@@ -74,10 +72,9 @@ const FindPartTime = () => {
 
   useEffect(() => {
     setListings(sampleListings);
-    setFilteredListings(sampleListings); // Başlangıçta tüm listelemeler görünsün
+    setFilteredListings(sampleListings);
   }, []);
 
-  // Apply the filters when the user clicks on "Filtrele"
   const applyFilters = () => {
     const result = listings.filter(
       (listing) =>
@@ -102,11 +99,10 @@ const FindPartTime = () => {
 
   const handleProvinceChange = (e) => {
     setSelectedProvince(e.target.value);
-    setSelectedDistrict(""); // İl değiştiğinde ilçe sıfırlansın
+    setSelectedDistrict("");
   };
 
   const handleListingClick = (listing) => {
-    // İlan tıklandığında, ilan detay sayfasına yönlendir
     navigate(`/listing/${listing.name}`, { state: { listing } });
   };
 
@@ -114,7 +110,6 @@ const FindPartTime = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar className="w-full bg-indigo-600 text-white" />
       <div className="container mx-auto p-6 flex flex-grow flex-col md:flex-row">
-        {/* Filters section */}
         <div className="w-full lg:w-1/4 bg-white p-6 mb-4 lg:mb-0 flex-none flex flex-col justify-start">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtrele</h2>
 

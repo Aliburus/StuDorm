@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Logo1 from "../assets/Logo1.jpeg";
 
 const AuthPage = () => {
-  const [activeForm, setActiveForm] = useState("login"); // Başlangıçta Login formu aktif
+  const [activeForm, setActiveForm] = useState("login");
 
   return (
     <div className="min-h-screen flex items-center justify-center flex-col bg-white">
@@ -12,7 +12,6 @@ const AuthPage = () => {
       </div>
 
       <div className="flex w-full max-w-4xl">
-        {/* Left side - Login */}
         <div
           className={`w-1/2 p-8 transition-all duration-500 ${
             activeForm === "login"
@@ -25,7 +24,6 @@ const AuthPage = () => {
               <h2 className="text-4xl font-bold mb-4">Login</h2>
               <form className="flex flex-col justify-center h-[400px]">
                 {" "}
-                {/* Set fixed height for the form */}
                 <input
                   type="email"
                   placeholder="Email"
@@ -51,7 +49,7 @@ const AuthPage = () => {
           {activeForm === "register" && (
             <div className="flex items-center justify-center h-full">
               <button
-                onClick={() => setActiveForm("login")} // Login formuna geçiş
+                onClick={() => setActiveForm("login")}
                 className="text-black border p-4 border-black rounded-lg font-bold transition duration-300"
               >
                 Login here
@@ -60,7 +58,6 @@ const AuthPage = () => {
           )}
         </div>
 
-        {/* Right side - Register */}
         <div
           className={`w-1/2 p-8 transition-all duration-500 ${
             activeForm === "register"
@@ -73,7 +70,6 @@ const AuthPage = () => {
               <h2 className="text-4xl font-bold mb-4">Register</h2>
               <form className="flex flex-col justify-center h-[400px]">
                 {" "}
-                {/* Set fixed height for the form */}
                 <input
                   type="text"
                   placeholder="Full Name"
@@ -109,7 +105,7 @@ const AuthPage = () => {
           {activeForm === "login" && (
             <div className="flex items-center justify-center h-full">
               <button
-                onClick={() => setActiveForm("register")} // Register formuna geçiş
+                onClick={() => setActiveForm("register")}
                 className="text-black border p-4 border-black rounded-lg font-bold transition duration-300"
               >
                 Register here

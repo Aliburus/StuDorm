@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
-import Navbar from "../components/Navbar"; // Navbar bileşeniniz
-import Footer from "../components/Footer"; // Footer bileşeniniz
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const FindIntern = () => {
   const [listings, setListings] = useState([]);
@@ -9,9 +9,8 @@ const FindIntern = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [filteredListings, setFilteredListings] = useState([]);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
-  // Mock data for categories, cities, and districts
   const categories = [
     { name: "Software Development" },
     { name: "Marketing" },
@@ -24,7 +23,6 @@ const FindIntern = () => {
     { name: "Izmir", districts: ["Konak", "Bornova", "Karşıyaka"] },
   ];
 
-  // Sample listing data
   const sampleListings = [
     {
       id: 1,
@@ -73,10 +71,9 @@ const FindIntern = () => {
 
   useEffect(() => {
     setListings(sampleListings);
-    setFilteredListings(sampleListings); // Başlangıçta tüm listelemeler görünsün
+    setFilteredListings(sampleListings);
   }, []);
 
-  // Apply the filters when the user clicks on "Filtrele"
   const applyFilters = () => {
     const result = listings.filter(
       (listing) =>
@@ -97,16 +94,14 @@ const FindIntern = () => {
     setFilteredListings(result);
   };
 
-  // Navigate to the details page when the user clicks on a listing
   const goToDetails = (id) => {
-    navigate(`/intern-details/${id}`); // Navigates to the details page with the listing's ID
+    navigate(`/intern-details/${id}`);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar className="w-full bg-indigo-600 text-white" />
       <div className="container mx-auto p-6 flex flex-grow flex-col md:flex-row">
-        {/* Filters section */}
         <div className="w-full lg:w-1/4 bg-white p-6 mb-4 lg:mb-0 flex-none flex flex-col justify-start">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtrele</h2>
 
@@ -166,7 +161,7 @@ const FindIntern = () => {
               className="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none"
               value={selectedDistrict}
               onChange={(e) => setSelectedDistrict(e.target.value)}
-              disabled={!selectedCity} // Şehir seçilmeden ilçe seçimini kapat
+              disabled={!selectedCity}
             >
               <option value="">İlçe Seç</option>
               {selectedCity &&
@@ -188,14 +183,13 @@ const FindIntern = () => {
           </button>
         </div>
 
-        {/* Listings section */}
         <div className="w-full lg:w-3/4 pl-6 flex flex-col">
           {filteredListings.length > 0 ? (
             filteredListings.map((listing, index) => (
               <div
                 key={index}
                 className="w-full mb-6"
-                onClick={() => goToDetails(listing.id)} // Add onClick to the listing card
+                onClick={() => goToDetails(listing.id)}
               >
                 <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col space-y-4 cursor-pointer">
                   <h3 className="text-xl font-semibold text-gray-800">

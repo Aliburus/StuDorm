@@ -1,15 +1,13 @@
 import React from "react";
-import headerImg from "../assets/headerImg.jpeg"; // Görseli import et
+import headerImg from "../assets/headerImg.jpeg";
 
 const Header = () => {
   return (
     <header
       className="w-full text-white py-24 text-center bg-cover bg-center relative fixed top-0 left-0 right-0 z-20"
-      style={{ backgroundImage: `url(${headerImg})` }} // Arka plan görselini ayarla
+      style={{ backgroundImage: `url(${headerImg})` }}
     >
-      {/* Overlay kısmı */}
       <div className="absolute inset-0 bg-black opacity-50"></div>{" "}
-      {/* Yarı saydam siyah overlay */}
       <div className="relative z-10">
         <h1 className="text-6xl font-extrabold leading-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">
           Discover Your Ideal Dormitory and Roommates

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import Navbar from "../components/Navbar"; // Navbar bileşeniniz
-import Footer from "../components/Footer"; // Footer bileşeniniz
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import Dorm1 from "../assets/Dorm1.jpeg";
 import Dorm2 from "../assets/Dorm2.jpeg";
 import Dorm3 from "../assets/Dorm3.jpeg";
@@ -11,17 +11,15 @@ const FindingRD = () => {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
-  const [filterType, setFilterType] = useState(""); // Yurt/Oda Türü filtresi
+  const [filterType, setFilterType] = useState("");
   const [filteredListings, setFilteredListings] = useState([]);
 
-  // Mock data for provinces and districts
   const provinces = [
     { name: "Istanbul" },
     { name: "Ankara" },
     { name: "Izmir" },
   ];
 
-  // Sample listing data
   const sampleListings = [
     {
       name: "Room 1",
@@ -30,7 +28,7 @@ const FindingRD = () => {
       contact: "John Doe",
       type: "Private Room",
       imageUrl: Dorm1,
-      id: 1, // Listing ID
+      id: 1,
     },
     {
       name: "Room 2",
@@ -90,10 +88,9 @@ const FindingRD = () => {
 
   useEffect(() => {
     setListings(sampleListings);
-    setFilteredListings(sampleListings); // Başlangıçta tüm listelemeler görünsün
+    setFilteredListings(sampleListings);
   }, []);
 
-  // Apply the filters when the user clicks on "Filtrele"
   const applyFilters = () => {
     const result = listings.filter(
       (listing) =>
@@ -117,7 +114,6 @@ const FindingRD = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar className="w-full bg-indigo-600 text-white" />
       <div className="container mx-auto p-6 flex flex-grow flex-col md:flex-row">
-        {/* Filters section */}
         <div className="w-full lg:w-1/4 bg-white p-6 mb-4 lg:mb-0 flex-none flex flex-col justify-start">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtrele</h2>
 
@@ -206,17 +202,11 @@ const FindingRD = () => {
           </button>
         </div>
 
-        {/* Listings section */}
         <div className="w-full lg:w-3/4 pl-6 flex flex-col">
           {filteredListings.length > 0 ? (
             filteredListings.map((listing, index) => (
-              <div
-                key={index}
-                className="w-full mb-6 cursor-pointer"
-                // İlan detay sayfasına yönlendirme işlevi daha sonra eklenecek
-              >
+              <div key={index} className="w-full mb-6 cursor-pointer">
                 <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-6">
-                  {/* Image section (left side) */}
                   <div className="flex justify-center w-1/4">
                     <img
                       src={listing.imageUrl}
@@ -225,7 +215,6 @@ const FindingRD = () => {
                     />
                   </div>
 
-                  {/* Listing details (center) */}
                   <div className="flex flex-col justify-center w-1/2 space-y-2">
                     <h3 className="text-xl font-semibold text-gray-800">
                       {listing.name}
@@ -234,7 +223,6 @@ const FindingRD = () => {
                     <p className="text-sm text-gray-600">Tür: {listing.type}</p>
                   </div>
 
-                  {/* Price section (right side) */}
                   <div className="w-1/4 flex flex-col justify-center items-end space-y-2">
                     <p className="text-xl font-semibold text-gray-800">
                       {listing.price}₺
