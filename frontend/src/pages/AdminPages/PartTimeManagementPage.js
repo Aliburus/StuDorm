@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Örnek veriler (gerçek dünyada bu veriler API'den alınabilir)
 const partTimeWorkersData = [
   { id: 1, name: "John Doe", position: "Cashier", hoursWorked: 20 },
   { id: 2, name: "Jane Smith", position: "Barista", hoursWorked: 18 },
@@ -17,7 +16,6 @@ const PartTimeManagementPage = () => {
         Manage part-time workers, their positions, and working hours here.
       </p>
 
-      {/* Part-Time Workers List Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Part-Time Workers</h2>
         <table className="min-w-full bg-white shadow rounded-lg">

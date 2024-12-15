@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Örnek duyuru ve rehber verisi (gerçek dünyada bu veriler API'den veya veritabanından alınabilir)
 const announcementsData = [
   {
     id: 1,
@@ -60,7 +59,6 @@ const ContentManagementPage = () => {
         Manage announcements, blog posts, and FAQs for your site.
       </p>
 
-      {/* Duyuru Ekleme Bölümü */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Add New Announcement</h2>
         <form
@@ -108,7 +106,6 @@ const ContentManagementPage = () => {
         </form>
       </div>
 
-      {/* Duyuru Listesi */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Announcements List</h2>
         <ul className="bg-white p-4 rounded-lg shadow-md">
@@ -121,7 +118,6 @@ const ContentManagementPage = () => {
         </ul>
       </div>
 
-      {/* Sıkça Sorulan Sorular (SSS) Bölümü */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Add New FAQ</h2>
         <form
@@ -161,7 +157,6 @@ const ContentManagementPage = () => {
         </form>
       </div>
 
-      {/* Sıkça Sorulan Sorular Listesi */}
       <div>
         <h2 className="text-xl font-semibold mb-4">FAQ List</h2>
         <ul className="bg-white p-4 rounded-lg shadow-md">

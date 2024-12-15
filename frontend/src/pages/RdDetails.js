@@ -112,16 +112,14 @@ function RdDetails() {
       <Navbar />
       <div className="rd-details flex justify-center items-start bg-gray-100 overflow-auto min-h-screen">
         <div className="p-6 max-w-6xl w-full">
-          {/* Yurt Görseli */}
           <div className="flex items-center justify-between mb-6">
-            {/* Ana Resim */}
             <div className="relative w-[700px] h-80">
               <img
                 src={detail.images[currentImageIndex]}
                 alt={detail.title}
                 className="w-full h-full object-cover rounded-lg shadow-lg"
               />
-              {/* Oklar */}
+
               <button
                 onClick={prevImage}
                 className="absolute left-0 top-1/2 transform -translate-y-1/2 text-white bg-black bg-opacity-50 p-2 rounded-full shadow-lg transition-all duration-300 hover:bg-opacity-75 hover:scale-110 focus:outline-none"
@@ -136,7 +134,6 @@ function RdDetails() {
               </button>
             </div>
 
-            {/* Küçük Resimler */}
             <div className="flex space-x-4">
               {detail.images
                 .slice(currentImageIndex + 1, currentImageIndex + 4)
@@ -155,7 +152,6 @@ function RdDetails() {
             </div>
           </div>
 
-          {/* Başlık ve Kısa Açıklama */}
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
             {detail.title}
           </h1>
@@ -163,7 +159,6 @@ function RdDetails() {
             {detail.description}
           </p>
 
-          {/* Ücret, Konum ve İletişim Bilgileri */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
             <p className="text-2xl font-semibold ">{detail.price}</p>
             <div className="mt-4 sm:mt-0 text-gray-600 text-sm">
@@ -172,7 +167,6 @@ function RdDetails() {
             </div>
           </div>
 
-          {/* İmkanlar Listesi */}
           <h2 className="text-3xl font-semibold text-gray-900 mb-3">
             Yurt İmkanları
           </h2>
@@ -195,7 +189,6 @@ function RdDetails() {
             ))}
           </ul>
 
-          {/* İletişim Bilgileri */}
           <h2 className="text-3xl font-semibold text-gray-900 mb-3">
             İletişim Bilgileri
           </h2>
@@ -210,7 +203,6 @@ function RdDetails() {
             </div>
           </div>
 
-          {/* Harita Konumu */}
           <h2 className="text-3xl font-semibold text-gray-900 mb-3">Konum</h2>
           <div className="w-full h-64 rounded-lg overflow-hidden shadow-lg">
             <iframe

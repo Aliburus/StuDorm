@@ -29,7 +29,6 @@ function InternDetails() {
     <div className="bg-gray-50 min-h-screen">
       <Navbar />
       <div className="max-w-7xl mx-auto p-6">
-        {/* Başlık ve Kısa Açıklama */}
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-gray-900 leading-tight">
             {internshipDetail.title}
@@ -39,10 +38,8 @@ function InternDetails() {
           </p>
         </div>
 
-        {/* İş Bilgileri */}
         <div className="bg-white shadow-lg rounded-lg p-8 mb-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* İş Türü ve Çalışma Saatleri */}
             <div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                 İş Bilgileri
@@ -67,7 +64,6 @@ function InternDetails() {
               </div>
             </div>
 
-            {/* Lokasyon ve İletişim */}
             <div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                 İletişim Bilgileri
@@ -92,9 +88,11 @@ function InternDetails() {
               </div>
             </div>
           </div>
+          <button className="bg-yellow-500 text-white px-4 py-2 rounded-md">
+            Başvur
+          </button>
         </div>
 
-        {/* Harita Konumu */}
         <h2 className="text-3xl font-semibold text-gray-900 mb-6">Konum</h2>
         <div className="w-full h-64 rounded-lg overflow-hidden shadow-lg mb-10">
           <iframe

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Örnek veriler (gerçek dünyada bu veriler API'den alınabilir)
 const internsData = [
   { id: 1, name: "John Doe", department: "Marketing", duration: "6 months" },
   {
@@ -22,7 +21,6 @@ const InternManagementPage = () => {
         Manage interns, their departments, and internship durations.
       </p>
 
-      {/* Interns List Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Interns</h2>
         <table className="min-w-full bg-white shadow rounded-lg">

@@ -12,13 +12,14 @@ import PartTimeDetails from "./pages/PartTimeDetails";
 import InternDetails from "./pages/InternDetails";
 import AdminPages from "./pages/AdminPages";
 import "./index.css";
+import AccountPage from "./pages/Users/AccountPage";
 
 function App() {
   return (
     <Router>
       <div>
         <Routes>
-          {/* <Route path="/" element={<Homepage />} />
+          <Route path="/x" element={<Homepage />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/find-dorms" element={<FindingRD />} />
@@ -27,8 +28,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/rd-details/:id" element={<RdDetails />} />{" "}
           <Route path="/pt-details/:id" element={<PartTimeDetails />} />
-          <Route path="/intern-details/:id" element={<InternDetails />} /> */}
-          <Route path="/" element={<AdminPages />} />
+          <Route path="/intern-details/:id" element={<InternDetails />} />
+          {/* <Route path="/" element={<AdminPages />} />  */}
+          <Route path="/" element={<AccountPage />} />
         </Routes>
       </div>
     </Router>

@@ -8,6 +8,7 @@ import PartTimeManagementPage from "./AdminPages/PartTimeManagementPage";
 import InternManagementPage from "./AdminPages/InternManagementPage";
 import ContentManagementPage from "./AdminPages/ContentManagementPage";
 import RevenueManagementPage from "./AdminPages/RevenueManagementPage";
+
 const AdminPages = () => {
   const [activePage, setActivePage] = useState("Dashboard");
 
@@ -35,12 +36,11 @@ const AdminPages = () => {
   };
 
   return (
-    <div>
+    <div className="h-screen flex flex-col">
       <Navbar />
-      <div className="flex w-full h-full">
-        {/* Sidebar */}
-        <div className="bg-black w-[30%] h-[100vh]">
-          <ul className="w-full text-white">
+      <div className="flex flex-1">
+        <div className="bg-white w-[250px] h-full p-6 shadow-md">
+          <ul className="text-gray-700 space-y-4">
             {[
               "Dashboard",
               "Users Management",
@@ -53,8 +53,10 @@ const AdminPages = () => {
             ].map((item) => (
               <li
                 key={item}
-                className={`p-2 cursor-pointer ${
-                  activePage === item ? "bg-yellow-500" : "hover:bg-yellow-500"
+                className={`p-3 cursor-pointer text-lg rounded-md transition duration-300 ${
+                  activePage === item
+                    ? "border-l-4 border-yellow-500 text-gray-800 font-semibold"
+                    : "text-gray-600"
                 }`}
                 onClick={() => setActivePage(item)}
               >
@@ -64,9 +66,10 @@ const AdminPages = () => {
           </ul>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 p-6">
-          <div className="bg-white shadow rounded p-4">{renderContent()}</div>
+        <div className="flex-1 p-8 overflow-auto">
+          <div className="bg-white shadow rounded-lg p-6 h-full">
+            {renderContent()}
+          </div>
         </div>
       </div>
       <Footer />

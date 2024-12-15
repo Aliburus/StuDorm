@@ -11,7 +11,6 @@ import {
   Legend,
 } from "chart.js";
 
-// Chart.js'yi kullanabilmek için gerekli kütüphaneleri ekliyoruz
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -22,7 +21,6 @@ ChartJS.register(
   Legend
 );
 
-// Güncel tarihe göre gelir verilerini oluşturuyoruz
 const generateMonthlyRevenue = () => {
   const currentDate = new Date();
   const months = [
@@ -40,35 +38,29 @@ const generateMonthlyRevenue = () => {
     "December",
   ];
 
-  // 12 aylık gelir verisi oluşturuluyor (verilen sabit kullanıcı ve üye sayıları ile)
   return months.map((month, index) => {
-    const baseUsers = 5000; // Aylık ortalama kullanıcı sayısı
-    const users = baseUsers + (Math.random() * 1000 - 500); // Kullanıcı sayısında değişim
-    const dormMembers = 20; // Yurt üyeleri
-    const employerMembers = 10; // İşveren üyeleri
-    const memberFeeDorm = 100; // Yurt üyeliği ücreti (TL)
-    const memberFeeEmployer = 150; // İşveren üyeliği ücreti (TL)
+    const baseUsers = 5000;
+    const users = baseUsers + (Math.random() * 1000 - 500);
+    const dormMembers = 20;
+    const employerMembers = 10;
+    const memberFeeDorm = 100;
+    const memberFeeEmployer = 150;
 
-    // Aylık üyelik gelirleri (500 TL)
-    const monthlyMemberFeeDorm = 500; // Yurt aylık üyelik ücreti (TL)
-    const monthlyMemberFeeEmployer = 500; // İşveren aylık üyelik ücreti (TL)
-    const yearlyMemberFeeDorm = 5000; // Yurt yıllık üyelik ücreti (TL)
-    const yearlyMemberFeeEmployer = 5000; // İşveren yıllık üyelik ücreti (TL)
+    const monthlyMemberFeeDorm = 500;
+    const monthlyMemberFeeEmployer = 500;
+    const yearlyMemberFeeDorm = 5000;
+    const yearlyMemberFeeEmployer = 5000;
 
-    // Kullanıcılar için gelir (üyelikler dışında)
-    const userIncome = users * 10; // Her kullanıcıdan gelen gelir (örnek olarak 10 TL)
+    const userIncome = users * 10;
 
-    // Yurt üyelik gelirleri
     const monthlyMembershipIncomeDorm = dormMembers * monthlyMemberFeeDorm;
     const yearlyMembershipIncomeDorm = dormMembers * yearlyMemberFeeDorm;
 
-    // İşveren üyelik gelirleri
     const monthlyMembershipIncomeEmployer =
       employerMembers * monthlyMemberFeeEmployer;
     const yearlyMembershipIncomeEmployer =
       employerMembers * yearlyMemberFeeEmployer;
 
-    // Toplam gelir
     const totalIncome =
       userIncome +
       monthlyMembershipIncomeDorm +
@@ -76,8 +68,7 @@ const generateMonthlyRevenue = () => {
       monthlyMembershipIncomeEmployer +
       yearlyMembershipIncomeEmployer;
 
-    // Dolar cinsine çevirme (örneğin 1 USD = 27 TL)
-    const dollarExchangeRate = 27; // Dolar/TL kuru
+    const dollarExchangeRate = 34.5;
     const totalIncomeInUSD = (totalIncome / dollarExchangeRate).toFixed(2); // Dolar cinsine çevirme ve virgülden sonra 2 haneli
 
     const yearlyIncomeInUSD = (
@@ -86,8 +77,7 @@ const generateMonthlyRevenue = () => {
         monthlyMembershipIncomeEmployer) *
         12) /
       dollarExchangeRate
-    ).toFixed(2); // Yıllık gelir hesaplama ve dolara çevirme
-
+    ).toFixed(2);
     return {
       month,
       income: totalIncomeInUSD,
@@ -103,7 +93,6 @@ const generateMonthlyRevenue = () => {
 
 const monthlyRevenueData = generateMonthlyRevenue();
 
-// Yurtlar ve işverenler verisini simüle et
 const dorms = [
   { id: 1, name: "Yurt A", membership: "Premium", price: 100, listings: 45 },
   { id: 2, name: "Yurt B", membership: "Basic", price: 0, listings: 30 },
@@ -133,17 +122,14 @@ const employers = [
 ];
 
 const RevenueManagementPage = () => {
-  // Yurtlar ve işverenleri en fazla ilan verenlere göre sıralama
   const sortedDorms = dorms.sort((a, b) => b.listings - a.listings).slice(0, 5);
   const sortedEmployers = employers
     .sort((a, b) => b.listings - a.listings)
     .slice(0, 5);
 
-  // Aylık gelir verisi
   const monthlyLabels = monthlyRevenueData.map((data) => data.month);
   const monthlyIncome = monthlyRevenueData.map((data) => data.income);
 
-  // Yıllık gelir verisi
   const totalYearlyIncome = monthlyRevenueData[0].yearlyIncomeInUSD;
 
   const [totalIncome, setTotalIncome] = useState(totalYearlyIncome);
@@ -155,7 +141,6 @@ const RevenueManagementPage = () => {
         Manage income from dorms, paid memberships, and revenue statistics.
       </p>
 
-      {/* Gelir İstatistikleri */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">
@@ -165,7 +150,6 @@ const RevenueManagementPage = () => {
         </div>
       </div>
 
-      {/* Aylık Gelir Grafiği */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Monthly Revenue Chart</h2>
         <Line
@@ -198,7 +182,6 @@ const RevenueManagementPage = () => {
         />
       </div>
 
-      {/* Yurtlar İçin En Fazla İlan Verenler */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">
           Top 5 Dorms with Most Listings
@@ -229,7 +212,6 @@ const RevenueManagementPage = () => {
         </div>
       </div>
 
-      {/* İşverenler İçin En Fazla İlan Verenler */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">
           Top 5 Employers with Most Listings

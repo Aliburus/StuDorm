@@ -7,23 +7,22 @@ const AuthPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center flex-col bg-white">
       <div className="mb-10">
-        {" "}
         <img className="w-[250px] h-[120px]" src={Logo1} alt="Logo" />
       </div>
 
       <div className="flex w-full max-w-4xl">
+        {/* Login Form */}
         <div
-          className={`w-1/2 p-8 transition-all duration-500 ${
+          className={`w-1/2 p-8 transition-all duration-500 rounded-lg shadow-lg ${
             activeForm === "login"
-              ? "bg-black text-white"
-              : "bg-yellow-600 text-black"
+              ? "bg-black text-yellow-500"
+              : "bg-yellow-500 text-black"
           }`}
         >
           {activeForm === "login" && (
             <>
               <h2 className="text-4xl font-bold mb-4">Login</h2>
               <form className="flex flex-col justify-center h-[400px]">
-                {" "}
                 <input
                   type="email"
                   placeholder="Email"
@@ -34,13 +33,7 @@ const AuthPage = () => {
                   placeholder="Password"
                   className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
                 />
-                <button
-                  className={`w-full py-2 rounded-md ${
-                    activeForm === "login"
-                      ? "bg-yellow-600 text-black"
-                      : "bg-black text-yellow-600"
-                  }`}
-                >
+                <button className="w-full py-2 rounded-md bg-yellow-500 text-black font-bold hover:bg-yellow-600 transition duration-300">
                   Login
                 </button>
               </form>
@@ -50,7 +43,7 @@ const AuthPage = () => {
             <div className="flex items-center justify-center h-full">
               <button
                 onClick={() => setActiveForm("login")}
-                className="text-black border p-4 border-black rounded-lg font-bold transition duration-300"
+                className="text-black border p-4 border-black rounded-lg font-bold transition duration-300 hover:bg-black hover:text-yellow-500"
               >
                 Login here
               </button>
@@ -58,18 +51,18 @@ const AuthPage = () => {
           )}
         </div>
 
+        {/* Register Form */}
         <div
-          className={`w-1/2 p-8 transition-all duration-500 ${
+          className={`w-1/2 p-8 transition-all duration-500 rounded-lg shadow-lg ${
             activeForm === "register"
-              ? "bg-black text-white"
-              : "bg-yellow-600 text-black"
+              ? "bg-black text-yellow-500"
+              : "bg-yellow-500 text-black"
           }`}
         >
           {activeForm === "register" && (
             <>
               <h2 className="text-4xl font-bold mb-4">Register</h2>
               <form className="flex flex-col justify-center h-[400px]">
-                {" "}
                 <input
                   type="text"
                   placeholder="Full Name"
@@ -90,13 +83,7 @@ const AuthPage = () => {
                   placeholder="Confirm Password"
                   className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
                 />
-                <button
-                  className={`w-full py-2 rounded-md ${
-                    activeForm === "register"
-                      ? "bg-yellow-600 text-black"
-                      : "bg-black text-yellow-600"
-                  }`}
-                >
+                <button className="w-full py-2 rounded-md bg-yellow-500 text-black font-bold hover:bg-yellow-600 transition duration-300">
                   Register
                 </button>
               </form>
@@ -106,7 +93,7 @@ const AuthPage = () => {
             <div className="flex items-center justify-center h-full">
               <button
                 onClick={() => setActiveForm("register")}
-                className="text-black border p-4 border-black rounded-lg font-bold transition duration-300"
+                className="text-black border p-4 border-black rounded-lg font-bold transition duration-300 hover:bg-black hover:text-yellow-500"
               >
                 Register here
               </button>

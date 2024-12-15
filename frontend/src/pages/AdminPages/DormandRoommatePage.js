@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Örnek veriler (gerçek dünyada bu veriler API'den alınabilir)
 const dormsData = [
   { id: 1, name: "Greenwood Dorm", roomCount: 10 },
   { id: 2, name: "Sunset Dorm", roomCount: 8 },
@@ -24,7 +23,6 @@ const DormAndRoommatePage = () => {
         assigned roommates.
       </p>
 
-      {/* Dorm List Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Dormitories</h2>
         <table className="min-w-full bg-white shadow rounded-lg">
@@ -45,7 +43,6 @@ const DormAndRoommatePage = () => {
         </table>
       </div>
 
-      {/* Roommate List Section */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Roommates</h2>
         <table className="min-w-full bg-white shadow rounded-lg">
