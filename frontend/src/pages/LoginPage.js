@@ -1,27 +1,41 @@
 import React, { useState } from "react";
 import Logo1 from "../assets/Logo1.jpeg";
-import { register } from "../services/UserServices";
+import { register, login } from "../services/UserServices";
 
-const AuthPage = () => {
+const LoginPage = () => {
   const [activeForm, setActiveForm] = useState("login");
   const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [surname, setSurname] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await login(email, password); // Şifreyi direkt gönder
+      localStorage.setItem("token", response.token); // Token'ı kaydet
+      alert("Giriş başarılı!");
+      window.location.href = "/"; // Ana sayfaya yönlendir
+    } catch (error) {
+      console.error("Login hatası:", error);
+      alert("Giriş işlemi başarısız!");
+    }
+  };
 
   const handlesubmit = async (e) => {
     e.preventDefault();
-    console.log({ name, surname, email, password, confirmPassword });
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      alert("Şifreler eşleşmiyor!");
       return;
     }
     try {
       const response = await register(name, surname, email, password);
-      console.log("Kayıt başarılı:", response);
+      alert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
+      setActiveForm("login"); // Giriş formuna geçiş yap
     } catch (error) {
-      console.error("Hata:", error);
+      console.error("Kayıt hatası:", error);
+      alert("Kayıt işlemi başarısız!");
     }
   };
 
@@ -43,18 +57,26 @@ const AuthPage = () => {
           {activeForm === "login" && (
             <>
               <h2 className="text-4xl font-bold mb-4">Login</h2>
-              <form className="flex flex-col justify-center h-[400px]">
+              <form
+                onSubmit={handleLogin}
+                className="flex flex-col justify-center h-[400px]"
+              >
                 <input
                   type="email"
                   placeholder="Email"
                   className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <input
                   type="password"
                   placeholder="Password"
                   className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-                <button className="w-full py-2 rounded-md bg-yellow-500 text-black font-bold hover:bg-yellow-600 transition duration-300">
+                <button
+                  type="submit"
+                  className="w-full py-2 rounded-md bg-yellow-500 text-black font-bold hover:bg-yellow-600 transition duration-300"
+                >
                   Login
                 </button>
               </form>
@@ -92,7 +114,7 @@ const AuthPage = () => {
                   placeholder="Full Name"
                   className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
                   onChange={(e) => setName(e.target.value)}
-                />{" "}
+                />
                 <input
                   type="text"
                   placeholder="Surname"
@@ -142,4 +164,4 @@ const AuthPage = () => {
   );
 };
 
-export default AuthPage;
+export default LoginPage;

@@ -10,7 +10,7 @@ const User = {
       return result;
     } catch (error) {
       console.error("Kullanıcı kaydı sırasında hata:", error);
-      throw error;
+      throw new Error("Kullanıcı kaydı başarısız.");
     }
   },
   findByEmail: async (email) => {
@@ -20,8 +20,8 @@ const User = {
       ]);
       return rows[0];
     } catch (error) {
-      console.error("Email araması sırasında hata:", error);
-      throw error;
+      console.error("E-posta araması sırasında hata:", error);
+      throw new Error("E-posta arama işlemi başarısız.");
     }
   },
 };

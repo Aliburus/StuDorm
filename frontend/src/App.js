@@ -14,27 +14,25 @@ import AdminPages from "./pages/AdminPages";
 import "./index.css";
 import AccountPage from "./pages/Users/AccountPage";
 
-import DormAdvertForm from "./components/DormAdvertForm";
 import PartTimeAdvertForm from "./components/PartTimeAdvertForm";
 function App() {
   return (
     <Router>
       <div>
         <Routes>
-          <Route path="/" element={<PartTimeAdvertForm />} />
-          {/* 
-          <Route path="/x" element={<Homepage />} />
+          <Route path="/parttime" element={<PartTimeAdvertForm />} />
+          <Route path="/" element={<Homepage />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/find-dorms" element={<FindingRD />} />
           <Route path="/find-intern" element={<FindIntern />} />
-          <Route path="/find-part-time" element={<FindPartTime />} /> */}
-          {/* <Route path="/" element={<Login />} /> */}
-          {/* <Route path="/rd-details/:id" element={<RdDetails />} />{" "}
+          <Route path="/find-part-time" element={<FindPartTime />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/rd-details/:id" element={<RdDetails />} />{" "}
           <Route path="/pt-details/:id" element={<PartTimeDetails />} />
-          <Route path="/intern-details/:id" element={<InternDetails />} /> */}
-          {/* <Route path="/" element={<AdminPages />} />  */}
-          {/* <Route path="/account" element={<AccountPage />} /> */}
+          <Route path="/intern-details/:id" element={<InternDetails />} />
+          <Route path="/admin" element={<AdminPages />} />
+          <Route path="/account" element={<AccountPage />} />
         </Routes>
       </div>
     </Router>
