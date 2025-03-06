@@ -6,6 +6,7 @@ const yurtAdRoutes = require("./routes/YurtAdRoutes");
 const authRoutes = require("./routes/AuthRoutes");
 const parttimeAdvertRoutes = require("./routes/PartTimeAdvertRoutes");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
@@ -24,6 +25,8 @@ app.use("/api", yurtAdRoutes); // Yurt ilanı rotaları
 
 app.use("/api/parttimeadverts", parttimeAdvertRoutes);
 app.use("/api/user", userRoutes);
+
+app.use("/admin", adminRoutes);
 // Sunucuyu başlatma
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
