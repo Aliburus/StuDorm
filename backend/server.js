@@ -7,6 +7,7 @@ const authRoutes = require("./routes/AuthRoutes");
 const parttimeAdvertRoutes = require("./routes/PartTimeAdvertRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const forumRoutes = require("./routes/forumRoutes");
 
 const app = express();
 
@@ -27,6 +28,8 @@ app.use("/api/parttimeadverts", parttimeAdvertRoutes);
 app.use("/api/user", userRoutes);
 
 app.use("/admin", adminRoutes);
+
+app.use("/api/forum", forumRoutes);
 // Sunucuyu başlatma
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -13,6 +13,7 @@ import InternDetails from "./pages/InternDetails";
 import AdminPages from "./pages/AdminPages";
 import "./index.css";
 import AccountPage from "./pages/Users/AccountPage";
+import ForumPage from "./pages/ForumPages";
 
 import PartTimeAdvertForm from "./components/PartTimeAdvertForm";
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/intern-details/:id" element={<InternDetails />} />
           <Route path="/admin" element={<AdminPages />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/forum" element={<ForumPage />} />
         </Routes>
       </div>
     </Router>
