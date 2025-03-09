@@ -1,18 +1,38 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getListings, getFilteredListings } from "../services/ListingService"; // Servisi import ettik
+import {
+  Search,
+  MapPin,
+  Home,
+  DollarSign,
+  Filter,
+  Building2,
+  MapPinned,
+  BedDouble,
+  Hotel,
+  Mouse as House,
+} from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import Dorm1 from "../assets/Dorm1.jpeg";
-import Dorm2 from "../assets/Dorm2.jpeg";
-import Dorm3 from "../assets/Dorm3.jpeg";
-import Dorm4 from "../assets/Dorm4.jpeg";
 
-const FindingRD = () => {
+function FindingRD() {
   const [listings, setListings] = useState([]);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filteredListings, setFilteredListings] = useState([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  const roomTypes = [
+    { name: "Private Room", icon: <BedDouble className="w-5 h-5" /> },
+    { name: "Shared Room", icon: <Hotel className="w-5 h-5" /> },
+    { name: "Studio", icon: <House className="w-5 h-5" /> },
+  ];
 
   const provinces = [
     { name: "Istanbul" },
@@ -20,226 +40,249 @@ const FindingRD = () => {
     { name: "Izmir" },
   ];
 
-  const sampleListings = [
-    {
-      name: "Room 1",
-      location: "Kadıköy, Istanbul",
-      price: 1000,
-      contact: "John Doe",
-      type: "Private Room",
-      imageUrl: Dorm1,
-      id: 1,
-    },
-    {
-      name: "Room 2",
-      location: "Çankaya, Ankara",
-      price: 1200,
-      contact: "Jane Smith",
-      type: "Shared Room",
-      imageUrl: Dorm2,
-      id: 2,
-    },
-    {
-      name: "Room 3",
-      location: "Konak, Izmir",
-      price: 800,
-      contact: "Ali Veli",
-      type: "Private Room",
-      imageUrl: Dorm3,
-      id: 3,
-    },
-    {
-      name: "Room 4",
-      location: "Üsküdar, Istanbul",
-      price: 3500,
-      contact: "Mehmet Can",
-      type: "Shared Room",
-      imageUrl: Dorm1,
-      id: 4,
-    },
-    {
-      name: "Room 4",
-      location: "Pendik, Istanbul",
-      price: 2500,
-      contact: "Mehmet Can",
-      type: "Shared Room",
-      imageUrl: Dorm3,
-      id: 5,
-    },
-    {
-      name: "Room 4",
-      location: "Gaziosmanpaşa, Istanbul",
-      price: 1300,
-      contact: "Mehmet Can",
-      type: "Shared Room",
-      imageUrl: Dorm2,
-      id: 6,
-    },
-    {
-      name: "Room 4",
-      location: "Üsküdar, Istanbul",
-      price: 1200,
-      contact: "Mehmet Can",
-      type: "Shared Room",
-      imageUrl: Dorm4,
-      id: 7,
-    },
-  ];
-
-  useEffect(() => {
-    setListings(sampleListings);
-    setFilteredListings(sampleListings);
-  }, []);
-
-  const applyFilters = () => {
-    const result = listings.filter(
-      (listing) =>
-        (minPrice ? listing.price >= minPrice : true) &&
-        (maxPrice ? listing.price <= maxPrice : true) &&
-        (selectedProvince
-          ? listing.location
-              .toLowerCase()
-              .includes(selectedProvince.toLowerCase())
-          : true) &&
-        (filterType
-          ? listing.type.toLowerCase().includes(filterType.toLowerCase())
-          : true)
-    );
-    setFilteredListings(result);
+  const districts = {
+    Istanbul: ["Kadıköy", "Üsküdar", "Pendik", "Gaziosmanpaşa"],
+    Ankara: ["Çankaya", "Keçiören"],
+    Izmir: ["Konak", "Bornova"],
   };
 
-  const handleProvinceChange = (e) => setSelectedProvince(e.target.value);
+  // Verileri çekerken backend API'sini çağır
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await getListings();
+        setListings(data);
+        setFilteredListings(data);
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+      }
+    };
+
+    fetchListings();
+  }, []);
+
+  const applyFilters = async () => {
+    const filters = {
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      province: selectedProvince,
+      district: selectedDistrict,
+      roomType: filterType,
+    };
+
+    try {
+      const data = await getFilteredListings(filters);
+      setFilteredListings(data);
+      setIsFilterOpen(false);
+    } catch (error) {
+      console.error("Error fetching filtered listings:", error);
+    }
+  };
+
+  const handleProvinceChange = (e) => {
+    setSelectedProvince(e.target.value);
+    setSelectedDistrict("");
+  };
+
+  const handleListingClick = (listing) => {
+    navigate(`/listing/${listing.id}`, { state: { listing } });
+  };
+
+  const getRoomTypeIcon = (typeName) => {
+    const type = roomTypes.find((t) => t.name === typeName);
+    return type ? type.icon : <Home className="w-5 h-5" />;
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar className="w-full bg-indigo-600 text-white" />
-      <div className="container mx-auto p-6 flex flex-grow flex-col md:flex-row">
-        <div className="w-full lg:w-1/4 bg-white p-6 mb-4 lg:mb-0 flex-none flex flex-col justify-start">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtrele</h2>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Navbar />
 
-          <div className="mb-4">
-            <label
-              className="block text-sm text-gray-600 font-medium mb-2"
-              htmlFor="minPrice"
-            >
-              Min Fiyat
-            </label>
-            <input
-              type="number"
-              id="minPrice"
-              placeholder="Min Fiyat"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none  "
-            />
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        {/* Mobile Filter Button */}
+        <button
+          className="md:hidden w-full mb-4 flex items-center justify-center space-x-2 bg-indigo-600 text-white py-3 rounded-lg shadow-md"
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+        >
+          <Filter className="w-5 h-5" />
+          <span>Filtreleri Göster</span>
+        </button>
 
-          <div className="mb-4">
-            <label
-              className="block text-sm text-gray-600 font-medium mb-2"
-              htmlFor="maxPrice"
-            >
-              Max Fiyat
-            </label>
-            <input
-              type="number"
-              id="maxPrice"
-              placeholder="Max Fiyat"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none "
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              className="block text-sm text-gray-600 font-medium mb-2"
-              htmlFor="province"
-            >
-              İl Seç
-            </label>
-            <select
-              id="province"
-              className="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none "
-              value={selectedProvince}
-              onChange={handleProvinceChange}
-            >
-              <option value="">İl Seç</option>
-              {provinces.map((province, index) => (
-                <option key={index} value={province.name}>
-                  {province.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label
-              className="block text-sm text-gray-600 font-medium mb-2"
-              htmlFor="filterType"
-            >
-              Tür Seç
-            </label>
-            <select
-              id="filterType"
-              className="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none "
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
-              <option value="">Tür</option>
-              <option value="Private Room">Oda</option>
-              <option value="Shared Room">Yurt</option>
-              <option value="Dormitory">Yurt (Genel)</option>
-              <option value="Studio">Studio</option>
-            </select>
-          </div>
-
-          <button
-            onClick={applyFilters}
-            className="w-full py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 outline-none focus:outline-none transition-all"
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Filters */}
+          <div
+            className={`md:w-1/4 bg-white rounded-xl shadow-lg p-6
+            ${isFilterOpen ? "block" : "hidden"} md:block
+            fixed md:relative top-0 left-0 right-0 bottom-0 md:top-auto md:left-auto md:right-auto md:bottom-auto
+            z-50 md:z-auto bg-white md:bg-transparent
+          `}
           >
-            Filtrele
-          </button>
-        </div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Filtrele
+              </h2>
+              <button
+                className="md:hidden text-gray-500"
+                onClick={() => setIsFilterOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
 
-        <div className="w-full lg:w-3/4 pl-6 flex flex-col">
-          {filteredListings.length > 0 ? (
-            filteredListings.map((listing, index) => (
-              <div key={index} className="w-full mb-6 cursor-pointer">
-                <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-6">
-                  <div className="flex justify-center w-1/4">
-                    <img
-                      src={listing.imageUrl}
-                      alt={listing.name}
-                      className="w-full h-auto rounded-lg"
-                    />
-                  </div>
-
-                  <div className="flex flex-col justify-center w-1/2 space-y-2">
-                    <h3 className="text-xl font-semibold text-gray-800">
-                      {listing.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">{listing.location}</p>
-                    <p className="text-sm text-gray-600">Tür: {listing.type}</p>
-                  </div>
-
-                  <div className="w-1/4 flex flex-col justify-center items-end space-y-2">
-                    <p className="text-xl font-semibold text-gray-800">
-                      {listing.price}₺
-                    </p>
-                  </div>
-                </div>
+            <div className="space-y-6">
+              <div>
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                  htmlFor="minPrice"
+                >
+                  <DollarSign className="w-4 h-4 inline mr-2" />
+                  Minimum Fiyat
+                </label>
+                <input
+                  type="number"
+                  id="minPrice"
+                  placeholder="Min Fiyat"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
               </div>
-            ))
-          ) : (
-            <p>No listings found.</p>
-          )}
+
+              <div>
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                  htmlFor="maxPrice"
+                >
+                  <DollarSign className="w-4 h-4 inline mr-2" />
+                  Maximum Fiyat
+                </label>
+                <input
+                  type="number"
+                  id="maxPrice"
+                  placeholder="Max Fiyat"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                  htmlFor="roomType"
+                >
+                  <Home className="w-4 h-4 inline mr-2" />
+                  Oda Tipi
+                </label>
+                <select
+                  id="roomType"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                >
+                  <option value="">Tür Seç</option>
+                  {roomTypes.map((type, index) => (
+                    <option key={index} value={type.name}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                  htmlFor="province"
+                >
+                  <Building2 className="w-4 h-4 inline mr-2" />
+                  İl
+                </label>
+                <select
+                  id="province"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={selectedProvince}
+                  onChange={handleProvinceChange}
+                >
+                  <option value="">İl Seç</option>
+                  {provinces.map((province, index) => (
+                    <option key={index} value={province.name}>
+                      {province.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                  htmlFor="district"
+                >
+                  <MapPinned className="w-4 h-4 inline mr-2" />
+                  İlçe
+                </label>
+                <select
+                  id="district"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={selectedDistrict}
+                  onChange={(e) => setSelectedDistrict(e.target.value)}
+                  disabled={!selectedProvince}
+                >
+                  <option value="">İlçe Seç</option>
+                  {selectedProvince &&
+                    districts[selectedProvince].map((district, index) => (
+                      <option key={index} value={district}>
+                        {district}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <button
+                onClick={applyFilters}
+                className="w-full bg-indigo-600 text-white py-2 rounded-lg mt-4"
+              >
+                Filtreleri Uygula
+              </button>
+            </div>
+          </div>
+
+          {/* Yurt İlanları */}
+          <div className="md:w-3/4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredListings.length > 0 ? (
+                filteredListings.map((listing) => (
+                  <div
+                    key={listing.id}
+                    className="bg-white p-6 rounded-lg shadow-md cursor-pointer"
+                    onClick={() => handleListingClick(listing)}
+                  >
+                    <div className="text-lg font-semibold text-gray-800">
+                      {listing.title}
+                    </div>
+                    <div className="mt-2 text-gray-600">
+                      {listing.district}, {listing.province}
+                    </div>
+                    <div className="mt-4 text-gray-500">
+                      {getRoomTypeIcon(listing.roomType)} {listing.roomType}
+                    </div>
+                    <div className="mt-2 text-lg font-semibold text-indigo-600">
+                      ₺{listing.price}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 text-center text-gray-500">
+                  Henüz ilan bulunamadı.
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      <Footer className="w-full bg-indigo-600 text-white mt-12" />
+      <Footer />
     </div>
   );
-};
+}
 
 export default FindingRD;

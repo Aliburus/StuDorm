@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import Logo1 from "../assets/Logo1.jpeg";
-import { register, login } from "../services/UserServices";
+import { Mail, Lock, User, UserPlus, ArrowRight, KeyRound } from "lucide-react";
+import { register, login } from "../services/UserServices"; // Assuming these functions exist
 
-const LoginPage = () => {
+function LoginPage() {
   const [activeForm, setActiveForm] = useState("login");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
@@ -13,155 +13,233 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await login(email, password); // Şifreyi direkt gönder
-      localStorage.setItem("token", response.token); // Token'ı kaydet
-      alert("Giriş başarılı!");
-      window.location.href = "/"; // Ana sayfaya yönlendir
+      const response = await login(email, password); // Call the login service
+      localStorage.setItem("token", response.token); // Store the token in localStorage
+      alert("Login successful!");
+      window.location.href = "/"; // Redirect to the homepage or dashboard
     } catch (error) {
-      console.error("Login hatası:", error);
-      alert("Giriş işlemi başarısız!");
+      console.error("Login error:", error);
+      alert("Login failed!");
     }
   };
 
-  const handlesubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Şifreler eşleşmiyor!");
+      alert("Passwords do not match!");
       return;
     }
     try {
-      const response = await register(name, surname, email, password);
-      alert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
-      setActiveForm("login"); // Giriş formuna geçiş yap
+      const response = await register(name, surname, email, password); // Call the register service
+      alert("Registration successful! You can now log in.");
+      setActiveForm("login"); // Switch to the login form after successful registration
     } catch (error) {
-      console.error("Kayıt hatası:", error);
-      alert("Kayıt işlemi başarısız!");
+      console.error("Registration error:", error);
+      alert("Registration failed!");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center flex-col bg-white">
-      <div className="mb-10">
-        <img className="w-[250px] h-[120px]" src={Logo1} alt="Logo" />
-      </div>
-
-      <div className="flex w-full max-w-4xl">
-        {/* Login Form */}
-        <div
-          className={`w-1/2 p-8 transition-all duration-500 rounded-lg shadow-lg ${
-            activeForm === "login"
-              ? "bg-black text-yellow-500"
-              : "bg-yellow-500 text-black"
-          }`}
-        >
-          {activeForm === "login" && (
-            <>
-              <h2 className="text-4xl font-bold mb-4">Login</h2>
-              <form
-                onSubmit={handleLogin}
-                className="flex flex-col justify-center h-[400px]"
-              >
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="w-full py-2 rounded-md bg-yellow-500 text-black font-bold hover:bg-yellow-600 transition duration-300"
-                >
-                  Login
-                </button>
-              </form>
-            </>
-          )}
-          {activeForm === "register" && (
-            <div className="flex items-center justify-center h-full">
-              <button
-                onClick={() => setActiveForm("login")}
-                className="text-black border p-4 border-black rounded-lg font-bold transition duration-300 hover:bg-black hover:text-yellow-500"
-              >
-                Login here
-              </button>
-            </div>
-          )}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl w-full space-y-8">
+        {/* Logo Area */}
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
+            <KeyRound className="w-10 h-10 text-black" />
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Welcome Back
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            {activeForm === "login"
+              ? "Don't have an account?"
+              : "Already have an account?"}
+          </p>
         </div>
 
-        {/* Register Form */}
-        <div
-          className={`w-1/2 p-8 transition-all duration-500 rounded-lg shadow-lg ${
-            activeForm === "register"
-              ? "bg-black text-yellow-500"
-              : "bg-yellow-500 text-black"
-          }`}
-        >
-          {activeForm === "register" && (
-            <>
-              <h2 className="text-4xl font-bold mb-4">Register</h2>
-              <form
-                onSubmit={handlesubmit}
-                className="flex flex-col justify-center h-[400px]"
-              >
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Surname"
-                  className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
-                  onChange={(e) => setSurname(e.target.value)}
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <input
-                  type="password"
-                  placeholder="Confirm Password"
-                  className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded-md"
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="w-full py-2 rounded-md bg-yellow-500 text-black font-bold hover:bg-yellow-600 transition duration-300"
-                >
-                  Register
-                </button>
-              </form>
-            </>
-          )}
-          {activeForm === "login" && (
-            <div className="flex items-center justify-center h-full">
-              <button
-                onClick={() => setActiveForm("register")}
-                className="text-black border p-4 border-black rounded-lg font-bold transition duration-300 hover:bg-black hover:text-yellow-500"
-              >
-                Register here
-              </button>
+        <div className="flex gap-8 mt-8">
+          {/* Login Form */}
+          <div
+            className={`w-1/2 transition-all duration-500 rounded-2xl overflow-hidden ${
+              activeForm === "login"
+                ? "bg-black text-yellow-500 shadow-xl"
+                : "bg-yellow-500 text-black shadow-md"
+            }`}
+          >
+            <div className="p-8">
+              {activeForm === "login" ? (
+                <>
+                  <h3 className="text-2xl font-bold mb-6 flex items-center">
+                    <User className="w-6 h-6 mr-2" />
+                    Sign In
+                  </h3>
+                  <form onSubmit={handleLogin} className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Email Address
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="email"
+                          required
+                          className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                          placeholder="Enter your email"
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="password"
+                          required
+                          className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                          placeholder="Enter your password"
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-base font-medium text-black bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                    >
+                      Sign In
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-[400px]">
+                  <button
+                    onClick={() => setActiveForm("login")}
+                    className="group relative flex items-center px-6 py-3 border-2 border-black rounded-lg text-black font-semibold hover:bg-black hover:text-yellow-500 transition-all duration-300"
+                  >
+                    <User className="w-5 h-5 mr-2" />
+                    Sign In Here
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Register Form */}
+          <div
+            className={`w-1/2 transition-all duration-500 rounded-2xl overflow-hidden ${
+              activeForm === "register"
+                ? "bg-black text-yellow-500 shadow-xl"
+                : "bg-yellow-500 text-black shadow-md"
+            }`}
+          >
+            <div className="p-8">
+              {activeForm === "register" ? (
+                <>
+                  <h3 className="text-2xl font-bold mb-6 flex items-center">
+                    <UserPlus className="w-6 h-6 mr-2" />
+                    Create Account
+                  </h3>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          First Name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          className="w-full px-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                          placeholder="John"
+                          onChange={(e) => setName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Last Name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          className="w-full px-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                          placeholder="Doe"
+                          onChange={(e) => setSurname(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Email Address
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="email"
+                          required
+                          className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                          placeholder="john@example.com"
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="password"
+                          required
+                          className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                          placeholder="••••••••"
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Confirm Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="password"
+                          required
+                          className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                          placeholder="••••••••"
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-base font-medium text-black bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                    >
+                      Register
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-[400px]">
+                  <button
+                    onClick={() => setActiveForm("register")}
+                    className="group relative flex items-center px-6 py-3 border-2 border-black rounded-lg text-black font-semibold hover:bg-black hover:text-yellow-500 transition-all duration-300"
+                  >
+                    <UserPlus className="w-5 h-5 mr-2" />
+                    Register Here
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default LoginPage;

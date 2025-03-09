@@ -1,27 +1,32 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Bars3Icon } from "@heroicons/react/24/outline"; // Updated to v2
+import {
+  User,
+  Settings,
+  Bell,
+  Shield,
+  Activity,
+  CreditCard,
+  LogOut,
+  Menu,
+  Mail,
+} from "lucide-react";
 
 const AccountPage = () => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate(); // Hook to navigate programmatically
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (token) {
       axios
         .get("http://localhost:5000/api/user/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         })
-        .then((response) => {
-          setUser(response.data);
-        })
+        .then((response) => setUser(response.data))
         .catch((error) => {
           setError("Kullanıcı bilgileri alınırken bir hata oluştu!");
           console.error("Hata:", error);
@@ -30,59 +35,86 @@ const AccountPage = () => {
   }, []);
 
   const handleLogout = () => {
-    // Remove the token from localStorage
     localStorage.removeItem("token");
-
-    // Redirect the user to the login page
     navigate("/login");
   };
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!user) return <div className="text-gray-500">Yükleniyor...</div>;
 
-  if (!user) {
-    return <div className="text-gray-500">Yükleniyor...</div>;
-  }
+  const menuItems = [
+    { id: "profile", label: "Profile", icon: User },
+    { id: "settings", label: "Settings", icon: Settings },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "security", label: "Security", icon: Shield },
+    { id: "billing", label: "Billing", icon: CreditCard },
+    { id: "activity", label: "Activity", icon: Activity },
+  ];
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <div
         className={`${
-          sidebarOpen ? "block" : "hidden"
-        } md:block w-64 bg-gray-800 text-white p-4 transition-all duration-300 ease-in-out`}
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } fixed md:relative md:translate-x-0 z-30 w-64 h-full bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out`}
       >
-        <h2 className="text-xl font-semibold mb-6">Account</h2>
-        <ul>
-          <li className="py-2 hover:bg-gray-700 cursor-pointer">Profile</li>
-          <li className="py-2 hover:bg-gray-700 cursor-pointer">Settings</li>
-          <li className="py-2 hover:bg-gray-700 cursor-pointer">
-            Notifications
-          </li>
-          <li
-            className="py-2 hover:bg-gray-700 cursor-pointer"
-            onClick={handleLogout} // Trigger logout on click
-          >
-            Logout
-          </li>
-        </ul>
+        <div className="flex flex-col h-full">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-800">Account</h2>
+          </div>
+          <nav className="flex-1 p-4 space-y-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  className="flex items-center w-full px-4 py-3 text-sm text-gray-600 rounded-lg hover:bg-gray-50"
+                >
+                  <Icon className="w-5 h-5 mr-3" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
+          <div className="p-4 border-t border-gray-200">
+            <button
+              onClick={handleLogout}
+              className="flex items-center w-full px-4 py-3 text-sm text-red-600 rounded-lg hover:bg-red-50"
+            >
+              <LogOut className="w-5 h-5 mr-3" /> Logout
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Hamburger Menu for Mobile */}
+      {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="md:hidden p-4 bg-gray-800 text-white rounded-full fixed top-4 left-4"
+        className="fixed md:hidden z-40 m-4 p-2 rounded-lg bg-white shadow-lg border border-gray-200 text-gray-600 hover:text-gray-900"
       >
-        <Bars3Icon className="h-6 w-6" /> {/* Updated to v2 */}
+        <Menu className="w-6 h-6" />
       </button>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-gray-100">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">
-          Merhaba, {user.name} {user.surname}
-        </h1>
-        <p className="text-lg text-gray-700">Email: {user.email}</p>
+      <div className="flex-1 min-w-0 p-8">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+          <div className="flex items-center space-x-4 mb-8">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold">
+              {user.name[0]}
+              {user.surname[0]}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {user.name} {user.surname}
+              </h1>
+              <div className="flex items-center text-gray-500 mt-1">
+                <Mail className="w-4 h-4 mr-2" />
+                {user.email}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

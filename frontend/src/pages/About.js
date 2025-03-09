@@ -1,11 +1,11 @@
 import React from "react";
-import Navbar from "../components/Navbar"; // Navbar bileşeni
-import Footer from "../components/Footer"; // Footer bileşeni
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
-const About = () => {
+function About() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar className="w-full bg-gray-800 text-white" />
+      <Navbar />
       <main className="flex-grow container mx-auto p-6 text-gray-700">
         {/* Sayfa Başlığı */}
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
@@ -18,9 +18,7 @@ const About = () => {
             Biz, müşterilerimizin ihtiyaçlarına en uygun çözümleri sunarak
             onların hayatlarını kolaylaştırmayı ilke edinen bir ekibiz. Gelişen
             teknolojiye ayak uydurarak, sektörümüzde yenilikçi adımlar atmayı ve
-            güvenilir bir marka olmayı amaçlıyoruz. Müşteri memnuniyeti, işimize
-            olan tutkumuz ve etik değerlere bağlılığımız sayesinde, her geçen
-            gün daha güçlü bir yapıya ulaşmayı hedefliyoruz.
+            güvenilir bir marka olmayı amaçlıyoruz.
           </p>
         </section>
 
@@ -61,32 +59,33 @@ const About = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {/* Ekip Üyesi 1 */}
             <div className="bg-gray-100 p-6 rounded-lg shadow-sm text-center">
+              <div className="w-24 h-24 rounded-full bg-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-800">
                 Ahmet Yılmaz
               </h3>
               <p className="text-gray-600">CEO & Kurucu</p>
               <p className="text-gray-600 mt-2 text-sm leading-relaxed">
                 Ahmet, şirketimizin kurucusu ve stratejik vizyonunu
-                şekillendiren liderdir. Sektördeki deneyimi ve yenilikçi bakış
-                açısıyla şirketimizin gelecekteki adımlarını belirler.
+                şekillendiren liderdir.
               </p>
             </div>
 
             {/* Ekip Üyesi 2 */}
             <div className="bg-gray-100 p-6 rounded-lg shadow-sm text-center">
+              <div className="w-24 h-24 rounded-full bg-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-800">
                 Ayşe Demir
               </h3>
               <p className="text-gray-600">Teknoloji Yöneticisi</p>
               <p className="text-gray-600 mt-2 text-sm leading-relaxed">
                 Ayşe, projelerimizin teknolojik gelişimini ve yenilikçi
-                çözümlerini yönetir. İnovasyona ve kaliteye odaklanarak
-                teknolojinin gücünü müşterilerimizin faydasına dönüştürür.
+                çözümlerini yönetir.
               </p>
             </div>
 
             {/* Ekip Üyesi 3 */}
             <div className="bg-gray-100 p-6 rounded-lg shadow-sm text-center">
+              <div className="w-24 h-24 rounded-full bg-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-800">
                 Mehmet Can
               </h3>
@@ -103,6 +102,6 @@ const About = () => {
       <Footer />
     </div>
   );
-};
+}
 
 export default About;
