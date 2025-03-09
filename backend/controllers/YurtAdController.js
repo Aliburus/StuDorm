@@ -2,18 +2,41 @@ const YurtAd = require("../models/YurtAd");
 const YurtAdPhoto = require("../models/YurtAdPhoto");
 
 const createYurtAd = async (req, res) => {
-  const { title, description, price, location, gender_required } = req.body;
+  const {
+    user_id, // Yeni alan: user_id
+    title,
+    description,
+    price,
+    location,
+    gender_required,
+    province,
+    district,
+    room_type,
+    status, // Yeni alan: status
+    is_hidden, // Yeni alan: is_hidden
+    is_premium, // Yeni alan: is_premium
+  } = req.body;
+
   const photos = req.files.map((file) => `/uploads/${file.filename}`);
 
   try {
+    // Yeni ilan oluşturma
     const yurtAdId = await YurtAd.create({
+      user_id,
       title,
       description,
       price,
       location,
       gender_required,
+      province,
+      district,
+      room_type,
+      status,
+      is_hidden,
+      is_premium,
     });
 
+    // Fotoğrafları ekleme
     if (photos.length > 0) {
       await YurtAdPhoto.addPhotos(yurtAdId, photos);
     }
@@ -30,9 +53,16 @@ const createYurtAd = async (req, res) => {
 
 // Tüm ilanlar ve fotoğraflar ile birlikte almak için controller fonksiyonu
 const getAllYurtAdsWithPhotos = async (req, res) => {
+  const { minPrice, maxPrice, province, district, roomType } = req.query;
   try {
     // Tüm ilanları al
-    const yurtAds = await YurtAd.getAll();
+    const yurtAds = await YurtAd.getAll({
+      minPrice,
+      maxPrice,
+      province,
+      district,
+      roomType,
+    });
 
     // Her bir ilan için fotoğrafları al
     const yurtAdsWithPhotos = await Promise.all(
