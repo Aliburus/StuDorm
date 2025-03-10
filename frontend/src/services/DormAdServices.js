@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/yurt-ilan";
 
-// Yurt ilanı gönderme servisi
+// Create a new yurt ilan (ad) by sending the form data
 export const createYurtIlan = async (formData) => {
   try {
     const formDataToSend = new FormData();
@@ -12,6 +12,12 @@ export const createYurtIlan = async (formData) => {
     formDataToSend.append("price", formData.price);
     formDataToSend.append("location", formData.location);
     formDataToSend.append("gender_required", formData.gender_required);
+    formDataToSend.append("province", formData.province);
+    formDataToSend.append("district", formData.district);
+    formDataToSend.append("room_type", formData.room_type);
+    formDataToSend.append("status", formData.status);
+    formDataToSend.append("is_hidden", formData.is_hidden);
+    formDataToSend.append("is_premium", formData.is_premium);
 
     formData.photos.forEach((photo) => {
       formDataToSend.append("photos", photo);
@@ -24,6 +30,6 @@ export const createYurtIlan = async (formData) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error("İlan kaydedilemedi.");
+    throw new Error("Failed to save ad.");
   }
 };

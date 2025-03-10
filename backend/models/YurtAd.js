@@ -1,9 +1,9 @@
 const db = require("../config/db");
 
 const YurtAd = {
-  // Yeni ilan oluşturma
+  // Create a new ad
   create: async ({
-    user_id, // Yeni alan: user_id
+    user_id,
     title,
     description,
     price,
@@ -12,9 +12,9 @@ const YurtAd = {
     province,
     district,
     room_type,
-    status, // Yeni alan: status
-    is_hidden, // Yeni alan: is_hidden
-    is_premium, // Yeni alan: is_premium
+    status,
+    is_hidden,
+    is_premium,
   }) => {
     const [result] = await db.query(
       "INSERT INTO YurtAds (user_id, title, description, price, location, gender_required, province, district, room_type, status, is_hidden, is_premium) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -33,10 +33,10 @@ const YurtAd = {
         is_premium,
       ]
     );
-    return result.insertId; // Yeni ilan ID'si
+    return result.insertId; // Return new ad ID
   },
 
-  // Tüm ilanları al
+  // Get all ads with optional filters
   getAll: async ({ minPrice, maxPrice, province, district, roomType }) => {
     let query =
       "SELECT id, user_id, title, description, price, location, gender_required, province, district, room_type, status, is_hidden, is_premium, created_at, updated_at FROM YurtAds WHERE 1=1";

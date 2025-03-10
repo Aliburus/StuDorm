@@ -3,7 +3,7 @@ const YurtAdPhoto = require("../models/YurtAdPhoto");
 
 const createYurtAd = async (req, res) => {
   const {
-    user_id, // Yeni alan: user_id
+    user_id, // User who is posting the ad
     title,
     description,
     price,
@@ -12,15 +12,15 @@ const createYurtAd = async (req, res) => {
     province,
     district,
     room_type,
-    status, // Yeni alan: status
-    is_hidden, // Yeni alan: is_hidden
-    is_premium, // Yeni alan: is_premium
+    status, // New field: status (active/inactive)
+    is_hidden, // New field: visibility status
+    is_premium, // New field: premium status
   } = req.body;
 
   const photos = req.files.map((file) => `/uploads/${file.filename}`);
 
   try {
-    // Yeni ilan oluşturma
+    // Create new ad
     const yurtAdId = await YurtAd.create({
       user_id,
       title,
@@ -36,26 +36,26 @@ const createYurtAd = async (req, res) => {
       is_premium,
     });
 
-    // Fotoğrafları ekleme
+    // Add photos if provided
     if (photos.length > 0) {
       await YurtAdPhoto.addPhotos(yurtAdId, photos);
     }
 
     res.status(200).json({
-      message: "İlan ve fotoğraflar başarıyla kaydedildi.",
+      message: "Ad and photos saved successfully.",
       ilan_id: yurtAdId,
     });
   } catch (error) {
-    console.error("Kayıt sırasında hata:", error);
-    res.status(500).json({ message: "Kayıt işlemi başarısız.", error });
+    console.error("Error during save:", error);
+    res.status(500).json({ message: "Failed to save ad.", error });
   }
 };
 
-// Tüm ilanlar ve fotoğraflar ile birlikte almak için controller fonksiyonu
+// Get all ads with optional filters and photos
 const getAllYurtAdsWithPhotos = async (req, res) => {
   const { minPrice, maxPrice, province, district, roomType } = req.query;
   try {
-    // Tüm ilanları al
+    // Get all ads with filters
     const yurtAds = await YurtAd.getAll({
       minPrice,
       maxPrice,
@@ -64,24 +64,22 @@ const getAllYurtAdsWithPhotos = async (req, res) => {
       roomType,
     });
 
-    // Her bir ilan için fotoğrafları al
+    // Get photos for each ad
     const yurtAdsWithPhotos = await Promise.all(
       yurtAds.map(async (yurtAd) => {
         const photos = await YurtAdPhoto.getPhotosByYurtAdId(yurtAd.id);
         return {
           ...yurtAd,
           photos: photos.map((photo) => photo.photo_url),
-        }; // İlan bilgileri ve fotoğraflarını birleştir
+        };
       })
     );
 
-    // İlanlar ve fotoğraflar
+    // Return ads with photos
     res.status(200).json(yurtAdsWithPhotos);
   } catch (error) {
-    console.error("Veri çekme hatası:", error);
-    res
-      .status(500)
-      .json({ message: "Veri çekme sırasında bir hata oluştu.", error });
+    console.error("Error fetching data:", error);
+    res.status(500).json({ message: "Error fetching data.", error });
   }
 };
 

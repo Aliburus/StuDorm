@@ -1,23 +1,25 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
   MapPin,
   Briefcase,
-  Clock,
-  DollarSign,
   Filter,
   Building2,
   MapPinned,
+  Clock,
+  DollarSign,
   GraduationCap,
   ShoppingBag,
   HeadphonesIcon,
   WrenchIcon,
+  UserCheck,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { getPartTimeJobs } from "../services/PartTimeService";
 
-const FindPartTime = () => {
+function FindPartTime() {
   const [listings, setListings] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
@@ -46,48 +48,23 @@ const FindPartTime = () => {
     Izmir: ["Konak", "Bornova"],
   };
 
-  const sampleListings = [
-    {
-      name: "Özel Ders Öğretmeni",
-      location: "Kadıköy, Istanbul",
-      category: "Eğitim",
-      contact: "Ahmet Yılmaz",
-      description: "Bireysel ders veren öğretmen arayışındayız.",
-      salary: "5000 TL",
-      hours: "20 saat/hafta",
-    },
-    {
-      name: "Satış Danışmanı",
-      location: "Çankaya, Ankara",
-      category: "Satış",
-      contact: "Ayşe Demir",
-      description: "Satış yapmak üzere bir danışman arayışımız var.",
-      salary: "4000 TL",
-      hours: "30 saat/hafta",
-    },
-    {
-      name: "Teknik Destek Personeli",
-      location: "Konak, Izmir",
-      category: "Teknik",
-      contact: "Ali Veli",
-      description: "Teknik destek sağlayacak personel arayışı.",
-      salary: "3500 TL",
-      hours: "25 saat/hafta",
-    },
-    {
-      name: "Çağrı Merkezi Elemanı",
-      location: "Üsküdar, Istanbul",
-      category: "Destek",
-      contact: "Mehmet Can",
-      description: "Çağrı merkezi için personel alımı.",
-      salary: "3000 TL",
-      hours: "40 saat/hafta",
-    },
-  ];
-
   useEffect(() => {
-    setListings(sampleListings);
-    setFilteredListings(sampleListings);
+    const fetchPartTimeJobs = async () => {
+      try {
+        console.log("Fetching part-time jobs...");
+        const jobs = await getPartTimeJobs();
+
+        const validJobs = jobs.filter(
+          (job) => job.id && job.title && job.category
+        ); // Updated filtering logic
+
+        setListings(validJobs);
+        setFilteredListings(validJobs);
+      } catch (error) {
+        console.error("Part-time jobs fetch error:", error);
+      }
+    };
+    fetchPartTimeJobs();
   }, []);
 
   const applyFilters = () => {
@@ -119,7 +96,7 @@ const FindPartTime = () => {
   };
 
   const handleListingClick = (listing) => {
-    navigate(`/listing/${listing.name}`, { state: { listing } });
+    navigate(`/part-time-details/${listing.id}`, { state: { listing } });
   };
 
   const getCategoryIcon = (categoryName) => {
@@ -132,9 +109,8 @@ const FindPartTime = () => {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Mobile Filter Button */}
         <button
-          className="md:hidden w-full mb-4 flex items-center justify-center space-x-2 bg-indigo-600 text-white py-3 rounded-lg shadow-md"
+          className="md:hidden w-full mb-4 flex items-center justify-center space-x-2 bg-yellow-500 text-white py-3 rounded-lg shadow-md"
           onClick={() => setIsFilterOpen(!isFilterOpen)}
         >
           <Filter className="w-5 h-5" />
@@ -142,10 +118,8 @@ const FindPartTime = () => {
         </button>
 
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Filters */}
           <div
-            className={`
-            md:w-1/4 bg-white rounded-xl shadow-lg p-6
+            className={`md:w-1/4 bg-white rounded-xl shadow-lg p-6
             ${isFilterOpen ? "block" : "hidden"} md:block
             fixed md:relative top-0 left-0 right-0 bottom-0 md:top-auto md:left-auto md:right-auto md:bottom-auto
             z-50 md:z-auto bg-white md:bg-transparent
@@ -175,7 +149,7 @@ const FindPartTime = () => {
                 </label>
                 <select
                   id="category"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
@@ -198,7 +172,7 @@ const FindPartTime = () => {
                 </label>
                 <select
                   id="province"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={selectedProvince}
                   onChange={handleProvinceChange}
                 >
@@ -221,7 +195,7 @@ const FindPartTime = () => {
                 </label>
                 <select
                   id="district"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={selectedDistrict}
                   onChange={(e) => setSelectedDistrict(e.target.value)}
                   disabled={!selectedProvince}
@@ -238,7 +212,7 @@ const FindPartTime = () => {
 
               <button
                 onClick={applyFilters}
-                className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 <Search className="w-5 h-5" />
                 Filtrele
@@ -246,27 +220,28 @@ const FindPartTime = () => {
             </div>
           </div>
 
-          {/* Listings */}
           <div className="md:w-3/4">
             {filteredListings.length > 0 ? (
               <div className="grid gap-6">
-                {filteredListings.map((listing, index) => (
+                {filteredListings.map((listing) => (
                   <div
-                    key={index}
+                    key={listing.id}
                     className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer overflow-hidden"
-                    onClick={() => handleListingClick(listing)}
                   >
-                    <div className="p-6">
+                    <div
+                      className="p-6"
+                      onClick={() => handleListingClick(listing)}
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             {getCategoryIcon(listing.category)}
-                            <span className="text-sm font-medium text-indigo-600">
+                            <span className="text-sm font-medium text-yellow-500">
                               {listing.category}
                             </span>
                           </div>
                           <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                            {listing.name}
+                            {listing.title} {/* Updated from listing.name */}
                           </h3>
                           <p className="text-gray-600 mb-4">
                             {listing.description}
@@ -276,16 +251,22 @@ const FindPartTime = () => {
                             <div className="flex items-center gap-2 text-gray-600">
                               <MapPin className="w-4 h-4" />
                               <span className="text-sm">
-                                {listing.location}
+                                {listing.province} - {listing.district}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                               <Clock className="w-4 h-4" />
-                              <span className="text-sm">{listing.hours}</span>
+                              <span className="text-sm">
+                                {listing.duration}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <UserCheck className="w-4 h-4" />
+                              <span className="text-sm">{listing.contact}</span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                               <DollarSign className="w-4 h-4" />
-                              <span className="text-sm">{listing.salary}</span>
+                              <span className="text-sm">{listing.price}₺</span>
                             </div>
                           </div>
                         </div>
@@ -295,19 +276,17 @@ const FindPartTime = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-xl text-gray-600">
-                  Hiçbir sonuç bulunamadı.
-                </p>
+              <div className="text-center text-lg font-semibold text-gray-500">
+                Hiç ilan bulunamadı.
               </div>
             )}
           </div>
         </div>
       </div>
+
       <Footer />
     </div>
   );
-};
+}
 
 export default FindPartTime;

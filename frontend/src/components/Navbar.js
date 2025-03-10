@@ -74,6 +74,12 @@ const Navbar = () => {
                     My Account
                   </button>
                   <button
+                    onClick={() => navigate("/dormAdForm")}
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
+                  >
+                    Advert{" "}
+                  </button>
+                  <button
                     onClick={handleLogout}
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
                   >
@@ -152,6 +158,15 @@ const Navbar = () => {
                 }}
               >
                 My Account
+              </div>
+              <div
+                className="block text-lg font-semibold hover:text-yellow-500"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/dormAdForm"); // My Account yönlendirmesi
+                }}
+              >
+                Advert
               </div>
               <div
                 className="block text-lg font-semibold hover:text-yellow-500"

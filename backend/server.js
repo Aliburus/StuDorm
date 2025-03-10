@@ -4,7 +4,7 @@ const path = require("path");
 
 const yurtAdRoutes = require("./routes/YurtAdRoutes");
 const authRoutes = require("./routes/AuthRoutes");
-const parttimeAdvertRoutes = require("./routes/PartTimeAdvertRoutes");
+const partTimeAdvertRoutes = require("./routes/PartTimeAdvertRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const forumRoutes = require("./routes/forumRoutes");
@@ -24,7 +24,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", authRoutes); // Yetkilendirme rotaları
 app.use("/api", yurtAdRoutes); // Yurt ilanı rotaları
 
-app.use("/api/parttimeadverts", parttimeAdvertRoutes);
+app.use("/api/parttimeads", partTimeAdvertRoutes);
 app.use("/api/user", userRoutes);
 
 app.use("/admin", adminRoutes);
@@ -32,6 +32,7 @@ app.use("/admin", adminRoutes);
 app.use("/api/forum", forumRoutes);
 
 app.use("/api/interns", internRoutes);
+
 // Sunucuyu başlatma
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

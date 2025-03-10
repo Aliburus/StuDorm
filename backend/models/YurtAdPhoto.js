@@ -4,27 +4,42 @@ const YurtAdPhoto = {
   // Yurt ilanına ait fotoğrafları ekle
   addPhotos: async (yurtAdId, photos) => {
     const photoValues = photos.map((photo) => [yurtAdId, photo]);
-    await db.query(
-      "INSERT INTO YurtAdPhotos (yurt_ad_id, photo_url) VALUES ?",
-      [photoValues]
-    );
+    try {
+      await db.query(
+        "INSERT INTO YurtAdPhotos (yurt_ad_id, photo_url) VALUES ?",
+        [photoValues]
+      );
+    } catch (error) {
+      console.error("Error while inserting photos:", error);
+      throw new Error("Error while saving photos.");
+    }
   },
 
   // Yurt ilanına ait fotoğrafları al
   getPhotosByYurtAdId: async (yurtAdId) => {
-    const [result] = await db.query(
-      "SELECT id, yurt_ad_id, photo_url FROM YurtAdPhotos WHERE yurt_ad_id = ?",
-      [yurtAdId]
-    );
-    return result; // Fotoğrafları döndür
+    try {
+      const [result] = await db.query(
+        "SELECT id, yurt_ad_id, photo_url FROM YurtAdPhotos WHERE yurt_ad_id = ?",
+        [yurtAdId]
+      );
+      return result; // Return photos
+    } catch (error) {
+      console.error("Error while fetching photos:", error);
+      throw new Error("Error while fetching photos.");
+    }
   },
 
   // Tüm ilanların fotoğraflarını al
   getAllPhotos: async () => {
-    const [result] = await db.query(
-      "SELECT id, yurt_ad_id, photo_url FROM YurtAdPhotos"
-    );
-    return result;
+    try {
+      const [result] = await db.query(
+        "SELECT id, yurt_ad_id, photo_url FROM YurtAdPhotos"
+      );
+      return result; // Return all photos
+    } catch (error) {
+      console.error("Error while fetching all photos:", error);
+      throw new Error("Error while fetching all photos.");
+    }
   },
 };
 
