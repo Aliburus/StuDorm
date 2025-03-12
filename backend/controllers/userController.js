@@ -15,5 +15,16 @@ const getUserProfile = async (req, res) => {
     return res.status(500).json({ error: "Veritabanı hatası" });
   }
 };
+const updateUserProfile = async (req, res) => {
+  const userId = req.user.id;
+  const updateData = req.body; // Gelen veriler (name, surname, email vs.)
 
-module.exports = { getUserProfile };
+  try {
+    const updatedUser = await userModel.updateProfile(userId, updateData);
+    res.json(updatedUser);
+  } catch (err) {
+    console.error("Hata:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+};
+module.exports = { getUserProfile, updateUserProfile };

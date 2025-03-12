@@ -2,6 +2,26 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/auth/";
 
+export const updateUserProfile = async (formData, token) => {
+  try {
+    const response = await axios.put(
+      "http://localhost:5000/api/user/profile",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Profil güncelleme hatası:",
+      error.response?.data || error.message
+    );
+    throw new Error("Profil güncellenirken bir hata oluştu.");
+  }
+};
 // Kullanıcı kaydı
 export const register = async (name, surname, email, password) => {
   try {
