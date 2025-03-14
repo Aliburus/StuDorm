@@ -1,7 +1,8 @@
+// src/pages/AccountPage.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/Navbar"; // Navbar componenti import edildi
-import Footer from "../../components/Footer"; // Footer componenti import edildi
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import {
   User,
   Settings,
@@ -15,12 +16,12 @@ import {
   Mail,
   Save,
 } from "lucide-react";
-
 import {
   getUserInfo,
   updateUserProfile,
   logout,
-} from "../../services/UserServices"; // Import edilen servisler
+} from "../../services/UserServices";
+import ProfileForm from "../Users/ProfileForm"; // ProfileForm componentini import ettik
 
 const AccountPage = () => {
   const [user, setUser] = useState(null);
@@ -71,6 +72,7 @@ const AccountPage = () => {
       }
     }
   };
+
   if (error) return <div className="text-red-500">{error}</div>;
   if (!user) return <div className="text-gray-500">Yükleniyor...</div>;
 
@@ -84,136 +86,73 @@ const AccountPage = () => {
     { id: "premium", label: "Premium", icon: CreditCard },
   ];
   const handlePayment = () => {
-    alert("Payment feature is under development");
+    navigate("/payment");
   };
   const renderProfileContent = () => (
     <div className="flex flex-col h-[calc(100vh-12rem)] justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 bg-white rounded-xl shadow-sm p-8"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              First Name
-            </label>
-            <input
-              type="text"
-              disabled={!isEditing}
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-50 disabled:text-gray-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Last Name
-            </label>
-            <input
-              type="text"
-              disabled={!isEditing}
-              value={formData.surname}
-              onChange={(e) =>
-                setFormData({ ...formData, surname: e.target.value })
-              }
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-50 disabled:text-gray-500"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            type="email"
-            disabled={!isEditing}
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-50 disabled:text-gray-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            type="password"
-            disabled={!isEditing}
-            value={formData.password || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-50 disabled:text-gray-500"
-            placeholder={isEditing ? "Enter new password" : "••••••••"}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Phone
-          </label>
-          <input
-            type="tel"
-            disabled={!isEditing}
-            value={formData.phone || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, phone: e.target.value })
-            }
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-50 disabled:text-gray-500"
-          />
-        </div>
-
-        <div className="flex justify-end space-x-3 pt-6">
-          {isEditing ? (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  setFormData(user);
-                  setIsEditing(false);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex items-center px-4 py-2 bg-yellow-400 text-white rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-yellow-400 text-white rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors"
-            >
-              Edit Profile
-            </button>
-          )}
-        </div>
-      </form>
+      <ProfileForm
+        user={user}
+        formData={formData}
+        setFormData={setFormData}
+        isEditing={isEditing}
+        setIsEditing={setIsEditing}
+        handleSubmit={handleSubmit}
+      />
     </div>
   );
   const renderPremiumContent = () => {
+    if (user?.isPremium) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8">
+          <h2 className="text-2xl font-bold mb-4">Premium Member 🚀</h2>
+          <p className="text-gray-600 mb-6 text-center">
+            You have 12 months left in your premium membership!
+          </p>
+        </div>
+      );
+    }
+
+    // Kullanıcı premium değilse üyelik avantajlarını göster
     return (
       <div className="flex flex-col items-center justify-center py-8">
         <h2 className="text-2xl font-bold mb-4">Go Premium 🚀</h2>
         <p className="text-gray-600 mb-6 text-center">
-          Unlock exclusive features by becoming a premium member!
+          Premium üyelik ile daha fazla özellikten yararlanabilirsiniz!
         </p>
 
+        {/* Premium Avantajları Listesi */}
+        <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-6 max-w-md w-full">
+          <h3 className="text-lg font-semibold mb-3">
+            Premium Üyelik Avantajları
+          </h3>
+          <ul className="list-disc list-inside text-gray-700 space-y-2">
+            <li>
+              <span className="font-bold">Sınırsız ilan ekleme:</span> Normal
+              üyeler en fazla 2 ilan ekleyebilir.
+            </li>
+            <li>
+              <span className="font-bold">Daha uzun ilan süresi:</span> Normal
+              üyeler için ilan süresi 2 ay, premium üyeler için süresiz.
+            </li>
+            <li>
+              <span className="font-bold">Öne çıkan ilan:</span> Premium
+              üyelerin ilanları özel bir bölümde gösterilir.
+            </li>
+            <li>
+              <span className="font-bold">Daha fazla görünürlük:</span>{" "}
+              İlanlarınız ana sayfada daha üst sıralarda yer alır.
+            </li>
+            <li>
+              <span className="font-bold">Özel destek:</span> 7/24 müşteri
+              desteğine erişim.
+            </li>
+          </ul>
+        </div>
+
+        {/* Premiuma Geçiş Butonu */}
         <button
           onClick={handlePayment}
-          className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition"
+          className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition font-medium"
         >
           Upgrade to Premium
         </button>

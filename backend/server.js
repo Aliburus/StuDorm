@@ -9,6 +9,7 @@ const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const forumRoutes = require("./routes/forumRoutes");
 const internRoutes = require("./routes/InternRoutes");
+const paymentRoutes = require("./routes/PaymentRoutes");
 const app = express();
 
 // Middleware'ler
@@ -32,7 +33,7 @@ app.use("/admin", adminRoutes);
 app.use("/api/forum", forumRoutes);
 
 app.use("/api/interns", internRoutes);
-
+app.use("/api", paymentRoutes);
 // Sunucuyu başlatma
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -15,6 +15,7 @@ import PartTimeAdvertForm from "./components/PartTimeAdvertForm";
 import RoomListingDetails from "./pages/RoomListingDetails";
 import DormAdvertForm from "./components/DormAdvertForm";
 import DashboardPage from "./pages/AdminPages/DashboardPage";
+import PaymentPage from "./pages/Users/PaymentPage";
 function App() {
   return (
     <Router>
@@ -31,6 +32,7 @@ function App() {
           <Route path="/dormAdForm" element={<DormAdvertForm />} />
           <Route path="/admin" element={<DashboardPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
           <Route path="/forum" element={<ForumPage />} />
           <Route
             path="/room-listing-details"
