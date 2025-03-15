@@ -22,6 +22,7 @@ import {
   logout,
 } from "../../services/UserServices";
 import ProfileForm from "../Users/ProfileForm"; // ProfileForm componentini import ettik
+import ForumPosts from "./AccountForumPosts";
 
 const AccountPage = () => {
   const [user, setUser] = useState(null);
@@ -159,6 +160,9 @@ const AccountPage = () => {
       </div>
     );
   };
+  const renderForumPostsContent = () => {
+    return <ForumPosts />;
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -166,12 +170,11 @@ const AccountPage = () => {
         return renderProfileContent();
       case "premium":
         return renderPremiumContent();
+
+      case "forumPosts":
+        return renderForumPostsContent();
       default:
-        return (
-          <div className="text-center text-gray-500 py-8">
-            This section is under development
-          </div>
-        );
+        return <div>Content</div>;
     }
   };
 

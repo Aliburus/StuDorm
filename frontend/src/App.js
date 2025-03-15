@@ -33,7 +33,7 @@ function App() {
           <Route path="/admin" element={<DashboardPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/forum" element={<ForumPage />} />
+          <Route path="/forumpage" element={<ForumPage />} />
           <Route
             path="/room-listing-details"
             element={<RoomListingDetails />}

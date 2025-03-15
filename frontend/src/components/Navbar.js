@@ -50,6 +50,9 @@ const Navbar = () => {
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
             <Link to="/find-part-time">Find Part Time</Link>
+          </div>{" "}
+          <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
+            <Link to="/forumpage">Forum</Link>
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
             <Link to="/about">About Us</Link>
@@ -57,7 +60,6 @@ const Navbar = () => {
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
             <Link to="/contact">Contact</Link>
           </div>
-
           {/* Giriş Yapılmışsa Account Iconu */}
           {isLoggedIn ? (
             <div className="relative">
