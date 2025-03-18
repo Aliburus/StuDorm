@@ -22,7 +22,7 @@ import {
   logout,
 } from "../../services/UserServices";
 import ProfileForm from "../Users/ProfileForm"; // ProfileForm componentini import ettik
-import ForumPosts from "./AccountForumPosts";
+import AccountForumPosts from "./AccountForumPosts";
 
 const AccountPage = () => {
   const [user, setUser] = useState(null);
@@ -161,7 +161,7 @@ const AccountPage = () => {
     );
   };
   const renderForumPostsContent = () => {
-    return <ForumPosts />;
+    return <AccountForumPosts />;
   };
 
   const renderContent = () => {

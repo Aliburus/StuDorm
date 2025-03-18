@@ -73,20 +73,109 @@ const getAllPosts = async (req, res) => {
   }
 };
 const getPostByUserId = async (req, res) => {
-  const user_id = req.user.id; // Kullanıcı id'si authenticateToken middleware'den alınıyor
+  const user_id = req.user?.id; // Middleware ile gelen user_id
+  if (!user_id) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized - User ID not found" });
+  }
+
+  console.log("User ID:", user_id); // Kullanıcı ID'sini logluyoruz
 
   try {
-    const posts = await ForumPost.getPostByUserId(user_id); // Kullanıcı id'sine göre postları alıyoruz
-    res.status(200).json(posts); // Kullanıcıya ait postları döndürüyoruz
+    // Kullanıcıya ait tüm postları alıyoruz
+    const posts = await ForumPost.getPostByUserId(user_id);
+
+    if (!posts || posts.length === 0) {
+      return res.status(404).json({ message: "No posts found for this user." });
+    }
+
+    console.log("Posts fetched:", posts); // Fetch edilen postları logluyoruz
+
+    return res.status(200).json(posts);
   } catch (err) {
-    console.error("Posts alınırken hata:", err);
-    res.status(500).json({ message: "Posts getirilemedi." });
+    console.error("Error fetching posts:", err);
+    return res.status(500).json({ message: "Posts could not be retrieved." });
   }
 };
+// Post silme
+const deletePost = async (req, res) => {
+  const postId = req.params.id;
+  const userId = req.user.id; // JWT'den alınan user ID
+
+  try {
+    // Postu veritabanından silmeden önce, postun sahibi olup olmadığını kontrol edelim
+    const post = await ForumPost.getById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post bulunamadı!" });
+    }
+
+    if (post.user_id !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Bu postu silmeye yetkiniz yok!" });
+    }
+
+    // Postu silme işlemi
+    const result = await ForumPost.delete(postId);
+    if (result.affectedRows === 0) {
+      return res.status(500).json({ message: "Post silinemedi." });
+    }
+
+    return res.status(200).json({ message: "Post başarıyla silindi." });
+  } catch (err) {
+    console.error("Post silinirken hata:", err);
+    return res.status(500).json({ message: "Bir hata oluştu." });
+  }
+};
+// Post güncelleme
+const updatePost = async (req, res) => {
+  const { content } = req.body; // Yeni içerik
+  const postId = req.params.id; // Güncellenecek post ID'si
+  const userId = req.user.id; // JWT'den alınan user ID
+
+  if (!content) {
+    return res.status(400).json({ message: "İçerik boş olamaz!" });
+  }
+
+  try {
+    // Postu veritabanından alıyoruz
+    const post = await ForumPost.getById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post bulunamadı!" });
+    }
+
+    // Postu sadece sahip olan kişi güncelleyebilir
+    if (post.user_id !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Bu postu güncellemeye yetkiniz yok!" });
+    }
+
+    // Postu güncelleme
+    const updated = await ForumPost.updateContent(postId, content);
+    if (updated === 0) {
+      return res.status(500).json({ message: "Post güncellenemedi." });
+    }
+
+    // Güncellenmiş postu döndür
+    const updatedPost = await ForumPost.getById(postId);
+
+    return res
+      .status(200)
+      .json({ message: "Post başarıyla güncellendi", post: updatedPost });
+  } catch (err) {
+    console.error("Post güncellenirken hata:", err);
+    return res.status(500).json({ message: "Bir hata oluştu." });
+  }
+};
+
 module.exports = {
   createPost,
   likePost,
   dislikePost,
   getAllPosts,
   getPostByUserId,
+  deletePost,
+  updatePost,
 };

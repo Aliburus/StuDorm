@@ -1,10 +1,8 @@
+// routes/adminRoutes.js
 const express = require("express");
+const { getUsers } = require("../controllers/adminController"); // `require` ile içe aktar
 const router = express.Router();
-const { getUsersWithPartTimeAds } = require("../controllers/adminController");
-const { getUsersWithYurtAds } = require("../controllers/adminController");
 
-router.get("/yurtads", getUsersWithYurtAds);
+router.get("/users", getUsers); // Kullanıcıları çekmek için rota
 
-router.get("/parttimeads", getUsersWithPartTimeAds);
-
-module.exports = router;
+module.exports = router; // Modül olarak dışa aktar

@@ -1,6 +1,6 @@
 // controllers/userController.js
 const userModel = require("../models/userModel"); // userModel'i import et
-
+const bcrypt = require("bcrypt"); // bcrypt'i import et
 const getUserProfile = async (req, res) => {
   const userId = req.user.id;
 
@@ -49,17 +49,49 @@ const accessPremiumContent = async (req, res) => {
     return res.status(500).json({ error: "Veritabanı hatası" });
   }
 };
-// Kullanıcı profilini güncelle
 const updateUserProfile = async (req, res) => {
-  const userId = req.user.id;
-  const updateData = req.body; // Gelen veriler (name, surname, email vs.)
-
   try {
-    const updatedUser = await userModel.updateProfile(userId, updateData);
-    res.json(updatedUser); // Güncellenmiş kullanıcıyı döndür
-  } catch (err) {
-    console.error("Hata:", err.message);
-    return res.status(500).json({ error: err.message });
+    const { name, surname, email, oldPassword, newPassword } = req.body;
+    const userId = req.user.id; // Auth token'dan kullanıcıyı al
+
+    const user = await userModel.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Eski şifre doğrulaması
+    if (oldPassword && !(await bcrypt.compare(oldPassword, user.password))) {
+      return res.status(400).json({ message: "Invalid old password" });
+    }
+
+    // Yeni şifreyi hash'leyip güncelle
+    let hashedPassword = user.password;
+    if (newPassword) {
+      const salt = await bcrypt.genSalt(10); // Hash için salt üret
+      hashedPassword = await bcrypt.hash(newPassword, salt); // Yeni şifreyi hash'le
+    }
+
+    // Kullanıcı bilgilerini güncelle
+    user.name = name || user.name;
+    user.surname = surname || user.surname;
+    user.email = email || user.email;
+    user.password = hashedPassword; // Şifreyi de burada güncelliyoruz
+
+    // Kullanıcıyı veritabanında güncelle
+    await userModel.updateProfile(user.id, {
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      password: user.password, // Şifreyi de burada güncelliyoruz
+    });
+
+    return res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "An error occurred while updating user",
+      error: error.message,
+    });
   }
 };
 
