@@ -119,16 +119,6 @@ function OverviewTab({ stats }) {
             {stats.partTimeListings.toLocaleString()}
           </p>
         </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center space-x-3">
-            <UserPlus className="h-5 w-5 text-pink-500" />
-            <span className="text-sm text-gray-500">Roommate Listings</span>
-          </div>
-          <p className="text-2xl font-bold mt-2">
-            {stats.roommateListings.toLocaleString()}
-          </p>
-        </div>
       </div>
     </div>
   );

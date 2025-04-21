@@ -12,3 +12,43 @@ module.exports = {
     }
   },
 };
+module.exports.getAllListings = async (req, res) => {
+  try {
+    const listings = await AdminModel.getAllListings();
+    res.status(200).json(listings);
+  } catch (err) {
+    console.error("Error fetching listings:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+module.exports.getOverviewStats = async (req, res) => {
+  try {
+    const stats = await AdminModel.getOverviewStats();
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error("Error fetching overview stats:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+module.exports.deleteListing = async (req, res) => {
+  try {
+    const { source, id } = req.params;
+    await AdminModel.deleteListing(source, id);
+    res.status(200).json({ message: "Listing deleted successfully" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.updateListingDetails = async (req, res) => {
+  try {
+    const { source, id } = req.params;
+    // body’de tüm güncellenmiş alanlar geliyor
+    await AdminModel.updateListingDetails(source, id, req.body);
+    res.status(200).json({ message: "Listing details updated" });
+  } catch (err) {
+    console.error("UpdateDetails error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

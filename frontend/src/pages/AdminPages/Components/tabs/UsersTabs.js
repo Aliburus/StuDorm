@@ -23,10 +23,9 @@ function UsersTab() {
     fetchUsers(); // Sayfa ilk yüklendiğinde kullanıcıları çek
   }, []);
 
-  // Tarih formatlama fonksiyonu
   const formatDate = (dateString) => {
-    const date = new Date(dateString); // ISO 8601 formatındaki tarihi al
-    return date.toLocaleDateString("tr-TR"); // Türkçe tarih formatına dönüştür
+    const date = new Date(dateString);
+    return date.toLocaleDateString("tr-TR");
   };
 
   // E-posta ile arama

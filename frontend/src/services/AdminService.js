@@ -13,7 +13,32 @@ const getUsers = async () => {
     throw error;
   }
 };
+const getAllListings = async () => {
+  const res = await axios.get(`${API_URL}/listings`);
+  return res.data;
+};
+const getOverviewStats = async () => {
+  const res = await axios.get(`${API_URL}/overview-stats`);
+  return res.data;
+};
+const deleteListing = async (source, id) => {
+  await axios.delete(`${API_URL}/listings/${source}/${id}`);
+};
+
+// services/AdminService.js
+const updateListingDetails = async (source, id, data) => {
+  const res = await axios.put(
+    `${API_URL}/listings/${source}/${id}/details`,
+    data
+  );
+  return res.data;
+};
 
 export const AdminService = {
+  getAllListings,
   getUsers,
+  getOverviewStats,
+
+  deleteListing,
+  updateListingDetails,
 };

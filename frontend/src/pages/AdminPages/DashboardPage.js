@@ -1,29 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../AdminPages/Components/Navbar";
 import TabNavigation from "../AdminPages/Components/TabNavigation";
 import OverviewTab from "./Components/tabs/OverwievTabs";
 import UsersTab from "./Components/tabs/UsersTabs";
 import ListingsTab from "./Components/tabs/ListingTabs";
 import SettingsTab from "./Components/tabs/SettingTabs";
+import { AdminService } from "../../services/AdminService";
 
-// Mock data
 export const adminData = {
   name: "Admin User",
   email: "admin@dormfinder.com",
-};
-
-export const stats = {
-  totalUsers: 100000,
-  activeUsers: 120,
-  premiumUsers: 50,
-  basicUsers: 125,
-  totalListings: 5000,
-  internListings: 1000,
-  partTimeListings: 1200,
-  dormListings: 1400,
-  roommateListings: 1400,
-  pendingApprovals: 25,
-  reportedContent: 8,
 };
 
 export const notifications = [
@@ -61,32 +47,41 @@ export const recentUsers = [
   },
 ];
 
-export const recentListings = [
-  {
-    id: 1,
-    title: "2BR Apartment Near Campus",
-    type: "Dorm",
-    status: "active",
-    date: "2024-03-15",
-  },
-  {
-    id: 2,
-    title: "Software Developer Intern",
-    type: "Intern",
-    status: "pending",
-    date: "2024-03-14",
-  },
-  {
-    id: 3,
-    title: "Campus Cafe Staff",
-    type: "Part-time",
-    status: "reported",
-    date: "2024-03-13",
-  },
-];
-
 function DashboardPage() {
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [stats, setStats] = useState(null);
+  const [statsError, setStatsError] = useState(null);
+
+  useEffect(() => {
+    if (selectedTab === "overview") {
+      AdminService.getOverviewStats()
+        .then((data) => setStats(data))
+        .catch((err) => {
+          console.error("❌ Error fetching overview stats:", err);
+          setStatsError(err);
+        });
+    }
+  }, [selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab === "listings") {
+      setLoading(true);
+      AdminService.getAllListings()
+        .then((data) => {
+          console.log("✅ Listings data:", data);
+          setListings(data);
+        })
+        .catch((err) => {
+          console.error("❌ Error fetching listings:", err);
+          setError(err);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [selectedTab]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -98,10 +93,31 @@ function DashboardPage() {
           setSelectedTab={setSelectedTab}
         />
 
-        {selectedTab === "overview" && <OverviewTab stats={stats} />}
+        {selectedTab === "overview" && (
+          <>
+            {!stats && !statsError && <div>Loading stats...</div>}
+            {statsError && (
+              <div className="text-red-500">Error loading stats</div>
+            )}
+            {stats && <OverviewTab stats={stats} />}
+          </>
+        )}
+
         {selectedTab === "users" && <UsersTab users={recentUsers} />}
         {selectedTab === "listings" && (
-          <ListingsTab listings={recentListings} />
+          <>
+            {loading && (
+              <div className="text-center text-gray-500 py-4">
+                Loading listings...
+              </div>
+            )}
+            {error && (
+              <div className="text-center text-red-500 py-4">
+                Failed to load listings.
+              </div>
+            )}
+            {!loading && !error && <ListingsTab listings={listings} />}
+          </>
         )}
         {selectedTab === "settings" && <SettingsTab adminData={adminData} />}
       </div>
