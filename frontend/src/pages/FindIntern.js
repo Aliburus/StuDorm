@@ -51,16 +51,21 @@ function FindIntern() {
         const interns = await getInterns(); // API çağrısı
         console.log("Fetched interns:", interns);
 
-        // İlk iç diziyi alıp düzleştiriyoruz
-        const validInterns = interns[0].filter(
-          (intern) => intern.id && intern.name && intern.category
-        );
+        // intern[0]'ın gerçekten bir dizi olup olmadığını kontrol edin
+        if (Array.isArray(interns)) {
+          // intern verisi düzgün formatta geliyorsa, işlemleri yap
+          const validInterns = interns.filter(
+            (intern) => intern.id && intern.name && intern.category
+          );
 
-        console.log("Valid interns:", validInterns); // Geçerli internleri kontrol et
+          console.log("Valid interns:", validInterns); // Geçerli internleri kontrol et
 
-        // Geçerli verileri state'e kaydediyoruz
-        setListings(validInterns);
-        setFilteredListings(validInterns);
+          // Geçerli verileri state'e kaydediyoruz
+          setListings(validInterns);
+          setFilteredListings(validInterns);
+        } else {
+          console.error("Interns verisi bir dizi değil:", interns);
+        }
       } catch (error) {
         console.error("Interns fetch error:", error);
       }

@@ -6,13 +6,14 @@ const JWT_SECRET = process.env.JWT_SECRET || "default_secret_key";
 const JWT_EXPIRES_IN = "1h";
 
 const registerUser = async (req, res) => {
-  const { name, surname, email, password } = req.body;
+  const { name, surname, email, phone, password } = req.body;
 
   if (!password || password.length < 6) {
     return res.status(400).json({ error: "Şifre en az 6 karakter olmalıdır!" });
   }
 
   try {
+    // Check if the email already exists in the database
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
       return res.status(400).json({ error: "Bu e-posta zaten kullanılıyor!" });
@@ -20,10 +21,19 @@ const registerUser = async (req, res) => {
 
     console.log("Gelen şifre:", password);
 
-    const hashedPassword = await bcrypt.hash(password, 10); // Şifreyi hashle
+    // Hash the password for security
+    const hashedPassword = await bcrypt.hash(password, 10);
     console.log("Hashlenmiş şifre:", hashedPassword);
 
-    await User.create({ name, surname, email, password: hashedPassword });
+    // Insert the new user into the database with default 'normal' user_type
+    await User.create({
+      name,
+      surname,
+      email,
+      phone,
+      password: hashedPassword,
+    });
+
     res.status(201).json({ message: "Kullanıcı başarıyla kayıt edildi!" });
   } catch (error) {
     console.error("Kayıt hatası:", error);
