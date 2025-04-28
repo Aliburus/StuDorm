@@ -65,6 +65,17 @@ const InternController = {
       res.status(500).json({ message: "Error deleting intern", error: err });
     }
   },
+  getInternsByUserId: async (req, res) => {
+    try {
+      const interns = await InternAd.getByUserId(req.params.userId);
+      return res.status(200).json(interns);
+    } catch (error) {
+      console.error("Error fetching user interns:", error);
+      return res
+        .status(500)
+        .json({ message: "Error fetching user interns", error });
+    }
+  },
 };
 
 module.exports = InternController;

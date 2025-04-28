@@ -4,11 +4,16 @@ import { updateUserForumPost } from "../../services/ForumService";
 const EditPostModal = ({ postId, currentContent, onClose, onSave }) => {
   const [content, setContent] = useState(currentContent);
 
+  // Eğer parent’tan gelen currentContent değişirse güncelle
+  useEffect(() => {
+    setContent(currentContent);
+  }, [currentContent]);
+
   const handleSave = async () => {
     try {
-      await updateUserForumPost(postId, content); // Postu güncelle
-      onSave(); // Save işlemi sonrası dışarıya bildirim gönder
-      onClose(); // Modal'ı kapat
+      await updateUserForumPost(postId, content);
+      onSave();
+      onClose();
     } catch (err) {
       console.error("Post güncellenirken hata:", err);
     }
@@ -23,7 +28,7 @@ const EditPostModal = ({ postId, currentContent, onClose, onSave }) => {
           onChange={(e) => setContent(e.target.value)}
           className="w-full h-32 p-2 border border-gray-300 rounded-lg mb-4"
           placeholder="Post içeriğini düzenleyin..."
-        ></textarea>
+        />
         <div className="flex justify-end space-x-4">
           <button
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700"

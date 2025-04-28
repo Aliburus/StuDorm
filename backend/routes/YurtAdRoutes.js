@@ -4,6 +4,7 @@ const path = require("path");
 const {
   createYurtAd,
   getAllYurtAdsWithPhotos,
+  getYurtAdsByUserId,
 } = require("../controllers/YurtAdController");
 
 const router = express.Router();
@@ -15,7 +16,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-
+router.get("/yurt-ilanlar/user/:userId", getYurtAdsByUserId);
 router.post("/yurt-ilan", upload.array("photos"), createYurtAd);
 
 // Tüm yurt ilanlarını ve fotoğraflarını almak için route

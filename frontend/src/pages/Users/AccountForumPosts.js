@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getUserForumPosts,
   deleteUserForumPost,
@@ -11,46 +12,62 @@ const AccountForumPosts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editPostId, setEditPostId] = useState(null);
   const [currentContent, setCurrentContent] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUserForumPosts = async () => {
-      try {
-        const fetchedPosts = await getUserForumPosts();
-        setPosts(fetchedPosts);
-      } catch (err) {
-        setError("An error occurred while fetching your forum posts.");
-      }
-    };
-
-    fetchUserForumPosts();
-  }, []);
-
-  const handleDelete = async (postId) => {
+  // Gönderileri sunucudan çeker
+  const fetchPosts = async () => {
     try {
-      await deleteUserForumPost(postId);
-      setPosts(posts.filter((post) => post.id !== postId)); // Silinen postu listeden kaldır
+      const fetchedPosts = await getUserForumPosts();
+      setPosts(fetchedPosts);
+      setError(null);
     } catch (err) {
-      setError("An error occurred while deleting the post.");
+      setError("Gönderiler alınırken bir hata oluştu.");
     }
   };
 
+  // Bileşen yüklendiğinde gönderileri yükle
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  // Gönderi silme işlemi
+  const handleDelete = async (postId) => {
+    try {
+      await deleteUserForumPost(postId);
+      await fetchPosts(); // Silme sonrası listeyi yenile
+    } catch (err) {
+      setError("Gönderi silinirken bir hata oluştu.");
+    }
+  };
+
+  // Düzenleme modalını aç
   const handleEdit = (postId, content) => {
     setEditPostId(postId);
     setCurrentContent(content);
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
-    // Güncellenmiş postu tekrar yükle
-    const updatedPosts = posts.map((post) =>
-      post.id === editPostId ? { ...post, content: currentContent } : post
-    );
-    setPosts(updatedPosts); // Yeni post içeriğini listeye güncelle
+  // Düzenleme kaydedildiğinde listeyi güncelle
+  const handleSave = async () => {
+    setIsModalOpen(false);
+    await fetchPosts();
   };
 
   if (error) return <div className="text-red-500">{error}</div>;
+
+  // Gönderi yoksa yönlendirme butonlu boş durum
   if (!posts.length)
-    return <div className="text-gray-500">No forum posts available</div>;
+    return (
+      <div className="text-center text-gray-500 space-y-4">
+        <p>Henüz paylaşımınız bulunmuyor.</p>
+        <button
+          onClick={() => navigate("/forumpage")}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+        >
+          Paylaşım Yap
+        </button>
+      </div>
+    );
 
   return (
     <div className="space-y-6">
@@ -64,13 +81,13 @@ const AccountForumPosts = () => {
             <div className="flex space-x-4">
               <button
                 className="text-blue-500"
-                onClick={() => handleEdit(post.id, post.content)} // Edit butonuna tıklandığında handleEdit çalışır
+                onClick={() => handleEdit(post.id, post.content)}
               >
                 ✏️ Düzenle
               </button>
               <button
                 className="text-red-500"
-                onClick={() => handleDelete(post.id)} // Silme butonuna tıklandığında handleDelete çalışır
+                onClick={() => handleDelete(post.id)}
               >
                 🗑️ Sil
               </button>

@@ -86,13 +86,8 @@ const getPostByUserId = async (req, res) => {
     // Kullanıcıya ait tüm postları alıyoruz
     const posts = await ForumPost.getPostByUserId(user_id);
 
-    if (!posts || posts.length === 0) {
-      return res.status(404).json({ message: "No posts found for this user." });
-    }
-
-    console.log("Posts fetched:", posts); // Fetch edilen postları logluyoruz
-
-    return res.status(200).json(posts);
+    // Artık boş bile olsa 200 + [] dönüyoruz
+    return res.status(200).json(posts || []);
   } catch (err) {
     console.error("Error fetching posts:", err);
     return res.status(500).json({ message: "Posts could not be retrieved." });

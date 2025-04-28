@@ -75,6 +75,13 @@ const PartTimeAdvert = {
       throw err;
     }
   },
+  getByUserId: async (userId) => {
+    const [rows] = await db.query(
+      "SELECT * FROM parttimeads WHERE user_id = ?",
+      [userId]
+    );
+    return rows;
+  },
 };
 
 module.exports = PartTimeAdvert;

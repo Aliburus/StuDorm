@@ -1,15 +1,24 @@
-// models/Intern.js
+// models/InternAd.js
+
 const db = require("../config/db");
 
 const InternAd = {
-  getAll: () => {
-    return db.query("SELECT * FROM interns"); // Veritabanındaki tablo adını düzgün yazdığınızdan emin olun
+  // Tüm intern ilanlarını sadece rows olarak dönecek şekilde
+  getAll: async () => {
+    const [rows] = await db.query("SELECT * FROM interns");
+    return rows;
   },
-  getById: (id) => {
-    return db.query("SELECT * FROM interns WHERE id = ?", [id]);
+
+  // Belirli bir kullanıcıya ait ilanlar
+  getByUserId: async (userId) => {
+    const [rows] = await db.query("SELECT * FROM interns WHERE user_id = ?", [
+      userId,
+    ]);
+    return rows;
   },
-  create: (internData) => {
-    return db.query(
+
+  create: async (internData) => {
+    const result = await db.query(
       "INSERT INTO interns (user_id, name, category, location, contact, description, duration, requirements) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
         internData.user_id,
@@ -22,9 +31,11 @@ const InternAd = {
         internData.requirements,
       ]
     );
+    return result[0].insertId;
   },
-  update: (id, internData) => {
-    return db.query(
+
+  update: async (id, internData) => {
+    const result = await db.query(
       "UPDATE interns SET name = ?, category = ?, location = ?, contact = ?, description = ?, duration = ?, requirements = ? WHERE id = ?",
       [
         internData.name,
@@ -37,9 +48,12 @@ const InternAd = {
         id,
       ]
     );
+    return result[0].affectedRows;
   },
-  delete: (id) => {
-    return db.query("DELETE FROM interns WHERE id = ?", [id]);
+
+  delete: async (id) => {
+    const result = await db.query("DELETE FROM interns WHERE id = ?", [id]);
+    return result[0].affectedRows;
   },
 };
 

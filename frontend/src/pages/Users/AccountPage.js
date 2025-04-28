@@ -1,4 +1,5 @@
-// src/pages/AccountPage.js
+// src/pages/Users/AccountPage.js
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
@@ -14,16 +15,15 @@ import {
   LogOut,
   Menu,
   Mail,
-  Save,
 } from "lucide-react";
 import {
   getUserInfo,
   updateUserProfile,
   logout,
 } from "../../services/UserServices";
-import ProfileForm from "../Users/ProfileForm"; // ProfileForm componentini import ettik
+import ProfileForm from "../Users/ProfileForm";
 import AccountForumPosts from "./AccountForumPosts";
-
+import AccountListingsPage from "./AccountListingPage";
 const AccountPage = () => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
@@ -81,7 +81,7 @@ const AccountPage = () => {
     { id: "profile", label: "Profile", icon: User },
     { id: "settings", label: "Settings", icon: Settings },
     { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "listings", label: "Listing", icon: Megaphone },
+    { id: "listings", label: "Listing", icon: Megaphone }, // ← listings eklendi
     { id: "forumPosts", label: "Forum Posts", icon: MessageCircle },
     { id: "favorites", label: "Favorites", icon: Star },
     { id: "premium", label: "Premium", icon: CreditCard },
@@ -89,6 +89,7 @@ const AccountPage = () => {
   const handlePayment = () => {
     navigate("/payment");
   };
+
   const renderProfileContent = () => (
     <div className="flex flex-col h-[calc(100vh-12rem)] justify-center">
       <ProfileForm
@@ -101,6 +102,7 @@ const AccountPage = () => {
       />
     </div>
   );
+
   const renderPremiumContent = () => {
     if (user?.isPremium) {
       return (
@@ -113,7 +115,6 @@ const AccountPage = () => {
       );
     }
 
-    // Kullanıcı premium değilse üyelik avantajlarını göster
     return (
       <div className="flex flex-col items-center justify-center py-8">
         <h2 className="text-2xl font-bold mb-4">Go Premium 🚀</h2>
@@ -121,7 +122,6 @@ const AccountPage = () => {
           Premium üyelik ile daha fazla özellikten yararlanabilirsiniz!
         </p>
 
-        {/* Premium Avantajları Listesi */}
         <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-6 max-w-md w-full">
           <h3 className="text-lg font-semibold mb-3">
             Premium Üyelik Avantajları
@@ -150,7 +150,6 @@ const AccountPage = () => {
           </ul>
         </div>
 
-        {/* Premiuma Geçiş Butonu */}
         <button
           onClick={handlePayment}
           className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition font-medium"
@@ -160,8 +159,13 @@ const AccountPage = () => {
       </div>
     );
   };
+
   const renderForumPostsContent = () => {
     return <AccountForumPosts />;
+  };
+
+  const renderListingsContent = () => {
+    return <AccountListingsPage user={user} />;
   };
 
   const renderContent = () => {
@@ -170,9 +174,10 @@ const AccountPage = () => {
         return renderProfileContent();
       case "premium":
         return renderPremiumContent();
-
       case "forumPosts":
         return renderForumPostsContent();
+      case "listings": // ← listings case eklendi
+        return renderListingsContent();
       default:
         return <div>Content</div>;
     }
@@ -201,7 +206,7 @@ const AccountPage = () => {
                     onClick={() => setActiveSection(item.id)}
                     className={`flex items-center w-full px-4 py-3 text-sm rounded-lg ${
                       activeSection === item.id
-                        ? "bg-yelloww-50 text-yellow-400"
+                        ? "bg-yellow-50 text-yellow-400"
                         : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
@@ -231,8 +236,8 @@ const AccountPage = () => {
         </button>
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0 p-8 ">
-          <div className="max-w-4xl mx-auto  bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="flex-1 min-w-0 p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
             <div className="flex items-center space-x-4 mb-8">
               <div className="w-20 h-20 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 flex items-center justify-center text-white text-2xl font-bold">
                 {user.name[0]}
@@ -252,7 +257,7 @@ const AccountPage = () => {
             {renderContent()}
           </div>
         </div>
-      </div>{" "}
+      </div>
       <Footer />
     </div>
   );

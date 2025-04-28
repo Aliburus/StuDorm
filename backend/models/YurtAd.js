@@ -66,6 +66,12 @@ const YurtAd = {
     const [result] = await db.query(query, params);
     return result;
   },
+  getByUserId: async (userId) => {
+    const [rows] = await db.query("SELECT * FROM YurtAds WHERE user_id = ?", [
+      userId,
+    ]);
+    return rows;
+  },
 };
 
 module.exports = YurtAd;

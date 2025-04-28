@@ -82,5 +82,15 @@ const getAllYurtAdsWithPhotos = async (req, res) => {
     res.status(500).json({ message: "Error fetching data.", error });
   }
 };
-
-module.exports = { createYurtAd, getAllYurtAdsWithPhotos };
+const getYurtAdsByUserId = async (req, res) => {
+  try {
+    const ads = await YurtAd.getByUserId(req.params.userId);
+    return res.status(200).json(ads);
+  } catch (error) {
+    console.error("Error fetching user yurt ads:", error);
+    return res
+      .status(500)
+      .json({ message: "Error fetching user yurt ads", error });
+  }
+};
+module.exports = { createYurtAd, getAllYurtAdsWithPhotos, getYurtAdsByUserId };

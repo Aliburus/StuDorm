@@ -88,8 +88,19 @@ const deleteAdvertById = async (req, res) => {
     res.status(500).json({ message: "İlan silinirken hata oluştu", error });
   }
 };
-
+const getAdvertsByUserId = async (req, res) => {
+  try {
+    const adverts = await PartTimeAdvert.getByUserId(req.params.userId);
+    return res.status(200).json(adverts);
+  } catch (error) {
+    console.error("Error fetching user part-time ads:", error);
+    return res
+      .status(500)
+      .json({ message: "Error fetching user part-time ads", error });
+  }
+};
 module.exports = {
+  getAdvertsByUserId,
   createAdvert,
   getAllAdverts,
   getAdvertById,
