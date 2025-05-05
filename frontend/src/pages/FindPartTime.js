@@ -76,12 +76,12 @@ function FindPartTime() {
               .includes(selectedCategory.toLowerCase())
           : true) &&
         (selectedProvince
-          ? listing.location
+          ? listing.province
               .toLowerCase()
               .includes(selectedProvince.toLowerCase())
           : true) &&
         (selectedDistrict
-          ? listing.location
+          ? listing.district
               .toLowerCase()
               .includes(selectedDistrict.toLowerCase())
           : true)
@@ -96,7 +96,7 @@ function FindPartTime() {
   };
 
   const handleListingClick = (listing) => {
-    navigate(`/part-time-details/${listing.id}`, { state: { listing } });
+    navigate(`/part-time-details/${listing.id}`);
   };
 
   const getCategoryIcon = (categoryName) => {

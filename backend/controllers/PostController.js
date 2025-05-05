@@ -164,7 +164,16 @@ const updatePost = async (req, res) => {
     return res.status(500).json({ message: "Bir hata oluştu." });
   }
 };
-
+const getTopPosts = async (req, res) => {
+  const limit = parseInt(req.query.limit, 10) || 5;
+  try {
+    const posts = await ForumPostModel.getTopPosts(limit);
+    return res.status(200).json(posts);
+  } catch (err) {
+    console.error("Error fetching top posts:", err);
+    return res.status(500).json({ message: "Could not fetch top posts." });
+  }
+};
 module.exports = {
   createPost,
   likePost,
@@ -173,4 +182,5 @@ module.exports = {
   getPostByUserId,
   deletePost,
   updatePost,
+  getTopPosts,
 };

@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect, useState } from "react";
 import {
   Building2,
   Users,
@@ -16,8 +17,21 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { PremiumService } from "../services/PremiumService";
 
-function App() {
+function Homepage() {
+  const [premiumListings, setPremiumListings] = useState([]);
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const listings = await PremiumService.getPremiumListings(10);
+        setPremiumListings(listings);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchListings();
+  }, []);
   const features = [
     {
       icon: <Building2 className="w-8 h-8" />,
@@ -42,64 +56,11 @@ function App() {
       description: "Join discussions and get help from fellow students",
     },
   ];
-
-  const premiumListings = [
-    {
-      type: "Dormitory",
-      title: "Sunset Valley Dorms",
-      location: "Near Central University",
-      price: "$350/month",
-      image:
-        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
-      features: ["WiFi", "Study Room", "24/7 Security"],
-    },
-    {
-      type: "Part-Time Job",
-      title: "Campus Café Barista",
-      location: "University District",
-      price: "$18/hour",
-      image:
-        "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
-      features: ["Flexible Hours", "Student Friendly", "Tips"],
-    },
-    {
-      type: "Internship",
-      title: "Tech Startup Intern",
-      location: "Downtown Tech Hub",
-      price: "Paid Internship",
-      image:
-        "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=800&q=80",
-      features: ["Remote Option", "Career Growth", "Mentorship"],
-    },
-    {
-      type: "Dormitory",
-      title: "Student Haven",
-      location: "East Campus Area",
-      price: "$400/month",
-      image:
-        "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-      features: ["Gym", "Laundry", "Parking"],
-    },
-    {
-      type: "Part-Time Job",
-      title: "Library Assistant",
-      location: "University Library",
-      price: "$16/hour",
-      image:
-        "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=800&q=80",
-      features: ["Quiet Environment", "Academic Setting", "Fixed Schedule"],
-    },
-    {
-      type: "Internship",
-      title: "Marketing Intern",
-      location: "Creative Agency",
-      price: "$20/hour",
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
-      features: ["Portfolio Building", "Client Interaction", "Creative Work"],
-    },
+  const placeholderImages = [
+    "https://img.freepik.com/free-vector/internship-job-concept_23-2148737067.jpg",
+    "https://img.freepik.com/free-vector/internship-job-concept-illustration_23-2148754785.jpg",
+    "https://img.freepik.com/free-vector/internship-job-illustration_52683-51046.jpg?w=360",
   ];
-
   const topPosts = [
     {
       title: "Tips for Finding Affordable Housing Near Campus",
@@ -147,6 +108,7 @@ function App() {
         "Essential tips for maintaining a healthy relationship with your roommates...",
     },
   ];
+  // src/constants/placeholderImages.js
 
   const sliderSettings = {
     dots: true,
@@ -242,50 +204,51 @@ function App() {
             </div>
           </div>
 
-          <Slider {...sliderSettings} className="premium-slider">
-            {premiumListings.map((listing, index) => (
-              <div key={index} className="px-2 h-full">
-                <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow h-[500px] flex flex-col">
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      src={listing.image}
-                      alt={listing.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-6 flex flex-col flex-grow">
-                    <div className="flex items-center mb-2">
-                      <Star className="w-5 h-5 text-yellow-500 mr-2" />
-                      <span className="text-sm font-semibold text-yellow-500">
-                        {listing.type}
-                      </span>
+          <Slider {...sliderSettings}>
+            {premiumListings.map((ad, index) => {
+              const imageToShow =
+                ad.photos && ad.photos.length > 0
+                  ? ad.photos[0]
+                  : placeholderImages[index % placeholderImages.length];
+
+              return (
+                <div key={`${ad.type}-${ad.id}`} className="p-2 h-full">
+                  <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-[500px]">
+                    <div className="h-48 overflow-hidden">
+                      <img
+                        src={imageToShow}
+                        alt={ad.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">
-                      {listing.title}
-                    </h3>
-                    <div className="flex items-center mb-2 text-gray-600">
-                      <MapPin className="w-4 h-4 mr-1" /> {listing.location}
-                    </div>
-                    <div className="flex items-center mb-4 text-gray-600">
-                      <DollarSign className="w-4 h-4 mr-1" /> {listing.price}
-                    </div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {listing.features.map((feature, i) => (
-                        <span
-                          key={i}
-                          className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm"
-                        >
-                          {feature}
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="flex items-center mb-2">
+                        <Star className="w-5 h-5 text-yellow-500 mr-2" />
+                        <span className="text-sm font-semibold text-yellow-500">
+                          {ad.type === "dorm"
+                            ? "Dormitory"
+                            : ad.type === "parttime"
+                            ? "Part-Time Job"
+                            : "Internship"}
                         </span>
-                      ))}
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">{ad.title}</h3>
+                      <div className="flex items-center mb-2 text-gray-600">
+                        <MapPin className="w-4 h-4 mr-1" /> {ad.location}
+                      </div>
+                      {ad.price && (
+                        <div className="flex items-center mb-4 text-gray-600">
+                          <DollarSign className="w-4 h-4 mr-1" /> {ad.price}
+                        </div>
+                      )}
+                      <button className="mt-auto w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600">
+                        View Details
+                      </button>
                     </div>
-                    <button className="mt-auto w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600">
-                      View Details
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </Slider>
         </div>
       </div>
@@ -347,4 +310,4 @@ function App() {
   );
 }
 
-export default App;
+export default Homepage;

@@ -99,6 +99,7 @@ const getAdvertsByUserId = async (req, res) => {
       .json({ message: "Error fetching user part-time ads", error });
   }
 };
+
 module.exports = {
   getAdvertsByUserId,
   createAdvert,

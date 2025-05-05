@@ -122,6 +122,24 @@ const ForumPost = {
       throw err;
     }
   },
+  getTopPosts: async (limit = 5) => {
+    const sql = `
+      SELECT 
+        p.id,
+        p.content,
+        p.likes,
+        p.dislikes,
+        p.created_at,
+        u.name,
+        u.surname
+      FROM forum_posts p
+      JOIN users u ON p.user_id = u.id
+      ORDER BY p.likes DESC, p.created_at DESC
+      LIMIT ?
+    `;
+    const [rows] = await db.query(sql, [limit]);
+    return rows;
+  },
 };
 
 module.exports = ForumPost;

@@ -16,6 +16,7 @@ import RoomListingDetails from "./pages/RoomListingDetails";
 import DormAdvertForm from "./components/DormAdvertForm";
 import DashboardPage from "./pages/AdminPages/DashboardPage";
 import PaymentPage from "./pages/Users/PaymentPage";
+import PartTimeJobDetails from "./pages/PartTimeJobDetails";
 function App() {
   return (
     <Router>
@@ -34,6 +35,10 @@ function App() {
           <Route path="/account" element={<AccountPage />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/forumpage" element={<ForumPage />} />
+          <Route
+            path="/part-time-details/:id"
+            element={<PartTimeJobDetails />}
+          />
           <Route
             path="/room-listing-details"
             element={<RoomListingDetails />}

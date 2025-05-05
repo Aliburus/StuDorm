@@ -1,16 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const authenticateToken = require("../middleware/authenticateToken");
-const postController = require("../controllers/PostController");
+const forumController = require("../controllers/PostController");
 
-router.post("/", authenticateToken, postController.createPost);
-router.get("/", postController.getAllPosts);
-// Inside PostRoutes.js
-router.get("/user", authenticateToken, postController.getPostByUserId);
-router.delete("/:id", authenticateToken, postController.deletePost);
-router.put("/:id", authenticateToken, postController.updatePost);
-router.put("/:id/like", authenticateToken, postController.likePost);
-router.put("/:id/dislike", authenticateToken, postController.dislikePost);
-// Post güncelleme
+// Mevcut rotaların
+router.post("/", authenticateToken, forumController.createPost);
+router.get("/", forumController.getAllPosts);
+router.get("/user", authenticateToken, forumController.getPostByUserId);
+router.delete("/:id", authenticateToken, forumController.deletePost);
+router.put("/:id", authenticateToken, forumController.updatePost);
+router.put("/:id/like", authenticateToken, forumController.likePost);
+router.put("/:id/dislike", authenticateToken, forumController.dislikePost);
+
+// **Yeni eklenen**: Top N postu dönen endpoint
+router.get("/top", forumController.getTopPosts);
 
 module.exports = router;
