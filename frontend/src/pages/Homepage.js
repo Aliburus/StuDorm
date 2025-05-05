@@ -1,5 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
 import {
   Building2,
   Users,
@@ -10,7 +12,8 @@ import {
   DollarSign,
   Clock,
   Star,
-  ThumbsUp,
+  Heart,
+  ThumbsDown,
 } from "lucide-react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -18,9 +21,20 @@ import "slick-carousel/slick/slick-theme.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { PremiumService } from "../services/PremiumService";
+import { getTopForumPosts } from "../services/ForumService";
 
 function Homepage() {
   const [premiumListings, setPremiumListings] = useState([]);
+  const [topPosts, setTopPosts] = useState([]);
+
+  useEffect(() => {
+    const fetchTopPosts = async () => {
+      const data = await getTopForumPosts();
+      setTopPosts(data);
+    };
+
+    fetchTopPosts();
+  }, []);
   useEffect(() => {
     const fetchListings = async () => {
       try {
@@ -35,25 +49,23 @@ function Homepage() {
   const features = [
     {
       icon: <Building2 className="w-8 h-8" />,
-      title: "Find Dorms",
-      description:
-        "Discover affordable student housing options near your campus",
+      title: "Yurtlar",
+      description: "Keşfedin ve ihtiyaçlarınıza uygun yurtları bulun",
     },
     {
       icon: <Users className="w-8 h-8" />,
-      title: "Match Roommates",
-      description: "Connect with compatible roommates who share your interests",
+      title: "Oda Arkadaşları",
+      description: "Bağlantı kurun ve yeni arkadaşlar edinin",
     },
     {
       icon: <Briefcase className="w-8 h-8" />,
-      title: "Internships & Jobs",
-      description:
-        "Access exclusive part-time jobs and internship opportunities",
+      title: "Staj İlanları - İş Fırsatları",
+      description: "Fırsatları keşfedin ve kariyerinize yön verin",
     },
     {
       icon: <MessageSquare className="w-8 h-8" />,
-      title: "Student Forum",
-      description: "Join discussions and get help from fellow students",
+      title: "Öğrenci Topluluğu",
+      description: "Katılın, tartışın ve bilgi paylaşın",
     },
   ];
   const placeholderImages = [
@@ -61,53 +73,7 @@ function Homepage() {
     "https://img.freepik.com/free-vector/internship-job-concept-illustration_23-2148754785.jpg",
     "https://img.freepik.com/free-vector/internship-job-illustration_52683-51046.jpg?w=360",
   ];
-  const topPosts = [
-    {
-      title: "Tips for Finding Affordable Housing Near Campus",
-      author: "Sarah Chen",
-      likes: 156,
-      replies: 45,
-      timeAgo: "2 days ago",
-      preview:
-        "I've compiled a list of strategies that helped me find budget-friendly accommodation...",
-    },
-    {
-      title: "Must-Know Interview Tips for Tech Internships",
-      author: "James Wilson",
-      likes: 142,
-      replies: 38,
-      timeAgo: "1 day ago",
-      preview:
-        "After going through multiple interviews, here are the key things to prepare...",
-    },
-    {
-      title: "Best Part-Time Jobs for CS Students",
-      author: "Emily Rodriguez",
-      likes: 134,
-      replies: 52,
-      timeAgo: "3 days ago",
-      preview:
-        "Here are some flexible job options that won't interfere with your studies...",
-    },
-    {
-      title: "How to Balance Work and Study",
-      author: "Michael Park",
-      likes: 128,
-      replies: 41,
-      timeAgo: "4 days ago",
-      preview:
-        "My experience juggling a part-time job while maintaining good grades...",
-    },
-    {
-      title: "Roommate Communication Guidelines",
-      author: "Lisa Thompson",
-      likes: 121,
-      replies: 33,
-      timeAgo: "2 days ago",
-      preview:
-        "Essential tips for maintaining a healthy relationship with your roommates...",
-    },
-  ];
+
   // src/constants/placeholderImages.js
 
   const sliderSettings = {
@@ -142,27 +108,28 @@ function Homepage() {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="md:w-1/2 text-white mb-8 md:mb-0">
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                Your Student Life, Simplified
+                Senin Öğrenci Portalın , Senin İçin
               </h1>
               <p className="text-xl mb-8">
-                Find dorms, roommates, jobs, and connect with other students
+                Yurt bulma, iş fırsatları ve topluluk tartışmaları için tek
+                durak noktası. Öğrenci hayatını kolaylaştırmak için buradayız.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <button className="bg-white text-yellow-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">
                   <Building2 className="w-5 h-5 mr-2" />
-                  Browse Dorms
+                  Yurtlar
                 </button>
                 <button className="bg-white text-yellow-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">
                   <Users className="w-5 h-5 mr-2" />
-                  Find Roommates
+                  Oda Arkadaşları
                 </button>
                 <button className="bg-white text-yellow-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">
                   <Briefcase className="w-5 h-5 mr-2" />
-                  Internships
+                  Staj İlanları
                 </button>
                 <button className="bg-white text-yellow-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">
                   <Clock className="w-5 h-5 mr-2" />
-                  Part-Time Jobs
+                  Part-Time İşler
                 </button>
               </div>
             </div>
@@ -197,10 +164,10 @@ function Homepage() {
       <div className="bg-gray-100 py-16">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-semibold">Premium Listings</h2>
+            <h2 className="text-3xl font-semibold">Premium Listelemeler</h2>
             <div className="flex items-center text-yellow-500">
               <Crown className="w-6 h-6 mr-2" />
-              <span className="font-semibold">Featured by Premium Members</span>
+              <span className="font-semibold">Premium Üyeler İçin</span>
             </div>
           </div>
 
@@ -242,7 +209,7 @@ function Homepage() {
                         </div>
                       )}
                       <button className="mt-auto w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600">
-                        View Details
+                        Detayları Görüntüle
                       </button>
                     </div>
                   </div>
@@ -260,49 +227,56 @@ function Homepage() {
             Top Community Discussions
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Join our active student community and participate in trending
-            discussions
+            Katıldığınız tartışmalar ve paylaşımlar ile topluluğumuzun bir
+            parçası olun. En popüler gönderileri keşfedin ve fikirlerinizi
+            paylaşın.
           </p>
         </div>
 
         <div className="space-y-6">
-          {topPosts.map((post, index) => (
+          {topPosts.map((post) => (
             <div
-              key={index}
-              className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+              key={post.id}
+              className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col min-h-[250px] transform hover:-translate-y-1 border-l-4 border-yellow-500"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-xl font-semibold text-gray-800">
-                    {post.title}
-                  </h4>
-                  <p className="text-sm text-gray-500">
-                    Posted by {post.author} • {post.timeAgo}
-                  </p>
+              <div className="text-gray-600 text-sm mb-4 pb-3 border-b border-gray-100">
+                <span className="font-medium text-yellow-600">
+                  {post.name} {post.surname}
+                </span>
+                <span className="block mt-1 text-gray-400 text-xs">
+                  {new Date(post.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
+              </div>
+
+              <div className="text-gray-800 font-medium text-lg flex-grow leading-relaxed">
+                {post.content.slice(0, 100)}
+              </div>
+
+              <div className="flex justify-end items-center space-x-4 mt-6 pt-3 border-t border-gray-100">
+                <div className="flex items-center text-yellow-500">
+                  <Heart size={16} className="mr-1" />
+                  <span className="text-sm">{post.likes}</span>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center text-yellow-500">
-                    <ThumbsUp className="w-5 h-5 mr-1" />
-                    <span className="font-semibold">{post.likes}</span>
-                  </div>
-                  <div className="flex items-center text-gray-500">
-                    <MessageSquare className="w-5 h-5 mr-1" />
-                    <span>{post.replies}</span>
-                  </div>
+                <div className="flex items-center text-gray-400 hover:text-gray-600 transition-colors">
+                  <ThumbsDown size={16} className="mr-1" />
+                  <span className="text-sm">{post.dislikes}</span>
                 </div>
               </div>
-              <p className="text-gray-600 mb-4">{post.preview}</p>
-              <button className="text-yellow-500 font-semibold hover:text-yellow-600">
-                Read More →
-              </button>
             </div>
           ))}
         </div>
 
         <div className="text-center mt-12">
-          <button className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-8 py-3 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-colors">
-            Visit Forum
-          </button>
+          <Link
+            to="/forumpage"
+            className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-8 py-3 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-colors"
+          >
+            Forumu Görüntüle
+          </Link>
         </div>
       </div>
       <Footer />

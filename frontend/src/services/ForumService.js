@@ -64,3 +64,23 @@ export const updateUserForumPost = async (postId, updatedContent) => {
 
   return response.json(); // Güncellenmiş postu döndür
 };
+export const getTopForumPosts = async () => {
+  try {
+    const response = await fetch("http://localhost:5000/api/posts/top", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Top gönderiler alınamadı");
+    }
+
+    return await response.json(); // Top 5 gönderiyi döndür
+  } catch (error) {
+    console.error("Top gönderiler alınırken hata oluştu:", error);
+    return []; // Hata durumunda boş array döndür
+  }
+};

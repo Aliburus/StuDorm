@@ -1,4 +1,4 @@
-const ForumPost = require("../models/ForumPosts");
+const ForumPost = require("../models/ForumPosts"); // ForumPost modelini içe aktarıyoruz
 
 // Post oluşturma
 const createPost = async (req, res) => {
@@ -167,7 +167,7 @@ const updatePost = async (req, res) => {
 const getTopPosts = async (req, res) => {
   const limit = parseInt(req.query.limit, 10) || 5;
   try {
-    const posts = await ForumPostModel.getTopPosts(limit);
+    const posts = await ForumPost.getTopPosts(limit);
     return res.status(200).json(posts);
   } catch (err) {
     console.error("Error fetching top posts:", err);
