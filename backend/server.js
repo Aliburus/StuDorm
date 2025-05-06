@@ -12,6 +12,7 @@ const postRoutes = require("./routes/PostRoutes");
 const internRoutes = require("./routes/InternRoutes");
 const paymentRoutes = require("./routes/PaymentRoutes");
 const homepageRoutes = require("./routes/homepageRoutes");
+const contactRoutes = require("./routes/ContactRoutes"); // İletişim rotasını import et
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/interns", internRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api/homepage", homepageRoutes);
+app.use("/api/contact", contactRoutes);
 // Sunucuyu başlatma
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

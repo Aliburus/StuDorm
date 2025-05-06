@@ -2,22 +2,20 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/homepage";
-
 const getPremiumListings = async (limit = 10) => {
   try {
     const res = await axios.get(`${API_URL}/premium-listings`, {
       params: { limit },
     });
+    console.log("Premium Listings:", res.data); // Gelen veriyi konsola yazdırın
     return res.data.data;
   } catch (error) {
     console.error("Error fetching premium listings:", error);
-    // Display a user-friendly message or fallback UI
     throw new Error(
       "An error occurred while fetching premium listings. Please try again later."
     );
   }
 };
-
 export const PremiumService = {
   getPremiumListings,
 };
