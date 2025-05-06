@@ -18,9 +18,17 @@ export const getInterns = async () => {
 export const getInternById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/${id}`);
+    if (response.status !== 200) {
+      console.error("Intern not found", response.status);
+      return null;
+    }
     return response.data;
   } catch (error) {
-    console.error("Error fetching intern", error);
+    const errorMessage = error.response
+      ? `API Error: ${error.response.data.message || error.response.statusText}`
+      : `Request Error: ${error.message}`;
+    console.error("Error fetching intern:", errorMessage);
+    alert(errorMessage); // Show alert for debugging
     throw error;
   }
 };

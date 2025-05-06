@@ -5,16 +5,16 @@ import { Link } from "react-router-dom";
 import {
   Building2,
   Users,
-  Briefcase,
   MessageSquare,
   Crown,
   MapPin,
   DollarSign,
-  Clock,
   Star,
   Heart,
   ThumbsDown,
+  Briefcase,
 } from "lucide-react";
+
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -22,6 +22,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { PremiumService } from "../services/PremiumService";
 import { getTopForumPosts } from "../services/ForumService";
+import HeroSection from "../components/HeroSection";
 
 function Homepage() {
   const [premiumListings, setPremiumListings] = useState([]);
@@ -103,46 +104,7 @@ function Homepage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 py-20">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="md:w-1/2 text-white mb-8 md:mb-0">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                Senin Öğrenci Portalın , Senin İçin
-              </h1>
-              <p className="text-xl mb-8">
-                Yurt bulma, iş fırsatları ve topluluk tartışmaları için tek
-                durak noktası. Öğrenci hayatını kolaylaştırmak için buradayız.
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <button className="bg-white text-yellow-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">
-                  <Building2 className="w-5 h-5 mr-2" />
-                  Yurtlar
-                </button>
-                <button className="bg-white text-yellow-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">
-                  <Users className="w-5 h-5 mr-2" />
-                  Oda Arkadaşları
-                </button>
-                <button className="bg-white text-yellow-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 mr-2" />
-                  Staj İlanları
-                </button>
-                <button className="bg-white text-yellow-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">
-                  <Clock className="w-5 h-5 mr-2" />
-                  Part-Time İşler
-                </button>
-              </div>
-            </div>
-            <div className="md:w-3/5 ml-6">
-              <img
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80"
-                alt="Students studying"
-                className="rounded-lg shadow-2xl"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <HeroSection />
 
       {/* Features Grid */}
       <div className="container mx-auto px-6 py-16">
@@ -173,10 +135,14 @@ function Homepage() {
 
           <Slider {...sliderSettings}>
             {premiumListings.map((ad, index) => {
+              // Fotoğraf ve fiyat verilerinin kontrolü
               const imageToShow =
                 ad.photos && ad.photos.length > 0
-                  ? ad.photos[0]
+                  ? ad.photos.split(",")[0] // fotosu birden fazla ise, ilkini alıyoruz
                   : placeholderImages[index % placeholderImages.length];
+
+              // Location bilgisi: province ve district'i birleştiriyoruz
+              const location = `${ad.province}, ${ad.district}`;
 
               return (
                 <div key={`${ad.type}-${ad.id}`} className="p-2 h-full">
@@ -193,19 +159,32 @@ function Homepage() {
                         <Star className="w-5 h-5 text-yellow-500 mr-2" />
                         <span className="text-sm font-semibold text-yellow-500">
                           {ad.type === "dorm"
-                            ? "Dormitory"
+                            ? "Yurt"
                             : ad.type === "parttime"
-                            ? "Part-Time Job"
-                            : "Internship"}
+                            ? "Part-Time İş"
+                            : ad.type === "internship"
+                            ? "Staj"
+                            : "İlan"}
                         </span>
                       </div>
                       <h3 className="text-xl font-semibold mb-2">{ad.title}</h3>
                       <div className="flex items-center mb-2 text-gray-600">
-                        <MapPin className="w-4 h-4 mr-1" /> {ad.location}
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {location} {/* location bilgisi burada gösterilecek */}
                       </div>
                       {ad.price && (
                         <div className="flex items-center mb-4 text-gray-600">
                           <DollarSign className="w-4 h-4 mr-1" /> {ad.price}
+                        </div>
+                      )}
+                      {ad.description && (
+                        <p className="mb-4 text-gray-600 text-sm">
+                          {ad.description}
+                        </p>
+                      )}
+                      {ad.duration && (
+                        <div className="mb-4 text-gray-600 text-sm">
+                          <strong>Duration:</strong> {ad.duration}
                         </div>
                       )}
                       <button className="mt-auto w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600">
@@ -222,63 +201,102 @@ function Homepage() {
 
       {/* Top Forum Posts */}
       <div className="container mx-auto px-6 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-semibold mb-4">
-            Top Community Discussions
+        {/* Header with gradient text and decorative elements */}
+        <div className="relative text-center mb-12">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-24 h-24 bg-yellow-100 rounded-full opacity-20"></div>
+          </div>
+          <h2 className="relative text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-yellow-800">
+            Topluluk Tartışmaları
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="relative text-gray-600 max-w-2xl mx-auto text-lg">
             Katıldığınız tartışmalar ve paylaşımlar ile topluluğumuzun bir
             parçası olun. En popüler gönderileri keşfedin ve fikirlerinizi
             paylaşın.
           </p>
         </div>
 
-        <div className="space-y-6">
+        {/* Posts grid with enhanced cards */}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {topPosts.map((post) => (
             <div
               key={post.id}
-              className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col min-h-[250px] transform hover:-translate-y-1 border-l-4 border-yellow-500"
+              className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
             >
-              <div className="text-gray-600 text-sm mb-4 pb-3 border-b border-gray-100">
-                <span className="font-medium text-yellow-600">
-                  {post.name} {post.surname}
-                </span>
-                <span className="block mt-1 text-gray-400 text-xs">
-                  {new Date(post.created_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
+              {/* Card header accent */}
+              <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-1"></div>
 
-              <div className="text-gray-800 font-medium text-lg flex-grow leading-relaxed">
-                {post.content.slice(0, 100)}
-              </div>
-
-              <div className="flex justify-end items-center space-x-4 mt-6 pt-3 border-t border-gray-100">
-                <div className="flex items-center text-yellow-500">
-                  <Heart size={16} className="mr-1" />
-                  <span className="text-sm">{post.likes}</span>
+              <div className="p-6">
+                {/* Author section */}
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                    <span className="text-yellow-700 font-semibold">
+                      {post.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div className="ml-3">
+                    <p className="font-semibold text-gray-800">
+                      {post.name} {post.surname}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(post.created_at).toLocaleDateString("tr-TR", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center text-gray-400 hover:text-gray-600 transition-colors">
-                  <ThumbsDown size={16} className="mr-1" />
-                  <span className="text-sm">{post.dislikes}</span>
+
+                {/* Post content */}
+                <div className="mb-6">
+                  <p className="text-gray-700 leading-relaxed line-clamp-3">
+                    {post.content}
+                  </p>
+                </div>
+
+                {/* Interaction buttons */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex space-x-4">
+                    <button className="flex items-center text-gray-500 hover:text-yellow-600 transition-colors">
+                      <Heart size={18} className="mr-1" />
+                      <span className="text-sm">{post.likes}</span>
+                    </button>
+                    <button className="flex items-center text-gray-500 hover:text-yellow-600 transition-colors">
+                      <ThumbsDown size={18} className="mr-1" />
+                      <span className="text-sm">{post.dislikes}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
+        {/* CTA Button */}
         <div className="text-center mt-12">
           <Link
             to="/forumpage"
-            className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-8 py-3 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-colors"
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-full font-semibold hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
           >
             Forumu Görüntüle
+            <svg
+              className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
           </Link>
         </div>
       </div>
+
       <Footer />
     </div>
   );

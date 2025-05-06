@@ -11,7 +11,10 @@ const getPremiumListings = async (limit = 10) => {
     return res.data.data;
   } catch (error) {
     console.error("Error fetching premium listings:", error);
-    throw error;
+    // Display a user-friendly message or fallback UI
+    throw new Error(
+      "An error occurred while fetching premium listings. Please try again later."
+    );
   }
 };
 

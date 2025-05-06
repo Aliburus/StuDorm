@@ -122,7 +122,7 @@ const ForumPost = {
       throw err;
     }
   },
-  getTopPosts: async (limit = 5) => {
+  getTopPosts: async (limit = 6) => {
     const sql = `
       SELECT 
         p.id,

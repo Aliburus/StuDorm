@@ -5,6 +5,7 @@ const {
   createYurtAd,
   getAllYurtAdsWithPhotos,
   getYurtAdsByUserId,
+  getYurtAdById,
 } = require("../controllers/YurtAdController");
 
 const router = express.Router();
@@ -21,5 +22,5 @@ router.post("/yurt-ilan", upload.array("photos"), createYurtAd);
 
 // Tüm yurt ilanlarını ve fotoğraflarını almak için route
 router.get("/yurt-ilanlar", getAllYurtAdsWithPhotos);
-
+router.get("/yurt-ilanlar/:id", getYurtAdById);
 module.exports = router;

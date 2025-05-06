@@ -17,6 +17,7 @@ import DormAdvertForm from "./components/DormAdvertForm";
 import DashboardPage from "./pages/AdminPages/DashboardPage";
 import PaymentPage from "./pages/Users/PaymentPage";
 import PartTimeJobDetails from "./pages/PartTimeJobDetails";
+import InternDetails from "./pages/InternDetails"; // Detay sayfası için gerekli bileşeni içe aktar
 function App() {
   return (
     <Router>
@@ -40,9 +41,10 @@ function App() {
             element={<PartTimeJobDetails />}
           />
           <Route
-            path="/room-listing-details"
+            path="/room-listing-details/:id"
             element={<RoomListingDetails />}
           />
+          <Route path="/intern-details/:id" element={<InternDetails />} />{" "}
         </Routes>
       </div>
     </Router>

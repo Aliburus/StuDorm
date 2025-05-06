@@ -7,15 +7,12 @@ import {
   Filter,
   Building2,
   MapPinned,
-  GraduationCap,
   UserCheck,
   Calendar,
-  Code,
-  LineChart,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { getInterns } from "../services/InternService"; // Import the service
+import { getInterns } from "../services/InternService"; // API servis fonksiyonu
 
 function FindIntern() {
   const [listings, setListings] = useState([]);
@@ -27,9 +24,10 @@ function FindIntern() {
 
   const navigate = useNavigate();
 
+  // Kategoriler ve iller (Örneğin gerçek verilerle uyumlu olacak şekilde)
   const categories = [
-    { name: "Software Development", icon: <Code className="w-5 h-5" /> },
-    { name: "Marketing", icon: <LineChart className="w-5 h-5" /> },
+    { name: "Software Development", icon: <Briefcase className="w-5 h-5" /> },
+    { name: "Marketing", icon: <Briefcase className="w-5 h-5" /> },
     { name: "Finance", icon: <Briefcase className="w-5 h-5" /> },
   ];
 
@@ -46,31 +44,24 @@ function FindIntern() {
   };
 
   useEffect(() => {
-    const fetchInterns = async () => {
+    const fetchListings = async () => {
       try {
-        const interns = await getInterns(); // API çağrısı
-        console.log("Fetched interns:", interns);
+        const response = await getInterns(); // API çağrısı
+        console.log("Fetched listings:", response);
 
-        // intern[0]'ın gerçekten bir dizi olup olmadığını kontrol edin
-        if (Array.isArray(interns)) {
-          // intern verisi düzgün formatta geliyorsa, işlemleri yap
-          const validInterns = interns.filter(
-            (intern) => intern.id && intern.name && intern.category
-          );
-
-          console.log("Valid interns:", validInterns); // Geçerli internleri kontrol et
-
-          // Geçerli verileri state'e kaydediyoruz
-          setListings(validInterns);
-          setFilteredListings(validInterns);
+        // Liste verisinin geçerli olup olmadığını kontrol et
+        if (Array.isArray(response)) {
+          setListings(response);
+          setFilteredListings(response);
         } else {
-          console.error("Interns verisi bir dizi değil:", interns);
+          console.error("Veri formatı hatalı:", response);
         }
       } catch (error) {
-        console.error("Interns fetch error:", error);
+        console.error("İlanları getirirken hata oluştu:", error);
       }
     };
-    fetchInterns();
+
+    fetchListings();
   }, []);
 
   const applyFilters = () => {
@@ -82,12 +73,12 @@ function FindIntern() {
               .includes(selectedCategory.toLowerCase())
           : true) &&
         (selectedProvince
-          ? listing.location
+          ? listing.province
               .toLowerCase()
               .includes(selectedProvince.toLowerCase())
           : true) &&
         (selectedDistrict
-          ? listing.location
+          ? listing.district
               .toLowerCase()
               .includes(selectedDistrict.toLowerCase())
           : true)
@@ -98,7 +89,7 @@ function FindIntern() {
 
   const handleProvinceChange = (e) => {
     setSelectedProvince(e.target.value);
-    setSelectedDistrict(""); // Reset district when province changes
+    setSelectedDistrict(""); // İl değiştiğinde ilçeyi sıfırla
   };
 
   const handleListingClick = (listing) => {
@@ -151,7 +142,7 @@ function FindIntern() {
                   htmlFor="category"
                 >
                   <Briefcase className="w-4 h-4 inline mr-2" />
-                  Staj Kategorisi
+                  Kategori
                 </label>
                 <select
                   id="category"
@@ -226,7 +217,7 @@ function FindIntern() {
             </div>
           </div>
 
-          {/* Listings */}
+          {/* İlanlar Listesi */}
           <div className="md:w-3/4">
             {filteredListings.length > 0 ? (
               <div className="grid gap-6">
@@ -248,39 +239,27 @@ function FindIntern() {
                                 {listing.category}
                               </span>
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                              {listing.name}
+                            <h3 className="text-lg font-semibold text-gray-800">
+                              {listing.title}
                             </h3>
-                            <p className="text-gray-600 mb-4">
-                              {listing.description}
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <MapPin className="w-4 h-4" />
-                                <span className="text-sm">
-                                  {listing.location}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <Calendar className="w-4 h-4" />
-                                <span className="text-sm">
-                                  {listing.duration}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <UserCheck className="w-4 h-4" />
-                                <span className="text-sm">
-                                  {listing.contact}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <GraduationCap className="w-4 h-4" />
-                                <span className="text-sm">
-                                  {listing.requirements}
-                                </span>
-                              </div>
-                            </div>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(listing.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600 mb-4">
+                          {listing.description.length > 100
+                            ? listing.description.slice(0, 100) + "..."
+                            : listing.description}
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            {listing.province} / {listing.district}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="w-4 h-4" />
+                            {listing.contact}
                           </div>
                         </div>
                       </div>
@@ -289,8 +268,8 @@ function FindIntern() {
                 })}
               </div>
             ) : (
-              <div className="text-center text-gray-500">
-                Hiç ilan bulunamadı.
+              <div className="text-center text-gray-600">
+                Hiç ilan bulunamadı
               </div>
             )}
           </div>

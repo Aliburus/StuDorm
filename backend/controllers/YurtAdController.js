@@ -7,14 +7,12 @@ const createYurtAd = async (req, res) => {
     title,
     description,
     price,
-    location,
     gender_required,
     province,
     district,
     room_type,
-    status, // New field: status (active/inactive)
-    is_hidden, // New field: visibility status
-    is_premium, // New field: premium status
+    status, // active/inactive
+    is_hidden, // visibility status
   } = req.body;
 
   const photos = req.files.map((file) => `/uploads/${file.filename}`);
@@ -26,14 +24,12 @@ const createYurtAd = async (req, res) => {
       title,
       description,
       price,
-      location,
       gender_required,
       province,
       district,
       room_type,
       status,
       is_hidden,
-      is_premium,
     });
 
     // Add photos if provided
@@ -55,7 +51,6 @@ const createYurtAd = async (req, res) => {
 const getAllYurtAdsWithPhotos = async (req, res) => {
   const { minPrice, maxPrice, province, district, roomType } = req.query;
   try {
-    // Get all ads with filters
     const yurtAds = await YurtAd.getAll({
       minPrice,
       maxPrice,
@@ -64,7 +59,6 @@ const getAllYurtAdsWithPhotos = async (req, res) => {
       roomType,
     });
 
-    // Get photos for each ad
     const yurtAdsWithPhotos = await Promise.all(
       yurtAds.map(async (yurtAd) => {
         const photos = await YurtAdPhoto.getPhotosByYurtAdId(yurtAd.id);
@@ -75,13 +69,13 @@ const getAllYurtAdsWithPhotos = async (req, res) => {
       })
     );
 
-    // Return ads with photos
     res.status(200).json(yurtAdsWithPhotos);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ message: "Error fetching data.", error });
   }
 };
+
 const getYurtAdsByUserId = async (req, res) => {
   try {
     const ads = await YurtAd.getByUserId(req.params.userId);
@@ -93,4 +87,27 @@ const getYurtAdsByUserId = async (req, res) => {
       .json({ message: "Error fetching user yurt ads", error });
   }
 };
-module.exports = { createYurtAd, getAllYurtAdsWithPhotos, getYurtAdsByUserId };
+
+const getYurtAdById = async (req, res) => {
+  try {
+    const [ad] = await YurtAd.getById(req.params.id);
+    if (!ad) return res.status(404).json({ message: "İlan bulunamadı" });
+
+    const photos = await YurtAdPhoto.getPhotosByYurtAdId(ad.id);
+    res.json({
+      ...ad,
+      images: photos.map((p) => p.photo_url),
+      features: ad.features?.split(","),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "İlan getirilemedi", error: err });
+  }
+};
+
+module.exports = {
+  createYurtAd,
+  getAllYurtAdsWithPhotos,
+  getYurtAdsByUserId,
+  getYurtAdById,
+};

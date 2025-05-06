@@ -58,3 +58,7 @@ export const getPartTimeAdsByUserId = async (userId) => {
     throw error;
   }
 };
+export const getYurtAdById = async (id) => {
+  const res = await axios.get(`${YURT_BASE_URL}/${id}`);
+  return res.data;
+};

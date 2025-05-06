@@ -3,13 +3,27 @@
 const db = require("../config/db");
 
 const InternAd = {
-  // Tüm intern ilanlarını sadece rows olarak dönecek şekilde
+  // Tüm intern ilanlarını döner
   getAll: async () => {
     const [rows] = await db.query("SELECT * FROM interns");
+    if (!rows || rows.length === 0) {
+      throw new Error("No interns found");
+    }
     return rows;
   },
-
-  // Belirli bir kullanıcıya ait ilanlar
+  getById: async (id) => {
+    try {
+      const [rows] = await db.query("SELECT * FROM interns WHERE id = ?", [id]);
+      if (!rows || rows.length === 0) {
+        throw new Error("Intern not found");
+      }
+      return rows;
+    } catch (error) {
+      console.error("Error fetching intern:", error);
+      throw error; // Re-throw to propagate the error to the controller
+    }
+  },
+  // Belirli bir kullanıcıya ait ilanları döner
   getByUserId: async (userId) => {
     const [rows] = await db.query("SELECT * FROM interns WHERE user_id = ?", [
       userId,
@@ -17,30 +31,45 @@ const InternAd = {
     return rows;
   },
 
+  // Yeni ilan oluşturur
   create: async (internData) => {
     const result = await db.query(
-      "INSERT INTO interns (user_id, name, category, location, contact, description, duration, requirements) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      `INSERT INTO interns 
+        (title, province, district, category, contact, description, duration, requirements, user_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        internData.user_id,
-        internData.name,
+        internData.title,
+        internData.province,
+        internData.district,
         internData.category,
-        internData.location,
         internData.contact,
         internData.description,
         internData.duration,
         internData.requirements,
+        internData.user_id,
       ]
     );
     return result[0].insertId;
   },
 
+  // Var olan ilanı günceller
   update: async (id, internData) => {
     const result = await db.query(
-      "UPDATE interns SET name = ?, category = ?, location = ?, contact = ?, description = ?, duration = ?, requirements = ? WHERE id = ?",
+      `UPDATE interns SET 
+        title = ?, 
+        province = ?, 
+        district = ?, 
+        category = ?, 
+        contact = ?, 
+        description = ?, 
+        duration = ?, 
+        requirements = ? 
+      WHERE id = ?`,
       [
-        internData.name,
+        internData.title,
+        internData.province,
+        internData.district,
         internData.category,
-        internData.location,
         internData.contact,
         internData.description,
         internData.duration,
@@ -51,6 +80,7 @@ const InternAd = {
     return result[0].affectedRows;
   },
 
+  // İlanı siler
   delete: async (id) => {
     const result = await db.query("DELETE FROM interns WHERE id = ?", [id]);
     return result[0].affectedRows;

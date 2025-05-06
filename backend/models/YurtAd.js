@@ -7,30 +7,26 @@ const YurtAd = {
     title,
     description,
     price,
-    location,
     gender_required,
     province,
     district,
     room_type,
     status,
     is_hidden,
-    is_premium,
   }) => {
     const [result] = await db.query(
-      "INSERT INTO YurtAds (user_id, title, description, price, location, gender_required, province, district, room_type, status, is_hidden, is_premium) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO YurtAds (user_id, title, description, price, gender_required, province, district, room_type, status, is_hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         user_id,
         title,
         description,
         price,
-        location,
         gender_required,
         province,
         district,
         room_type,
         status,
         is_hidden,
-        is_premium,
       ]
     );
     return result.insertId; // Return new ad ID
@@ -39,7 +35,7 @@ const YurtAd = {
   // Get all ads with optional filters
   getAll: async ({ minPrice, maxPrice, province, district, roomType }) => {
     let query =
-      "SELECT id, user_id, title, description, price, location, gender_required, province, district, room_type, status, is_hidden, is_premium, created_at, updated_at FROM YurtAds WHERE 1=1";
+      "SELECT id, user_id, title, description, price, gender_required, province, district, room_type, status, is_hidden, created_at, updated_at FROM YurtAds WHERE 1=1";
     const params = [];
 
     if (minPrice) {
@@ -66,10 +62,19 @@ const YurtAd = {
     const [result] = await db.query(query, params);
     return result;
   },
+
   getByUserId: async (userId) => {
     const [rows] = await db.query("SELECT * FROM YurtAds WHERE user_id = ?", [
       userId,
     ]);
+    return rows;
+  },
+
+  getById: async (id) => {
+    const [rows] = await db.query(
+      "SELECT id, user_id, title, description, price, gender_required, province, district, room_type, status, is_hidden, created_at, updated_at FROM YurtAds WHERE id = ?",
+      [id]
+    );
     return rows;
   },
 };

@@ -85,7 +85,7 @@ function FindingRD() {
   };
 
   const handleListingClick = (listing) => {
-    navigate(`/listing/${listing.id}`, { state: { listing } });
+    navigate(`/room-listing-details/${listing.id}`, { state: { listing } });
   };
 
   const getRoomTypeIcon = (typeName) => {

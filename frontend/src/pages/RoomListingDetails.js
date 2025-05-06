@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import {
   MapPin,
   Phone,
@@ -7,205 +7,177 @@ import {
   User,
   Home,
   Calendar,
-  DollarSign,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { getYurtAdById } from "../services/ListingService";
 
 function RoomListingDetail() {
+  const { id } = useParams();
+  const [listing, setListing] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const location = useLocation();
 
-  // Sample data - replace with actual data from your backend
-  const listing = {
-    id: 1,
-    title: "Kadıköy'de 3+1 Dairede Kiralık Oda",
-    description:
-      "Kadıköy merkezde, metroya 5 dakika yürüme mesafesinde 3+1 dairede kiralık oda. Daire full eşyalı, odada çalışma masası, gardırop ve yatak bulunmaktadır. Mutfak ve banyo ortak kullanımlıdır. İnternet, elektrik, su ve doğalgaz faturalar dahildir.",
-    price: "2500 TL",
-    location: "Kadıköy, İstanbul",
-    roomType: "Özel Oda",
-    availableFrom: "01.04.2024",
-    contact: {
-      name: "Ahmet Yılmaz",
-      phone: "+90 555 123 4567",
-      email: "ahmet@email.com",
-    },
-    features: [
-      "İnternet",
-      "Eşyalı",
-      "Faturalar Dahil",
-      "Merkezi Konum",
-      "Çamaşır Makinesi",
-      "Bulaşık Makinesi",
-    ],
-    images: [
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
-      "https://images.unsplash.com/photo-1513694203232-719a280e022f",
-      "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6",
-      "https://images.unsplash.com/photo-1484101403633-562f891dc89a",
-      "https://images.unsplash.com/photo-1493809842364-78817add7ffb",
-    ],
-  };
+  useEffect(() => {
+    getYurtAdById(id)
+      .then((data) => setListing(data))
+      .catch((err) => console.error("Error fetching yurt ad:", err));
+  }, [id]);
 
-  const nextImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === listing.images.length - 1 ? 0 : prevIndex + 1
-    );
-  };
+  if (!listing) {
+    return <p className="text-center py-20">Yükleniyor...</p>;
+  }
 
-  const previousImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? listing.images.length - 1 : prevIndex - 1
-    );
-  };
+  const {
+    user_id,
+    title,
+    description,
+    price,
+    location,
+    gender_required,
+    created_at,
+    updated_at,
+    province,
+    district,
+    room_type,
+    images = [],
+  } = listing;
 
-  const selectImage = (index) => {
-    setCurrentImageIndex(index);
-  };
+  const nextImage = () =>
+    setCurrentImageIndex((i) => (i === images.length - 1 ? 0 : i + 1));
+  const previousImage = () =>
+    setCurrentImageIndex((i) => (i === 0 ? images.length - 1 : i - 1));
+  const selectImage = (idx) => setCurrentImageIndex(idx);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-1">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          {/* Image Gallery */}
+          {/* Görsel Galeri */}
           <div className="relative">
-            <div className="aspect-w-16 aspect-h-9 relative">
-              <img
-                src={`${listing.images[currentImageIndex]}?auto=format&fit=crop&w=1600&h=900`}
-                alt={`Room view ${currentImageIndex + 1}`}
-                className="w-full h-[500px] object-cover"
-              />
-
-              {/* Navigation Arrows */}
+            <div className="h-[500px] w-full">
+              {images.length > 0 && (
+                <img
+                  src={images[currentImageIndex]}
+                  alt={`Room view ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              )}
               <button
                 onClick={previousImage}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors duration-200"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={nextImage}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors duration-200"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
             </div>
-
-            {/* Thumbnail Gallery */}
             <div className="flex gap-2 mt-4 px-4">
-              {listing.images.slice(0, 4).map((image, index) => (
+              {images.slice(0, 4).map((img, idx) => (
                 <button
-                  key={index}
-                  onClick={() => selectImage(index)}
-                  className={`flex-1 aspect-w-16 aspect-h-9 relative ${
-                    currentImageIndex === index
+                  key={idx}
+                  onClick={() => selectImage(idx)}
+                  className={`flex-1 h-24 overflow-hidden rounded ${
+                    idx === currentImageIndex
                       ? "ring-2 ring-yellow-500"
                       : "opacity-70"
                   }`}
                 >
                   <img
-                    src={`${image}?auto=format&fit=crop&w=400&h=225`}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-24 object-cover "
+                    src={img}
+                    alt={`Thumb ${idx + 1}`}
+                    className="w-full h-full object-cover"
                   />
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-8 p-6">
-            {/* Main Content */}
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                {listing.title}
-              </h1>
+          <div className="p-6">
+            {/* Başlık */}
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+            </div>
 
-              {/* Description */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  İlan Detayları
-                </h2>
-                <p className="text-gray-600 leading-relaxed">
-                  {listing.description}
-                </p>
+            {/* Meta Bilgiler */}
+            <div className="text-sm text-gray-500 mb-6">
+              <span className="mr-4">İlan ID: {id}</span>
+              <span className="mr-4">Kullanıcı: {user_id}</span>
+              <span className="mr-4">
+                Oluşturma: {new Date(created_at).toLocaleDateString()}
+              </span>
+              <span>
+                Güncelleme: {new Date(updated_at).toLocaleDateString()}
+              </span>
+            </div>
+
+            {/* Temel Detaylar */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-yellow-500" />
+                  <span>Oda Tipi: {room_type}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-yellow-500" />
+                  <span>
+                    {province} / {district} ({location})
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-yellow-500" />
+                  <span>Cinsiyet: {gender_required}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Home className="w-5 h-5 text-yellow-500" />
+                  <span>Fiyat: {price}₺</span>
+                </div>
               </div>
 
-              {/* Features */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              {/* Açıklama */}
+              <div>
+                <h2 className="text-xl font-semibold mb-2 text-gray-800">
+                  Açıklama
+                </h2>
+                <p className="text-gray-700 leading-relaxed">{description}</p>
+              </div>
+            </div>
+
+            {/* İletişim Bilgileri */}
+            <div className="bg-gray-50 rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                İletişim Bilgileri
+              </h2>
+              <div className="flex items-center gap-3 text-gray-600 mb-2">
+                <Phone className="w-5 h-5" />
+                <span>{listing.contact?.phone || "-"}</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-600 mb-2">
+                <Mail className="w-5 h-5" />
+                <span>{listing.contact?.email || "-"}</span>
+              </div>
+            </div>
+
+            {/* Özellikler */}
+            {listing.features?.length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">
                   Özellikler
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {listing.features.map((feature, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 text-gray-600"
-                    >
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span>{feature}</span>
-                    </div>
+                <ul className="list-disc list-inside text-gray-700">
+                  {listing.features.map((feat, i) => (
+                    <li key={i}>{feat}</li>
                   ))}
-                </div>
+                </ul>
               </div>
-            </div>
-
-            {/* Sidebar */}
-            <div className="md:w-1/3">
-              <div className="bg-gray-50 rounded-lg p-6 sticky top-6">
-                {/* Price */}
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-2xl font-bold text-gray-900">
-                    {listing.price}
-                  </span>
-                  <span className="text-gray-500">/aylık</span>
-                </div>
-
-                {/* Details */}
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Home className="w-5 h-5" />
-                    <span>{listing.roomType}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <MapPin className="w-5 h-5" />
-                    <span>{listing.location}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Calendar className="w-5 h-5" />
-                    <span>Müsaitlik: {listing.availableFrom}</span>
-                  </div>
-                </div>
-
-                {/* Contact Information */}
-                <div className="border-t border-gray-200 pt-6 space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    İletişim Bilgileri
-                  </h3>
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <User className="w-5 h-5" />
-                    <span>{listing.contact.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Phone className="w-5 h-5" />
-                    <span>{listing.contact.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Mail className="w-5 h-5" />
-                    <span>{listing.contact.email}</span>
-                  </div>
-                </div>
-
-                {/* Contact Button */}
-                <button className="w-full bg-yellow-500 text-white py-3 rounded-lg mt-6 hover:bg-yellow-600 transition-colors duration-200">
-                  İletişime Geç
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

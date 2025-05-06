@@ -1,4 +1,3 @@
-// backend/controllers/homepageController.js
 const PremiumAdsModel = require("../models/PremiumAdsModel");
 
 const getHomepagePremiumListings = async (req, res) => {
