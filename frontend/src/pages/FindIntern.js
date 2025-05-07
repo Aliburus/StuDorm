@@ -107,7 +107,7 @@ function FindIntern() {
 
       <div className="container mx-auto px-4 py-8">
         <button
-          className="md:hidden w-full mb-4 flex items-center justify-center space-x-2 bg-indigo-600 text-white py-3 rounded-lg shadow-md"
+          className="md:hidden w-full mb-4 flex items-center justify-center space-x-2 bg-yellow-500 text-white py-3 rounded-lg shadow-md"
           onClick={() => setIsFilterOpen(!isFilterOpen)}
         >
           <Filter className="w-5 h-5" />
@@ -146,7 +146,7 @@ function FindIntern() {
                 </label>
                 <select
                   id="category"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
@@ -169,7 +169,7 @@ function FindIntern() {
                 </label>
                 <select
                   id="province"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={selectedProvince}
                   onChange={handleProvinceChange}
                 >
@@ -192,7 +192,7 @@ function FindIntern() {
                 </label>
                 <select
                   id="district"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={selectedDistrict}
                   onChange={(e) => setSelectedDistrict(e.target.value)}
                   disabled={!selectedProvince}
@@ -209,7 +209,7 @@ function FindIntern() {
 
               <button
                 onClick={applyFilters}
-                className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-500 transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 <Search className="w-5 h-5" />
                 Filtrele
@@ -235,7 +235,7 @@ function FindIntern() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               {getCategoryIcon(listing.category)}
-                              <span className="text-sm font-medium text-indigo-600">
+                              <span className="text-sm font-medium text-yellow-500">
                                 {listing.category}
                               </span>
                             </div>

@@ -52,7 +52,7 @@ const accessPremiumContent = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     const { name, surname, email, oldPassword, newPassword } = req.body;
-    const userId = req.user.id; // Auth token'dan kullanıcıyı al
+    const userId = req.user.id;
 
     const user = await userModel.getUserById(userId);
     if (!user) {

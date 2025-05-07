@@ -4,12 +4,13 @@ const router = express.Router();
 const {
   createContactMessage,
   getAllMessages,
+  getUserMessages,
 } = require("../controllers/ContactController");
 
-// Mesaj gönderme (POST) - Authenticated users only
+const authenticateToken = require("../middleware/authenticateToken");
+
 router.post("/message", createContactMessage);
 
-// Admin için mesajları listeleme (GET)
-router.get("/messages", getAllMessages); // Mesajları listeleme işlemi (GET)
-
+router.get("/messages", getAllMessages);
+router.get("/messages/user", authenticateToken, getUserMessages);
 module.exports = router;

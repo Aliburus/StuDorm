@@ -33,12 +33,35 @@ const updateListingDetails = async (source, id, data) => {
   );
   return res.data;
 };
-
+const getReportedContent = async () => {
+  try {
+    const res = await axios.get(`${API_URL}/reported-content`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching reported content:", error);
+    throw error;
+  }
+};
+const getAllPosts = async () => {
+  try {
+    const res = await axios.get(`${API_URL}/posts`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    throw error;
+  }
+};
+const deleteUser = async (id) => {
+  const res = await axios.delete(`${API_URL}/users/${id}`);
+  return res.data;
+};
 export const AdminService = {
   getAllListings,
   getUsers,
   getOverviewStats,
-
   deleteListing,
   updateListingDetails,
+  getReportedContent,
+  getAllPosts,
+  deleteUser,
 };

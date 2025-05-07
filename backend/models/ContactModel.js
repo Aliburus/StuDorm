@@ -1,26 +1,33 @@
 const db = require("../config/db");
 
 const Contact = {
-  create: async ({ user_id, name, surname, email, message }) => {
-    try {
-      const [result] = await db.query(
-        "INSERT INTO contact_messages (user_id, name, surname, email, message, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        [user_id, name, surname, email, message, new Date()]
-      );
-      return result;
-    } catch (error) {
-      console.error("Mesaj kaydı sırasında hata:", error);
+  create: async ({ email, message }) => {
+    const [result] = await db
+      .query(
+        `INSERT INTO contact_messages 
+         (email, message, created_at)
+       VALUES (?, ?, ?)`,
+        [email, message, new Date()]
+      )
+      .catch((err) => {
+        console.error("Veritabanı hatası:", err);
+        throw new Error("Veritabanı hatası.");
+      });
+    if (result.affectedRows === 0) {
       throw new Error("Mesaj kaydedilemedi.");
     }
+    return result;
   },
   getAllMessages: async () => {
-    try {
-      const [rows] = await db.query("SELECT * FROM contact_messages");
-      return rows;
-    } catch (error) {
-      console.error("Mesajları alma hatası:", error);
-      throw new Error("Mesajları alırken hata oluştu.");
-    }
+    const [rows] = await db.query("SELECT * FROM contact_messages");
+    return rows;
+  },
+  getByEmail: async (email) => {
+    const [rows] = await db.query(
+      `SELECT * FROM contact_messages WHERE email = ? ORDER BY created_at DESC`,
+      [email]
+    );
+    return rows;
   },
 };
 

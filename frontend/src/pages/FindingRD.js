@@ -46,7 +46,6 @@ function FindingRD() {
     Izmir: ["Konak", "Bornova"],
   };
 
-  // Verileri çekerken backend API'sini çağır
   useEffect(() => {
     const fetchListings = async () => {
       try {
@@ -100,7 +99,7 @@ function FindingRD() {
       <div className="container mx-auto px-4 py-8">
         {/* Mobile Filter Button */}
         <button
-          className="md:hidden w-full mb-4 flex items-center justify-center space-x-2 bg-indigo-600 text-white py-3 rounded-lg shadow-md"
+          className="md:hidden w-full mb-4 flex items-center justify-center space-x-2 bg-yellow-500 text-white py-3 rounded-lg shadow-md"
           onClick={() => setIsFilterOpen(!isFilterOpen)}
         >
           <Filter className="w-5 h-5" />
@@ -144,7 +143,7 @@ function FindingRD() {
                   placeholder="Min Fiyat"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 />
               </div>
 
@@ -162,7 +161,7 @@ function FindingRD() {
                   placeholder="Max Fiyat"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 />
               </div>
 
@@ -176,7 +175,7 @@ function FindingRD() {
                 </label>
                 <select
                   id="roomType"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                 >
@@ -199,7 +198,7 @@ function FindingRD() {
                 </label>
                 <select
                   id="province"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={selectedProvince}
                   onChange={handleProvinceChange}
                 >
@@ -222,7 +221,7 @@ function FindingRD() {
                 </label>
                 <select
                   id="district"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={selectedDistrict}
                   onChange={(e) => setSelectedDistrict(e.target.value)}
                   disabled={!selectedProvince}
@@ -239,7 +238,7 @@ function FindingRD() {
 
               <button
                 onClick={applyFilters}
-                className="w-full bg-indigo-600 text-white py-2 rounded-lg mt-4"
+                className="w-full bg-yellow-500 text-white py-2 rounded-lg mt-4"
               >
                 Filtreleri Uygula
               </button>
@@ -265,7 +264,7 @@ function FindingRD() {
                     <div className="mt-4 text-gray-500">
                       {getRoomTypeIcon(listing.roomType)} {listing.roomType}
                     </div>
-                    <div className="mt-2 text-lg font-semibold text-indigo-600">
+                    <div className="mt-2 text-lg font-semibold text-yellow-500">
                       ₺{listing.price}
                     </div>
                   </div>

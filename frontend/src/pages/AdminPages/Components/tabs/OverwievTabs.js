@@ -1,13 +1,4 @@
-import {
-  Users,
-  FileText,
-  Ban,
-  Activity,
-  Building,
-  Briefcase,
-  Clock,
-  UserPlus,
-} from "lucide-react";
+import { Users, FileText, Ban, Building, Briefcase, Clock } from "lucide-react";
 
 function OverviewTab({ stats }) {
   return (
@@ -57,7 +48,19 @@ function OverviewTab({ stats }) {
             </span>
           </div>
         </div>
-
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-sm">Total Forum Posts</p>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {stats.totalPosts.toLocaleString()}
+              </h3>
+            </div>
+            <div className="bg-green-100 p-3 rounded-lg">
+              <FileText className="h-6 w-6 text-green-500" />
+            </div>
+          </div>
+        </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -68,21 +71,6 @@ function OverviewTab({ stats }) {
             </div>
             <div className="bg-red-100 p-3 rounded-lg">
               <Ban className="h-6 w-6 text-red-500" />
-            </div>
-          </div>
-          <button className="mt-4 text-red-500 text-sm font-medium hover:text-red-600">
-            Review Reports →
-          </button>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">System Status</p>
-              <h3 className="text-2xl font-bold text-green-500">Online</h3>
-            </div>
-            <div className="bg-green-100 p-3 rounded-lg">
-              <Activity className="h-6 w-6 text-green-500" />
             </div>
           </div>
         </div>

@@ -4,79 +4,25 @@ import Footer from "../components/Footer";
 import { sendContactMessage } from "../services/ContactService";
 
 const Contact = () => {
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false); // Kullanıcı giriş durumu
-  const [userInfo, setUserInfo] = useState(null); // Kullanıcı bilgileri
-
-  // Giriş yapmışsa, backend'ten kullanıcı bilgilerini al
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setIsUserLoggedIn(true);
-      const fetchUserInfo = async () => {
-        try {
-          const response = await fetch("http://localhost:5000/api/user/info", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          setUserInfo(data); // Kullanıcı bilgilerini state'e kaydediyoruz
-          setEmail(data.email); // Email bilgisini formda önceden alıyoruz
-        } catch (err) {
-          console.error("Kullanıcı bilgileri alınamadı", err);
-        }
-      };
-
-      fetchUserInfo();
-    }
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(false);
 
-    let user_id, user_name, user_surname, user_email;
-
-    if (isUserLoggedIn && userInfo) {
-      // Kullanıcı giriş yapmışsa, backend'ten alınan bilgileri kullanıyoruz
-      user_id = userInfo.id;
-      user_name = userInfo.name;
-      user_surname = userInfo.surname;
-      user_email = email;
-    } else {
-      // Kullanıcı giriş yapmamışsa, formdaki bilgileri kullanıyoruz
-      user_id = `user-${Math.random().toString(36).substr(2, 9)}`;
-      user_name = name;
-      user_surname = surname;
-      user_email = email;
-    }
-
-    const messageData = {
-      user_id,
-      name: user_name,
-      surname: user_surname,
-      email: user_email,
-      message,
-    };
-
+    const messageData = { email, message };
     try {
-      const response = await sendContactMessage(messageData);
-      if (response.status === 200) {
-        setSuccess(true);
-        setName(""); // Formu sıfırlayın
-        setSurname(""); // Formu sıfırlayın
-        setEmail(""); // Formu sıfırlayın
-        setMessage(""); // Formu sıfırlayın
-        setError(null); // Hata mesajını temizleyin (başarı durumunda)
-      }
+      const result = await sendContactMessage(messageData);
+      setSuccess(true);
+      setEmail("");
+      setMessage("");
     } catch (err) {
+      console.error(err);
       setError("Mesaj gönderme sırasında bir hata oluştu.");
-      setSuccess(false); // Hata durumunda başarıyı sıfırlayın
     }
   };
 
@@ -94,42 +40,6 @@ const Contact = () => {
               Bize Ulaşın
             </h2>
             <form className="space-y-4" onSubmit={handleSubmit}>
-              {!isUserLoggedIn && (
-                <>
-                  <div>
-                    <label
-                      className="block text-gray-700 text-sm font-semibold mb-2"
-                      htmlFor="name"
-                    >
-                      Adınız
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                      placeholder="Adınızı girin"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="block text-gray-700 text-sm font-semibold mb-2"
-                      htmlFor="surname"
-                    >
-                      Soyadınız
-                    </label>
-                    <input
-                      type="text"
-                      id="surname"
-                      value={surname}
-                      onChange={(e) => setSurname(e.target.value)}
-                      className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                      placeholder="Soyadınızı girin"
-                    />
-                  </div>
-                </>
-              )}
               <div>
                 <label
                   className="block text-gray-700 text-sm font-semibold mb-2"
@@ -161,6 +71,7 @@ const Contact = () => {
                   className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
                   placeholder="Mesajınızı buraya yazın"
                   rows="5"
+                  required
                 ></textarea>
               </div>
               {error && <div className="text-red-500 text-sm">{error}</div>}

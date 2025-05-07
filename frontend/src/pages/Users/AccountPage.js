@@ -6,10 +6,8 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import {
   User,
-  Settings,
   Bell,
   Megaphone,
-  Star,
   MessageCircle,
   CreditCard,
   LogOut,
@@ -24,6 +22,8 @@ import {
 import ProfileForm from "../Users/ProfileForm";
 import AccountForumPosts from "./AccountForumPosts";
 import AccountListingsPage from "./AccountListingPage";
+import ContactMessagesPage from "./ContactMessages";
+
 const AccountPage = () => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
@@ -79,11 +79,10 @@ const AccountPage = () => {
 
   const menuItems = [
     { id: "profile", label: "Profile", icon: User },
-    { id: "settings", label: "Settings", icon: Settings },
-    { id: "notifications", label: "Notifications", icon: Bell },
+
+    { id: "messages", label: "Messages", icon: Bell },
     { id: "listings", label: "Listing", icon: Megaphone }, // ← listings eklendi
     { id: "forumPosts", label: "Forum Posts", icon: MessageCircle },
-    { id: "favorites", label: "Favorites", icon: Star },
     { id: "premium", label: "Premium", icon: CreditCard },
   ];
   const handlePayment = () => {
@@ -167,6 +166,9 @@ const AccountPage = () => {
   const renderListingsContent = () => {
     return <AccountListingsPage user={user} />;
   };
+  const renderContactMessages = () => {
+    return <ContactMessagesPage user={user} />;
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -176,8 +178,10 @@ const AccountPage = () => {
         return renderPremiumContent();
       case "forumPosts":
         return renderForumPostsContent();
-      case "listings": // ← listings case eklendi
+      case "listings":
         return renderListingsContent();
+      case "messages":
+        return renderContactMessages();
       default:
         return <div>Content</div>;
     }

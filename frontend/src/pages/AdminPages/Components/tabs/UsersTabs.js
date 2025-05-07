@@ -5,12 +5,12 @@ function UsersTab() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState(""); // Arama terimi durumu
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const data = await AdminService.getUsers(); // Kullanıcıları çek
+      const data = await AdminService.getUsers();
       setUsers(data);
     } catch (err) {
       setError("Bir hata oluştu, kullanıcılar alınamadı.");
@@ -20,7 +20,7 @@ function UsersTab() {
   };
 
   useEffect(() => {
-    fetchUsers(); // Sayfa ilk yüklendiğinde kullanıcıları çek
+    fetchUsers();
   }, []);
 
   const formatDate = (dateString) => {
@@ -28,12 +28,21 @@ function UsersTab() {
     return date.toLocaleDateString("tr-TR");
   };
 
-  // E-posta ile arama
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  // Kullanıcıları tarihe göre sıralama (yeniden eskiye)
+  const handleDelete = async (id) => {
+    if (window.confirm("Bu kullanıcıyı silmek istediğinizden emin misiniz?")) {
+      try {
+        await AdminService.deleteUser(id);
+        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+      } catch (err) {
+        alert("Kullanıcı silinirken bir hata oluştu.");
+      }
+    }
+  };
+
   const sortedUsers = [...users]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .filter((user) =>
@@ -54,9 +63,9 @@ function UsersTab() {
       </div>
       <div className="overflow-x-auto">
         {loading ? (
-          <div>Loading...</div>
+          <div className="p-4">Loading...</div>
         ) : error ? (
-          <div className="text-red-500">{error}</div>
+          <div className="text-red-500 p-4">{error}</div>
         ) : (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -72,6 +81,9 @@ function UsersTab() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Join Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -98,7 +110,15 @@ function UsersTab() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(user.created_at)} {/* Tarihi formatla */}
+                    {formatDate(user.created_at)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <button
+                      onClick={() => handleDelete(user.id)}
+                      className="text-red-600 hover:text-red-800 font-semibold"
+                    >
+                      Sil
+                    </button>
                   </td>
                 </tr>
               ))}

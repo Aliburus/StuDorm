@@ -42,6 +42,7 @@ app.use("/api/interns", internRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api/homepage", homepageRoutes);
 app.use("/api/contact", contactRoutes);
+
 // Sunucuyu başlatma
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

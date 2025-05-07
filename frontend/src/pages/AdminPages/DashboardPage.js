@@ -6,6 +6,8 @@ import UsersTab from "./Components/tabs/UsersTabs";
 import ListingsTab from "./Components/tabs/ListingTabs";
 import SettingsTab from "./Components/tabs/SettingTabs";
 import { AdminService } from "../../services/AdminService";
+import ReportedContent from "./Components/tabs/ReportedContent";
+import ForumPosts from "./Components/tabs/ForumPosts";
 
 export const adminData = {
   name: "Admin User",
@@ -52,10 +54,11 @@ function DashboardPage() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const [stats, setStats] = useState(null);
   const [statsError, setStatsError] = useState(null);
-
+  const [reportedContent, setReportedContent] = useState([]);
+  const [reportedContentError, setReportedContentError] = useState(null);
+  const [AllPosts, setAllPosts] = useState([]);
   useEffect(() => {
     if (selectedTab === "overview") {
       AdminService.getOverviewStats()
@@ -66,7 +69,21 @@ function DashboardPage() {
         });
     }
   }, [selectedTab]);
-
+  useEffect(() => {
+    if (selectedTab === "posts") {
+      setLoading(true);
+      AdminService.getAllPosts()
+        .then((data) => {
+          console.log("✅ Posts data:", data);
+          setAllPosts(data);
+        })
+        .catch((err) => {
+          console.error("❌ Error fetching posts:", err);
+          setError(err);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [selectedTab]);
   useEffect(() => {
     if (selectedTab === "listings") {
       setLoading(true);
@@ -82,6 +99,25 @@ function DashboardPage() {
         .finally(() => setLoading(false));
     }
   }, [selectedTab]);
+  {
+    selectedTab === "reported" && (
+      <>
+        {loading && (
+          <div className="text-center text-gray-500 py-4">
+            Loading reported content...
+          </div>
+        )}
+        {reportedContentError && (
+          <div className="text-center text-red-500 py-4">
+            Failed to load reported content.
+          </div>
+        )}
+        {!loading && !reportedContentError && (
+          <ReportedContent reportedContent={reportedContent} />
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,6 +156,24 @@ function DashboardPage() {
           </>
         )}
         {selectedTab === "settings" && <SettingsTab adminData={adminData} />}
+        {selectedTab === "reported" && (
+          <>
+            {loading && (
+              <div className="text-center text-gray-500 py-4">
+                Loading reported content...
+              </div>
+            )}
+            {error && (
+              <div className="text-center text-red-500 py-4">
+                Failed to load reported content.
+              </div>
+            )}
+            {!loading && !error && (
+              <ReportedContent reportedContent={reportedContent} />
+            )}
+          </>
+        )}
+        {selectedTab === "posts" && <ForumPosts AllPosts={AllPosts} />}
       </div>
     </div>
   );

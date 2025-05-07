@@ -1,14 +1,26 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/contact/message"; // Backend endpoint'i
+const BASE_URL = "http://localhost:5000/api/contact";
 
 export const sendContactMessage = async (messageData) => {
   try {
-    console.log("Gönderilen Veriler:", messageData); // Verilerin doğru şekilde gönderildiğini kontrol edin.
-    const response = await axios.post(API_URL, messageData);
+    const response = await axios.post(`${BASE_URL}/message`, messageData);
     return response.data;
   } catch (error) {
-    console.error("Mesaj gönderme hatası:", error); // Detaylı hata logu ekleyelim.
+    console.error("Mesaj gönderme hatası:", error);
+    throw error;
+  }
+};
+
+export const getUserMessages = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${BASE_URL}/messages/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Kullanıcı mesajları hatası:", error);
     throw error;
   }
 };

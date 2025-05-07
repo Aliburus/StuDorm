@@ -11,7 +11,7 @@ const PaymentPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const fixedAmount = 4000; // Sabit üyelik ücreti (TL)
+  const fixedAmount = 4000;
 
   const handlePayment = async () => {
     setLoading(true);
@@ -34,7 +34,7 @@ const PaymentPage = () => {
 
       const response = await axios.post("http://localhost:5000/api/payments", {
         cardNumber,
-        amount: fixedAmount, // Sabit 4000 TL gönderiyoruz
+        amount: fixedAmount,
       });
 
       if (response.data.success) {
