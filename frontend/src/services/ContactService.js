@@ -14,7 +14,7 @@ export const sendContactMessage = async (messageData) => {
 
 export const getUserMessages = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     const response = await axios.get(`${BASE_URL}/messages/user`, {
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -35,7 +35,7 @@ const AccountPage = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (token) {
         try {
           const userData = await getUserInfo(token);
@@ -56,13 +56,13 @@ const AccountPage = () => {
     } catch (error) {
       console.error(error.message);
     }
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     navigate("/login");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       // Giriş yapılmamışsa login sayfasına gönder
       navigate("/login");

@@ -57,7 +57,7 @@ const ProfileForm = ({
 
   const updateUserInfo = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const formDataWithPassword = {
         ...formData,
         oldPassword: oldPassword, // Eski şifre

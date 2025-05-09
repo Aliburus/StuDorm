@@ -20,7 +20,7 @@ function LoginPage() {
 
     try {
       const response = await login(email, password); // Call the login service
-      localStorage.setItem("token", response.token); // Store the token in localStorage
+      sessionStorage.setItem("token", response.token);
       alert("Login successful!");
       navigate("/"); // Redirect to the homepage or dashboard
     } catch (error) {

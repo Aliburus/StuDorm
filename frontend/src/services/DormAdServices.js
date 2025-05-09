@@ -4,7 +4,7 @@ const API_URL = "http://localhost:5000/api/yurt-ilan";
 
 export const createYurtIlan = async (formData) => {
   try {
-    const token = localStorage.getItem("token"); // <<< JWT’yi al
+    const token = sessionStorage.getItem("token"); // <<< JWT’yi al
     if (!token) throw new Error("Kullanıcı yetkilendirmesi bulunamadı");
 
     const formDataToSend = new FormData();

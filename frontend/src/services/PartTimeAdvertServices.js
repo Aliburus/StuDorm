@@ -4,7 +4,7 @@ import axios from "axios";
 const API_URL = "http://localhost:5000/api";
 // Part-time ilan oluşturma
 export const createPartTimeAdvert = async (advertData) => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   try {
     const response = await axios.post(
       `${API_URL}/parttimeads`, // ✅ doğru route bu

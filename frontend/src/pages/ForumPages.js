@@ -31,7 +31,7 @@ function ForumPages() {
     fetchPosts(); // Call the function on mount
   }, []);
   const handlePostSubmit = async () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       console.error("Token bulunamadı.");
       return;
@@ -71,7 +71,7 @@ function ForumPages() {
   };
 
   const handleLike = async (postId, index) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     try {
       const response = await fetch(
@@ -97,7 +97,7 @@ function ForumPages() {
   };
 
   const handleDislike = async (postId, index) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     try {
       const response = await fetch(

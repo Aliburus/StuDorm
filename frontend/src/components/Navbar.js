@@ -12,7 +12,7 @@ const Navbar = () => {
 
   useEffect(() => {
     // localStorage'dan token kontrolü
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     setIsLoggedIn(!!token); // Token varsa true, yoksa false
   }, []);
 
@@ -22,7 +22,7 @@ const Navbar = () => {
   }, [location]); // Dependency on location change
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Token temizle
+    sessionStorage.removeItem("token"); // Token temizle
     setIsLoggedIn(false); // Durumu güncelle
     navigate("/"); // Login sayfasına yönlendir
   };

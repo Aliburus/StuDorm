@@ -35,7 +35,7 @@ export const getInternById = async (id) => {
 
 // Create a new intern
 export const createIntern = async (internData) => {
-  const token = localStorage.getItem("token"); // veya nerede tutuyorsan
+  const token = sessionStorage.getItem("token"); // veya nerede tutuyorsan
 
   try {
     const response = await axios.post(
