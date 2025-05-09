@@ -25,34 +25,43 @@ const InternController = {
 
   createIntern: async (req, res) => {
     try {
+      const userId = req.user.id; // JWT'den gelen user ID
+
       const {
-        user_id,
         title,
         province,
         district,
         category,
-        contact,
+
         description,
         duration,
         requirements,
       } = req.body;
 
-      const newIntern = {
-        user_id,
+      const internData = {
+        user_id: userId,
         title,
         province,
         district,
         category,
-        contact,
+
         description,
         duration,
         requirements,
       };
 
-      await InternAd.create(newIntern);
-      res.status(201).json({ message: "Intern created successfully" });
+      const internId = await InternAd.create(internData);
+
+      res.status(201).json({
+        message: "Intern ad created successfully",
+        intern_id: internId,
+      });
     } catch (err) {
-      res.status(500).json({ message: "Error creating intern", error: err });
+      console.error("Intern create error:", err);
+      res.status(500).json({
+        message: "Error creating intern ad",
+        error: err.message,
+      });
     }
   },
 

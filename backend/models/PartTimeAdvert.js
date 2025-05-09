@@ -8,7 +8,7 @@ const PartTimeAdvert = {
         category,
         province,
         district,
-        contact,
+
         description,
         duration,
         requirements,
@@ -18,8 +18,8 @@ const PartTimeAdvert = {
 
       const query = `
         INSERT INTO parttimeads 
-        (title, category, province, district, contact, description, duration, requirements, price, created_at, user_id) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
+        (title, category, province, district,  description, duration, requirements, price, created_at, user_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
       `;
 
       const [result] = await db.query(query, [
@@ -27,7 +27,7 @@ const PartTimeAdvert = {
         category,
         province,
         district,
-        contact,
+
         description,
         duration,
         requirements,
@@ -44,7 +44,7 @@ const PartTimeAdvert = {
   getAll: async () => {
     try {
       const query = `
-        SELECT id, title, category, province, district, contact, description, duration, requirements, price, created_at, user_id 
+        SELECT id, title, category, province, district,  description, duration, requirements, price, created_at, user_id 
         FROM parttimeads 
         ORDER BY created_at DESC
       `;
@@ -58,7 +58,7 @@ const PartTimeAdvert = {
   getById: async (id) => {
     try {
       const query =
-        "SELECT id, title, category, province, district, contact, description, duration, requirements, price, created_at, user_id FROM parttimeads WHERE id = ?";
+        "SELECT id, title, category, province, district, description, duration, requirements, price, created_at, user_id FROM parttimeads WHERE id = ?";
       const [rows] = await db.query(query, [id]);
       return rows;
     } catch (err) {

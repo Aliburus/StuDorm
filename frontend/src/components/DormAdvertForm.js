@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import LocationSelector from "./LocationSelector";
 import {
   DollarSign,
-  Users,
   FileText,
   MapPin,
   X,
   Image as ImageIcon,
-  Home,
   Send,
 } from "lucide-react";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
-
+import { createIntern } from "../services/InternService"; // Adjust the import based on your file structure
+import { createPartTimeAdvert } from "../services/PartTimeAdvertServices"; // Adjust the import based on your file structure
 const DormAdvertForm = () => {
   const [adType, setAdType] = useState("dorm"); // NEW: ad type selection
 
@@ -27,7 +26,7 @@ const DormAdvertForm = () => {
 
     room_type: "single",
     category: "",
-    contact: "",
+
     duration: "",
     requirements: "",
     photos: [],
@@ -109,8 +108,17 @@ const DormAdvertForm = () => {
     const payload = { ...formData, location };
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      alert("İlan başarıyla kaydedildi.");
+      if (adType === "interns") {
+        await createIntern(payload);
+        alert("Staj ilanınız başarıyla kaydedildi.");
+      } else if (adType === "parttime") {
+        await createPartTimeAdvert(payload);
+        alert("Part-time ilanınız başarıyla kaydedildi.");
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        alert("İlanınız başarıyla kaydedildi.");
+      }
+
       setFormData({
         user_id: "",
         title: "",
@@ -122,7 +130,7 @@ const DormAdvertForm = () => {
 
         room_type: "single",
         category: "",
-        contact: "",
+
         duration: "",
         requirements: "",
         photos: [],
@@ -199,7 +207,6 @@ const DormAdvertForm = () => {
 
                 {adType !== "dorm" && (
                   <>
-                    {/* Category, Contact, Duration, Requirements for interns/parttime */}
                     <input
                       type="text"
                       name="category"
@@ -208,14 +215,7 @@ const DormAdvertForm = () => {
                       placeholder="Kategori"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300"
                     />
-                    <input
-                      type="text"
-                      name="contact"
-                      value={formData.contact}
-                      onChange={handleChange}
-                      placeholder="İletişim Bilgisi"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300"
-                    />
+
                     <input
                       type="text"
                       name="duration"

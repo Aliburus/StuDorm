@@ -63,6 +63,11 @@ const AccountPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
+    if (!token) {
+      // Giriş yapılmamışsa login sayfasına gönder
+      navigate("/login");
+      return;
+    }
     if (token) {
       try {
         const updatedUser = await updateUserProfile(formData, token);

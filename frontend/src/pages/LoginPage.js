@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Mail, Lock, User, UserPlus, ArrowRight, KeyRound } from "lucide-react";
 import { register, login } from "../services/UserServices"; // Assuming these functions exist
+import { useNavigate } from "react-router-dom"; // For navigation
 
 function LoginPage() {
   const [activeForm, setActiveForm] = useState("login");
@@ -9,33 +10,46 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState(""); // For handling error messages
+
+  const navigate = useNavigate(); // React Router's useNavigate hook
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(""); // Reset error state
+
     try {
       const response = await login(email, password); // Call the login service
       localStorage.setItem("token", response.token); // Store the token in localStorage
       alert("Login successful!");
-      window.location.href = "/"; // Redirect to the homepage or dashboard
+      navigate("/"); // Redirect to the homepage or dashboard
     } catch (error) {
       console.error("Login error:", error);
-      alert("Login failed!");
+      setError("Invalid credentials. Please try again.");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // Reset error state
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
+
     try {
       const response = await register(name, surname, email, password); // Call the register service
       alert("Registration successful! You can now log in.");
       setActiveForm("login"); // Switch to the login form after successful registration
+      setName(""); // Reset state
+      setSurname("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword(""); // Reset confirm password field
     } catch (error) {
       console.error("Registration error:", error);
-      alert("Registration failed!");
+      setError("Registration failed. Please try again.");
     }
   };
 
@@ -56,6 +70,13 @@ function LoginPage() {
               : "Already have an account?"}
           </p>
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="text-red-500 text-center mb-4">
+            <p>{error}</p>
+          </div>
+        )}
 
         <div className="flex gap-8 mt-8">
           {/* Login Form */}
@@ -85,6 +106,7 @@ function LoginPage() {
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                           placeholder="Enter your email"
+                          value={email}
                           onChange={(e) => setEmail(e.target.value)}
                         />
                       </div>
@@ -100,6 +122,7 @@ function LoginPage() {
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                           placeholder="Enter your password"
+                          value={password}
                           onChange={(e) => setPassword(e.target.value)}
                         />
                       </div>
@@ -153,6 +176,7 @@ function LoginPage() {
                           required
                           className="w-full px-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                           placeholder="John"
+                          value={name}
                           onChange={(e) => setName(e.target.value)}
                         />
                       </div>
@@ -165,6 +189,7 @@ function LoginPage() {
                           required
                           className="w-full px-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                           placeholder="Doe"
+                          value={surname}
                           onChange={(e) => setSurname(e.target.value)}
                         />
                       </div>
@@ -180,6 +205,7 @@ function LoginPage() {
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                           placeholder="john@example.com"
+                          value={email}
                           onChange={(e) => setEmail(e.target.value)}
                         />
                       </div>
@@ -195,6 +221,7 @@ function LoginPage() {
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                           placeholder="••••••••"
+                          value={password}
                           onChange={(e) => setPassword(e.target.value)}
                         />
                       </div>
@@ -210,6 +237,7 @@ function LoginPage() {
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                           placeholder="••••••••"
+                          value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                         />
                       </div>

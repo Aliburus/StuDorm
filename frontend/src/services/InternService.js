@@ -35,12 +35,22 @@ export const getInternById = async (id) => {
 
 // Create a new intern
 export const createIntern = async (internData) => {
+  const token = localStorage.getItem("token"); // veya nerede tutuyorsan
+
   try {
-    const response = await axios.post(API_URL, internData);
-    return response.data;
+    const response = await axios.post(
+      "http://localhost:5000/api/interns",
+      internData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    ); // Assuming your backend is hosted on localhost:5000
+    alert("Intern ad created successfully!");
   } catch (error) {
     console.error("Error creating intern", error);
-    throw error;
+    alert("There was an error while creating the intern ad.");
   }
 };
 

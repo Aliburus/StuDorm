@@ -33,23 +33,23 @@ const InternAd = {
 
   // Yeni ilan oluşturur
   create: async (internData) => {
-    const result = await db.query(
+    const [result] = await db.query(
       `INSERT INTO interns 
-        (title, province, district, category, contact, description, duration, requirements, user_id) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (title, province, district, category, description, duration, requirements, user_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?,  ?)`,
       [
         internData.title,
         internData.province,
         internData.district,
         internData.category,
-        internData.contact,
+
         internData.description,
         internData.duration,
         internData.requirements,
         internData.user_id,
       ]
     );
-    return result[0].insertId;
+    return result.insertId;
   },
 
   // Var olan ilanı günceller
@@ -60,7 +60,7 @@ const InternAd = {
         province = ?, 
         district = ?, 
         category = ?, 
-        contact = ?, 
+    
         description = ?, 
         duration = ?, 
         requirements = ? 
@@ -70,7 +70,7 @@ const InternAd = {
         internData.province,
         internData.district,
         internData.category,
-        internData.contact,
+
         internData.description,
         internData.duration,
         internData.requirements,

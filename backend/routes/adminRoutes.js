@@ -10,15 +10,23 @@ const {
   getAllPosts,
   deleteUser,
 } = require("../controllers/adminController");
+
+const authenticateAdmin = require("../middleware/authenticateAdmin");
 const router = express.Router();
-router.get("/overview-stats", getOverviewStats); // ✅ yeni rota
-router.get("/users", getUsers); // Kullanıcıları çekmek için rota
-router.get("/listings", getAllListings);
-router.delete("/listings/:source/:id", deleteListing);
 
-router.put("/listings/:source/:id/details", updateListingDetails);
+router.get("/overview-stats", authenticateAdmin, getOverviewStats);
+router.get("/users", authenticateAdmin, getUsers);
+router.get("/listings", authenticateAdmin, getAllListings);
+router.delete("/listings/:source/:id", authenticateAdmin, deleteListing);
 
-router.get("/reported-content", getReportedContent);
-router.get("/posts", getAllPosts); // Forum gönderilerini çekmek için rota
-router.delete("/users/:id", deleteUser); // Kullanıcıyı silmek için rota
-module.exports = router; // Modül olarak dışa aktar
+router.put(
+  "/listings/:source/:id/details",
+  authenticateAdmin,
+  updateListingDetails
+);
+
+router.get("/reported-content", authenticateAdmin, getReportedContent);
+router.get("/posts", authenticateAdmin, getAllPosts);
+router.delete("/users/:id", authenticateAdmin, deleteUser);
+
+module.exports = router;

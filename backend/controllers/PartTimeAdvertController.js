@@ -2,16 +2,17 @@ const PartTimeAdvert = require("../models/PartTimeAdvert");
 
 const createAdvert = async (req, res) => {
   try {
+    const userId = req.user.id; // ✅ JWT'den gelen user_id
+
     const {
       title,
       category,
       province,
       district,
-      contact,
       description,
       duration,
       requirements,
-      user_id,
+      price,
     } = req.body;
 
     if (
@@ -19,11 +20,10 @@ const createAdvert = async (req, res) => {
       !category ||
       !province ||
       !district ||
-      !contact ||
       !description ||
       !duration ||
       !requirements ||
-      !user_id
+      !price
     ) {
       return res.status(400).json({ message: "Tüm alanlar zorunludur!" });
     }
@@ -33,11 +33,11 @@ const createAdvert = async (req, res) => {
       category,
       province,
       district,
-      contact,
       description,
       duration,
       requirements,
-      user_id,
+      price,
+      user_id: userId, // ✅ doğrudan token'dan
     });
 
     res.status(201).json({ message: "İlan başarıyla oluşturuldu", advertId });

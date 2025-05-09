@@ -2,7 +2,9 @@
 const express = require("express");
 const router = express.Router();
 const InternController = require("../controllers/InternController");
+const verifyToken = require("../middleware/authenticateToken");
 
+router.post("/", verifyToken, InternController.createIntern);
 // Get all interns
 router.get("/", InternController.getAllInterns);
 
