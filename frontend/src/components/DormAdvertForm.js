@@ -14,6 +14,8 @@ import Footer from "./Footer";
 import Navbar from "./Navbar";
 
 const DormAdvertForm = () => {
+  const [adType, setAdType] = useState("dorm"); // NEW: ad type selection
+
   const [formData, setFormData] = useState({
     user_id: "",
     title: "",
@@ -22,8 +24,12 @@ const DormAdvertForm = () => {
     gender_required: "herkes",
     province: "",
     district: "",
-    neighborhood: "",
+
     room_type: "single",
+    category: "",
+    contact: "",
+    duration: "",
+    requirements: "",
     photos: [],
   });
 
@@ -76,11 +82,18 @@ const DormAdvertForm = () => {
     if (!formData.title.trim()) newErrors.title = "Başlık gereklidir";
     if (!formData.description.trim())
       newErrors.description = "Açıklama gereklidir";
-    if (!formData.price) newErrors.price = "Fiyat gereklidir";
     if (!formData.province) newErrors.province = "İl seçimi gereklidir";
     if (!formData.district) newErrors.district = "İlçe seçimi gereklidir";
-    if (formData.photos.length === 0)
-      newErrors.photos = "En az bir fotoğraf yüklemelisiniz";
+
+    if (adType === "dorm") {
+      if (!formData.price) newErrors.price = "Fiyat gereklidir";
+      if (formData.photos.length === 0)
+        newErrors.photos = "En az bir fotoğraf yüklemelisiniz";
+    }
+
+    if (adType === "parttime" && !formData.price) {
+      newErrors.price = "Ücret gereklidir";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -94,12 +107,9 @@ const DormAdvertForm = () => {
 
     const location = `${formData.province}, ${formData.district}`;
     const payload = { ...formData, location };
-    delete payload.neighborhood;
 
     try {
-      // Mocking the createYurtIlan function since it's not available
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       alert("İlan başarıyla kaydedildi.");
       setFormData({
         user_id: "",
@@ -109,8 +119,12 @@ const DormAdvertForm = () => {
         gender_required: "herkes",
         province: "",
         district: "",
-        neighborhood: "",
+
         room_type: "single",
+        category: "",
+        contact: "",
+        duration: "",
+        requirements: "",
         photos: [],
       });
       setPreviewImages([]);
@@ -125,25 +139,44 @@ const DormAdvertForm = () => {
   return (
     <div>
       <Navbar />
-      <div className="min-h-screen  py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            {/* Header with gradient background */}
             <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 px-6 py-8 sm:px-10 sm:py-10">
               <div className="text-center">
                 <h1 className="text-3xl font-bold text-white mb-2">
                   Yeni İlan Oluştur
                 </h1>
                 <p className="text-yellow-100">
-                  Yurt veya oda ilanınızı oluşturmak için aşağıdaki formu
-                  doldurun
+                  İlan türünü seçin ve bilgileri girin
                 </p>
               </div>
             </div>
 
+            {/* Ad Type Selector */}
+            <div className="px-6 pt-6 flex justify-center gap-4">
+              {["dorm", "interns", "parttime"].map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={`px-4 py-2 rounded-lg ${
+                    adType === type
+                      ? "bg-yellow-500 text-white"
+                      : "bg-gray-200 text-gray-800"
+                  } transition-colors`}
+                  onClick={() => setAdType(type)}
+                >
+                  {type === "dorm"
+                    ? "Yurt/Oda"
+                    : type === "interns"
+                    ? "Staj"
+                    : "Part-Time"}
+                </button>
+              ))}
+            </div>
+
             <div className="px-6 py-8 sm:p-10">
               <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Title */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <FileText className="w-4 h-4 inline-block mr-2 text-yellow-500" />
@@ -156,61 +189,65 @@ const DormAdvertForm = () => {
                     onChange={handleChange}
                     className={`w-full px-4 py-3 rounded-lg border ${
                       errors.title ? "border-red-500" : "border-gray-300"
-                    } focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200`}
-                    placeholder="Örn: Kadıköy'de 3+1 Dairede Kiralık Oda"
+                    }`}
+                    placeholder="Başlık girin"
                   />
                   {errors.title && (
-                    <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+                    <p className="text-sm text-red-500">{errors.title}</p>
                   )}
                 </div>
+
+                {adType !== "dorm" && (
+                  <>
+                    {/* Category, Contact, Duration, Requirements for interns/parttime */}
+                    <input
+                      type="text"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleChange}
+                      placeholder="Kategori"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300"
+                    />
+                    <input
+                      type="text"
+                      name="contact"
+                      value={formData.contact}
+                      onChange={handleChange}
+                      placeholder="İletişim Bilgisi"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300"
+                    />
+                    <input
+                      type="text"
+                      name="duration"
+                      value={formData.duration}
+                      onChange={handleChange}
+                      placeholder="Süre"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300"
+                    />
+                    <textarea
+                      name="requirements"
+                      value={formData.requirements}
+                      onChange={handleChange}
+                      placeholder="Gereksinimler"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300"
+                    />
+                  </>
+                )}
 
                 {/* Description */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    <FileText className="w-4 h-4 inline-block mr-2 text-yellow-500" />
-                    İlan Açıklaması
+                    Açıklama
                   </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    rows="4"
                     className={`w-full px-4 py-3 rounded-lg border ${
                       errors.description ? "border-red-500" : "border-gray-300"
-                    } focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200`}
-                    placeholder="İlanınızla ilgili detaylı bilgi verin..."
+                    }`}
+                    rows="4"
                   />
-                  {errors.description && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Price */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    <DollarSign className="w-4 h-4 inline-block mr-2 text-yellow-500" />
-                    Fiyat
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-3 rounded-lg border ${
-                        errors.price ? "border-red-500" : "border-gray-300"
-                      } focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200`}
-                      placeholder="0"
-                    />
-                    <div className="absolute left-0 top-0 bottom-0 w-10 bg-gray-100 rounded-l-lg flex items-center justify-center border-r border-gray-300">
-                      <span className="text-gray-500 font-medium">₺</span>
-                    </div>
-                  </div>
-                  {errors.price && (
-                    <p className="mt-1 text-sm text-red-500">{errors.price}</p>
-                  )}
                 </div>
 
                 {/* Location */}
@@ -230,108 +267,105 @@ const DormAdvertForm = () => {
                   )}
                 </div>
 
-                {/* Room Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Gender */}
+                {/* Price if dorm or parttime */}
+                {(adType === "dorm" || adType === "parttime") && (
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <Users className="w-4 h-4 inline-block mr-2 text-yellow-500" />
-                      Cinsiyet Tercihi
+                      <DollarSign className="w-4 h-4 inline-block mr-2 text-yellow-500" />
+                      Ücret
                     </label>
-                    <select
-                      name="gender_required"
-                      value={formData.gender_required}
+                    <input
+                      type="number"
+                      name="price"
+                      value={formData.price}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="erkek">Erkek</option>
-                      <option value="kiz">Kız</option>
-                      <option value="herkes">Herkes</option>
-                    </select>
+                      className={`w-full px-4 py-3 rounded-lg border ${
+                        errors.price ? "border-red-500" : "border-gray-300"
+                      }`}
+                      placeholder="₺"
+                    />
+                    {errors.price && (
+                      <p className="text-sm text-red-500">{errors.price}</p>
+                    )}
                   </div>
+                )}
 
-                  {/* Room Type */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <Home className="w-4 h-4 inline-block mr-2 text-yellow-500" />
-                      Oda Türü
-                    </label>
-                    <select
-                      name="room_type"
-                      value={formData.room_type}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="single">Tek Kişilik</option>
-                      <option value="double">Çift Kişilik</option>
-                      <option value="shared">Paylaşımlı</option>
-                    </select>
-                  </div>
-                </div>
+                {/* Gender & Room Type (only for dorm) */}
+                {adType === "dorm" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block mb-1 text-sm font-medium text-gray-700">
+                        Cinsiyet Tercihi
+                      </label>
+                      <select
+                        name="gender_required"
+                        value={formData.gender_required}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300"
+                      >
+                        <option value="erkek">Erkek</option>
+                        <option value="kiz">Kız</option>
+                        <option value="herkes">Herkes</option>
+                      </select>
+                    </div>
 
-                {/* Photos */}
-                <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    <ImageIcon className="w-4 h-4 inline-block mr-2 text-yellow-500" />
-                    Fotoğraflar
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 transition-all duration-300 hover:border-yellow-400 bg-gray-50 hover:bg-gray-100">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <ImageIcon className="w-8 h-8 text-yellow-500 mb-2" />
-                      <p className="text-sm font-medium text-gray-700">
-                        Fotoğrafları sürükleyin veya seçin
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        En fazla 10 adet fotoğraf yükleyebilirsiniz
-                      </p>
-                      <input
-                        type="file"
-                        name="photos"
-                        accept="image/*"
-                        multiple
-                        onChange={handleFileChange}
-                        className="w-full cursor-pointer file:mr-4 file:rounded-full file:border-0 file:bg-yellow-500 file:px-4 file:py-2 file:text-white file:transition-colors file:duration-300 file:hover:bg-yellow-600"
-                      />
+                    <div>
+                      <label className="block mb-1 text-sm font-medium text-gray-700">
+                        Oda Türü
+                      </label>
+                      <select
+                        name="room_type"
+                        value={formData.room_type}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300"
+                      >
+                        <option value="single">Tek Kişilik</option>
+                        <option value="double">Çift Kişilik</option>
+                        <option value="shared">Paylaşımlı</option>
+                      </select>
                     </div>
                   </div>
+                )}
 
-                  {errors.photos && (
-                    <p className="text-sm text-red-500">{errors.photos}</p>
-                  )}
-
-                  {previewImages.length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4 text-yellow-500" />
-                        Yüklenen Fotoğraflar
-                      </h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {adType === "dorm" && (
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Fotoğraflar
+                    </label>
+                    <input
+                      type="file"
+                      name="photos"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileChange}
+                      className="block"
+                    />
+                    {errors.photos && (
+                      <p className="text-sm text-red-500">{errors.photos}</p>
+                    )}
+                    {previewImages.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
                         {previewImages.map((img, idx) => (
-                          <div
-                            key={idx}
-                            className="relative group rounded-lg overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-md"
-                          >
+                          <div key={idx} className="relative">
                             <img
                               src={img}
                               alt={`Preview ${idx + 1}`}
                               className="w-full h-24 object-cover rounded-lg"
                             />
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
                             <button
                               type="button"
                               onClick={() => removeImage(idx)}
-                              className="absolute top-1 right-1 text-white bg-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-red-600 transform hover:scale-110"
+                              className="absolute top-1 right-1 text-white bg-red-500 rounded-full p-1"
                             >
                               <X className="w-3 h-3" />
                             </button>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
 
-                {/* Submit Button */}
                 <div className="pt-4">
                   <button
                     type="submit"
@@ -359,7 +393,7 @@ const DormAdvertForm = () => {
             </div>
           </div>
         </div>
-      </div>{" "}
+      </div>
       <Footer />
     </div>
   );

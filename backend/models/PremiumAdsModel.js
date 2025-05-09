@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 const getRandomPremiumUserAds = async (limit = 10) => {
-  limit = parseInt(limit, 10) || 10; // güvenli tamsayıya çevir
+  limit = parseInt(limit, 15) || 10; // güvenli tamsayıya çevir
 
   const yurtadsQuery = `
   SELECT 
