@@ -1,29 +1,30 @@
 import React, { useState, useEffect } from "react";
 import data from "../data.json";
+
 const LocationSelector = ({ formData, handleChange }) => {
-  const [cities, setCities] = useState([]);
+  const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [neighborhoods, setNeighborhoods] = useState([]);
 
-  // İlleri filtrele
+  // İlleri (provinces) filtrele
   useEffect(() => {
-    const uniqueCities = Array.from(new Set(data.map((item) => item.il)));
-    setCities(uniqueCities);
+    const uniqueProvinces = Array.from(new Set(data.map((item) => item.il)));
+    setProvinces(uniqueProvinces);
   }, []);
 
-  // İl seçildiğinde ilçeleri filtrele
-  const handleCityChange = (e) => {
-    const selectedCity = e.target.value;
-    handleChange({ target: { name: "city", value: selectedCity } });
+  // İl (province) seçildiğinde ilçeleri filtrele
+  const handleProvinceChange = (e) => {
+    const selectedProvince = e.target.value;
+    handleChange({ target: { name: "province", value: selectedProvince } });
 
     const filteredDistricts = data
-      .filter((item) => item.il === selectedCity)
+      .filter((item) => item.il === selectedProvince)
       .map((item) => item.ilce);
     setDistricts([...new Set(filteredDistricts)]);
     setNeighborhoods([]);
   };
 
-  // İlçe seçildiğinde mahalleleri filtrele
+  // İlçe (district) seçildiğinde mahalleleri filtrele
   const handleDistrictChange = (e) => {
     const selectedDistrict = e.target.value;
     handleChange({ target: { name: "district", value: selectedDistrict } });
@@ -39,21 +40,21 @@ const LocationSelector = ({ formData, handleChange }) => {
       <div>
         <label className="block text-gray-600 mb-2">İl</label>
         <select
-          name="city"
-          value={formData.city}
-          onChange={handleCityChange}
+          name="province"
+          value={formData.province}
+          onChange={handleProvinceChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">İl Seçin</option>
-          {cities.map((city, index) => (
-            <option key={index} value={city}>
-              {city}
+          {provinces.map((prov) => (
+            <option key={prov} value={prov}>
+              {prov}
             </option>
           ))}
         </select>
       </div>
 
-      {formData.city && (
+      {formData.province && (
         <div>
           <label className="block text-gray-600 mb-2">İlçe</label>
           <select
@@ -63,9 +64,9 @@ const LocationSelector = ({ formData, handleChange }) => {
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">İlçe Seçin</option>
-            {districts.map((district, index) => (
-              <option key={index} value={district}>
-                {district}
+            {districts.map((dist) => (
+              <option key={dist} value={dist}>
+                {dist}
               </option>
             ))}
           </select>
@@ -82,9 +83,9 @@ const LocationSelector = ({ formData, handleChange }) => {
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">Mahalle/Köy Seçin</option>
-            {neighborhoods.map((neighborhood, index) => (
-              <option key={index} value={neighborhood}>
-                {neighborhood}
+            {neighborhoods.map((nh) => (
+              <option key={nh} value={nh}>
+                {nh}
               </option>
             ))}
           </select>

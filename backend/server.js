@@ -27,10 +27,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Statik dosyalar için klasör
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
 // Rotalar
 app.use("/api/auth", authRoutes); // Yetkilendirme rotaları
 app.use("/api", yurtAdRoutes); // Yurt ilanı rotaları

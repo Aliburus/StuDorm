@@ -2,8 +2,10 @@ const YurtAd = require("../models/YurtAd");
 const YurtAdPhoto = require("../models/YurtAdPhoto");
 
 const createYurtAd = async (req, res) => {
+  // JWT'den gelen user_id
+  const userId = req.user.id;
+
   const {
-    user_id, // User who is posting the ad
     title,
     description,
     price,
@@ -11,16 +13,17 @@ const createYurtAd = async (req, res) => {
     province,
     district,
     room_type,
-    status, // active/inactive
-    is_hidden, // visibility status
   } = req.body;
 
-  const photos = req.files.map((file) => `/uploads/${file.filename}`);
+  // Defaults
+  const status = "active";
+  const is_hidden = false;
+
+  const photos = (req.files || []).map((file) => `/uploads/${file.filename}`);
 
   try {
-    // Create new ad
     const yurtAdId = await YurtAd.create({
-      user_id,
+      user_id: userId,
       title,
       description,
       price,
@@ -32,21 +35,21 @@ const createYurtAd = async (req, res) => {
       is_hidden,
     });
 
-    // Add photos if provided
-    if (photos.length > 0) {
+    if (photos.length) {
       await YurtAdPhoto.addPhotos(yurtAdId, photos);
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Ad and photos saved successfully.",
       ilan_id: yurtAdId,
     });
-  } catch (error) {
-    console.error("Error during save:", error);
-    res.status(500).json({ message: "Failed to save ad.", error });
+  } catch (err) {
+    console.error("Controller hata:", err);
+    return res
+      .status(500)
+      .json({ message: "İlan oluşturulamadı", error: err.message });
   }
 };
-
 // Get all ads with optional filters and photos
 const getAllYurtAdsWithPhotos = async (req, res) => {
   const { minPrice, maxPrice, province, district, roomType } = req.query;

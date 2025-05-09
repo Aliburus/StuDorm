@@ -1,16 +1,14 @@
-// models/userModel.js
-const db = require("../config/db.js"); // Veritabanı bağlantısını import et
+const db = require("../config/db.js");
 
-// Kullanıcı ID'sine göre kullanıcıyı al
 const getUserById = async (userId) => {
   try {
     const [rows] = await db.execute("SELECT * FROM users WHERE id = ?", [
       userId,
     ]);
     if (rows.length === 0) {
-      return null; // Kullanıcı bulunmazsa null döndür
+      return null;
     }
-    return rows[0]; // İlk satırı döndür
+    return rows[0];
   } catch (err) {
     console.error("Veritabanı hatası:", err);
     throw new Error("Veritabanı hatası");
@@ -38,7 +36,6 @@ const updateProfile = async (userId, updateData) => {
   }
 };
 
-// Kullanıcıyı premium yap
 const upgradeToPremium = async (userId) => {
   try {
     const [result] = await db.query(

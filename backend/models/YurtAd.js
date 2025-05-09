@@ -15,21 +15,23 @@ const YurtAd = {
     is_hidden,
   }) => {
     const [result] = await db.query(
-      "INSERT INTO YurtAds (user_id, title, description, price, gender_required, province, district, room_type, status, is_hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      `INSERT INTO YurtAds 
+        (user_id, title, description, price, gender_required, status, is_hidden, province, district, room_type) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         user_id,
         title,
         description,
         price,
         gender_required,
+        status,
+        is_hidden,
         province,
         district,
         room_type,
-        status,
-        is_hidden,
       ]
     );
-    return result.insertId; // Return new ad ID
+    return result.insertId;
   },
 
   // Get all ads with optional filters
