@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import AdminPageRoute from "./components/AdminPageRoute"; // Admin koruması
-import PrivateRoute from "./components/PrivateRoute"; // Giriş koruması
-
+import AdminPageRoute from "./components/AdminPageRoute";
+import PrivateRoute from "./components/PrivateRoute";
 import "./index.css";
 import Homepage from "./pages/Homepage";
 import About from "./pages/About";
@@ -51,7 +50,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dormAdForm" element={<DormAdvertForm />} />
 
-          {/* Admin sayfası */}
           <Route
             path="/admin"
             element={

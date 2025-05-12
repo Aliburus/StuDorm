@@ -4,7 +4,12 @@ const YurtAdPhoto = require("../models/YurtAdPhoto");
 const createYurtAd = async (req, res) => {
   // JWT'den gelen user_id
   const userId = req.user.id;
-
+  const uploadedFiles = req.files || [];
+  if (uploadedFiles.length < 5) {
+    return res
+      .status(400)
+      .json({ message: "En az 5 fotoğraf yüklemelisiniz." });
+  }
   const {
     title,
     description,
@@ -40,7 +45,7 @@ const createYurtAd = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Ad and photos saved successfully.",
+      message: "İlan ve fotoğraflar başarıyla kaydedildi.",
       ilan_id: yurtAdId,
     });
   } catch (err) {

@@ -12,6 +12,7 @@ import Footer from "./Footer";
 import Navbar from "./Navbar";
 import { createIntern } from "../services/InternService"; // Adjust the import based on your file structure
 import { createPartTimeAdvert } from "../services/PartTimeAdvertServices"; // Adjust the import based on your file structure
+import { createYurtIlan } from "../services/DormAdServices"; // Adjust the import based on your file structure
 const DormAdvertForm = () => {
   const [adType, setAdType] = useState("dorm"); // NEW: ad type selection
 
@@ -49,10 +50,12 @@ const DormAdvertForm = () => {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length > 10) {
+    const totalFiles = formData.photos.length + files.length;
+
+    if (totalFiles > 15) {
       setErrors((prev) => ({
         ...prev,
-        photos: "En fazla 10 fotoğraf yükleyebilirsiniz.",
+        photos: "En fazla 15 fotoğraf yükleyebilirsiniz.",
       }));
       return;
     }
@@ -86,8 +89,8 @@ const DormAdvertForm = () => {
 
     if (adType === "dorm") {
       if (!formData.price) newErrors.price = "Fiyat gereklidir";
-      if (formData.photos.length === 0)
-        newErrors.photos = "En az bir fotoğraf yüklemelisiniz";
+      if (formData.photos.length < 5)
+        newErrors.photos = "En az 5 fotoğraf yüklemelisiniz";
     }
 
     if (adType === "parttime" && !formData.price) {
@@ -103,22 +106,33 @@ const DormAdvertForm = () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-
     const location = `${formData.province}, ${formData.district}`;
     const payload = { ...formData, location };
 
     try {
-      if (adType === "interns") {
+      if (adType === "dorm") {
+        // Use FormData to handle file uploads
+        const data = new FormData();
+        Object.entries(payload).forEach(([key, value]) => {
+          if (key === "photos") {
+            Array.from(value).forEach((file) => {
+              data.append("photos", file);
+            });
+          } else {
+            data.append(key, value);
+          }
+        });
+        await createYurtIlan(data);
+        alert("Yurt ilanınız başarıyla kaydedildi.");
+      } else if (adType === "interns") {
         await createIntern(payload);
         alert("Staj ilanınız başarıyla kaydedildi.");
       } else if (adType === "parttime") {
         await createPartTimeAdvert(payload);
         alert("Part-time ilanınız başarıyla kaydedildi.");
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        alert("İlanınız başarıyla kaydedildi.");
       }
 
+      // Reset form
       setFormData({
         user_id: "",
         title: "",
@@ -127,10 +141,8 @@ const DormAdvertForm = () => {
         gender_required: "herkes",
         province: "",
         district: "",
-
         room_type: "single",
         category: "",
-
         duration: "",
         requirements: "",
         photos: [],
@@ -207,15 +219,21 @@ const DormAdvertForm = () => {
 
                 {adType !== "dorm" && (
                   <>
-                    <input
-                      type="text"
+                    <select
                       name="category"
                       value={formData.category}
                       onChange={handleChange}
-                      placeholder="Kategori"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300"
-                    />
-
+                    >
+                      <option value="">Kategori Seçin</option>
+                      <option value="software">Yazılım Geliştirme</option>
+                      <option value="marketing">Pazarlama</option>
+                      <option value="finance">Finans</option>
+                      <option value="design">Tasarım</option>
+                      <option value="sales">Satış</option>
+                      <option value="customer_support">Müşteri Destek</option>
+                      <option value="hr">İnsan Kaynakları</option>
+                    </select>
                     <input
                       type="text"
                       name="duration"
@@ -321,6 +339,9 @@ const DormAdvertForm = () => {
                       >
                         <option value="single">Tek Kişilik</option>
                         <option value="double">Çift Kişilik</option>
+                        <option value="triple">Üç Kişilik</option>
+                        <option value="quad">Dört Kişilik</option>
+                        <option value="six">Altı Kişilik</option>
                         <option value="shared">Paylaşımlı</option>
                       </select>
                     </div>

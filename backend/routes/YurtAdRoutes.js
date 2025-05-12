@@ -19,7 +19,12 @@ const upload = multer({ storage });
 const router = express.Router();
 
 // Yalnızca oturumlu kullanıcı ilan ekleyebilir
-router.post("/yurt-ilan", verifyToken, upload.array("photos"), createYurtAd);
+router.post(
+  "/yurt-ilan",
+  verifyToken,
+  upload.array("photos", 15), // en fazla 15 dosya
+  createYurtAd
+);
 
 // Diğer rotalar
 router.get("/yurt-ilanlar/user/:userId", getYurtAdsByUserId);

@@ -1,95 +1,120 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getListings, getFilteredListings } from "../services/ListingService"; // Servisi import ettik
+import { getListings, getFilteredListings } from "../services/ListingService";
 import {
-  Search,
-  MapPin,
-  Home,
-  DollarSign,
   Filter,
+  DollarSign,
   Building2,
-  MapPinned,
   BedDouble,
   Hotel,
   Mouse as House,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import LocationSelector from "../components/LocationSelector";
+
+const BASE_UPLOAD_URL = "http://localhost:5000";
 
 function FindingRD() {
   const [listings, setListings] = useState([]);
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("");
   const [filterType, setFilterType] = useState("");
-  const [filteredListings, setFilteredListings] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filteredListings, setFilteredListings] = useState([]);
+
+  const [formData, setFormData] = useState({
+    minPrice: "",
+    maxPrice: "",
+    province: "",
+    district: "",
+  });
 
   const navigate = useNavigate();
 
   const roomTypes = [
-    { name: "Private Room", icon: <BedDouble className="w-5 h-5" /> },
-    { name: "Shared Room", icon: <Hotel className="w-5 h-5" /> },
-    { name: "Studio", icon: <House className="w-5 h-5" /> },
+    {
+      name: "Tek Kişilik",
+      value: "single",
+      icon: <BedDouble className="w-5 h-5" />,
+    },
+    {
+      name: "İki Kişilik",
+      value: "double",
+      icon: <House className="w-5 h-5" />,
+    },
+    {
+      name: "Paylaşımlı",
+      value: "shared",
+      icon: <Hotel className="w-5 h-5" />,
+    },
+    {
+      name: "Üç Kişilik",
+      value: "triple",
+      icon: <BedDouble className="w-5 h-5" />,
+    },
+    {
+      name: "Dört Kişilik",
+      value: "quad",
+      icon: <House className="w-5 h-5" />,
+    },
+    { name: "Altı Kişilik", value: "six", icon: <Hotel className="w-5 h-5" /> },
   ];
-
-  const provinces = [
-    { name: "Istanbul" },
-    { name: "Ankara" },
-    { name: "Izmir" },
-  ];
-
-  const districts = {
-    Istanbul: ["Kadıköy", "Üsküdar", "Pendik", "Gaziosmanpaşa"],
-    Ankara: ["Çankaya", "Keçiören"],
-    Izmir: ["Konak", "Bornova"],
-  };
 
   useEffect(() => {
     const fetchListings = async () => {
       try {
         const data = await getListings();
-        setListings(data);
-        setFilteredListings(data);
+        const withImages = data.map((listing) => ({
+          ...listing,
+          photos: listing.photos?.map((p) => BASE_UPLOAD_URL + p) || [],
+        }));
+        setListings(withImages);
+        setFilteredListings(withImages);
       } catch (error) {
         console.error("Error fetching listings:", error);
       }
     };
-
     fetchListings();
   }, []);
 
   const applyFilters = async () => {
     const filters = {
-      minPrice: minPrice,
-      maxPrice: maxPrice,
-      province: selectedProvince,
-      district: selectedDistrict,
+      minPrice: formData.minPrice,
+      maxPrice: formData.maxPrice,
+      province: formData.province,
+      district: formData.district,
       roomType: filterType,
     };
 
     try {
       const data = await getFilteredListings(filters);
-      setFilteredListings(data);
+      const withImages = data.map((listing) => ({
+        ...listing,
+        photos: listing.photos?.map((p) => BASE_UPLOAD_URL + p) || [],
+      }));
+      setFilteredListings(withImages);
       setIsFilterOpen(false);
     } catch (error) {
       console.error("Error fetching filtered listings:", error);
     }
   };
 
-  const handleProvinceChange = (e) => {
-    setSelectedProvince(e.target.value);
-    setSelectedDistrict("");
-  };
-
   const handleListingClick = (listing) => {
     navigate(`/room-listing-details/${listing.id}`, { state: { listing } });
   };
 
-  const getRoomTypeIcon = (typeName) => {
-    const type = roomTypes.find((t) => t.name === typeName);
-    return type ? type.icon : <Home className="w-5 h-5" />;
+  const getRoomTypeIcon = (typeValue) => {
+    const type = roomTypes.find((t) => t.value === typeValue);
+    return type ? type.icon : null;
+  };
+
+  const getRoomTypeName = (typeValue) => {
+    const type = roomTypes.find((t) => t.value === typeValue);
+    return type ? type.name : typeValue;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -97,7 +122,6 @@ function FindingRD() {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Mobile Filter Button */}
         <button
           className="md:hidden w-full mb-4 flex items-center justify-center space-x-2 bg-yellow-500 text-white py-3 rounded-lg shadow-md"
           onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -107,13 +131,10 @@ function FindingRD() {
         </button>
 
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Filters */}
           <div
             className={`md:w-1/4 bg-white rounded-xl shadow-lg p-6
-            ${isFilterOpen ? "block" : "hidden"} md:block
-            fixed md:relative top-0 left-0 right-0 bottom-0 md:top-auto md:left-auto md:right-auto md:bottom-auto
-            z-50 md:z-auto bg-white md:bg-transparent
-          `}
+              ${isFilterOpen ? "block" : "hidden"} md:block
+              fixed md:relative z-50 md:z-auto bg-white md:bg-transparent`}
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
@@ -130,111 +151,56 @@ function FindingRD() {
 
             <div className="space-y-6">
               <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                  htmlFor="minPrice"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   <DollarSign className="w-4 h-4 inline mr-2" />
                   Minimum Fiyat
                 </label>
                 <input
                   type="number"
-                  id="minPrice"
-                  placeholder="Min Fiyat"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  name="minPrice"
+                  value={formData.minPrice}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
                 />
               </div>
 
               <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                  htmlFor="maxPrice"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   <DollarSign className="w-4 h-4 inline mr-2" />
-                  Maximum Fiyat
+                  Maksimum Fiyat
                 </label>
                 <input
                   type="number"
-                  id="maxPrice"
-                  placeholder="Max Fiyat"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  name="maxPrice"
+                  value={formData.maxPrice}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
                 />
               </div>
 
               <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                  htmlFor="roomType"
-                >
-                  <Home className="w-4 h-4 inline mr-2" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Building2 className="w-4 h-4 inline mr-2" />
                   Oda Tipi
                 </label>
                 <select
-                  id="roomType"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
                 >
                   <option value="">Tür Seç</option>
                   {roomTypes.map((type, index) => (
-                    <option key={index} value={type.name}>
+                    <option key={index} value={type.value}>
                       {type.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                  htmlFor="province"
-                >
-                  <Building2 className="w-4 h-4 inline mr-2" />
-                  İl
-                </label>
-                <select
-                  id="province"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  value={selectedProvince}
-                  onChange={handleProvinceChange}
-                >
-                  <option value="">İl Seç</option>
-                  {provinces.map((province, index) => (
-                    <option key={index} value={province.name}>
-                      {province.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                  htmlFor="district"
-                >
-                  <MapPinned className="w-4 h-4 inline mr-2" />
-                  İlçe
-                </label>
-                <select
-                  id="district"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  value={selectedDistrict}
-                  onChange={(e) => setSelectedDistrict(e.target.value)}
-                  disabled={!selectedProvince}
-                >
-                  <option value="">İlçe Seç</option>
-                  {selectedProvince &&
-                    districts[selectedProvince].map((district, index) => (
-                      <option key={index} value={district}>
-                        {district}
-                      </option>
-                    ))}
-                </select>
-              </div>
+              <LocationSelector
+                formData={formData}
+                handleChange={handleChange}
+              />
 
               <button
                 onClick={applyFilters}
@@ -245,32 +211,51 @@ function FindingRD() {
             </div>
           </div>
 
-          {/* Yurt İlanları */}
           <div className="md:w-3/4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {filteredListings.length > 0 ? (
                 filteredListings.map((listing) => (
                   <div
                     key={listing.id}
-                    className="bg-white p-6 rounded-lg shadow-md cursor-pointer"
+                    className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden flex flex-row h-48"
                     onClick={() => handleListingClick(listing)}
                   >
-                    <div className="text-lg font-semibold text-gray-800">
-                      {listing.title}
-                    </div>
-                    <div className="mt-2 text-gray-600">
-                      {listing.district}, {listing.province}
-                    </div>
-                    <div className="mt-4 text-gray-500">
-                      {getRoomTypeIcon(listing.roomType)} {listing.roomType}
-                    </div>
-                    <div className="mt-2 text-lg font-semibold text-yellow-500">
-                      ₺{listing.price}
+                    {listing.photos && listing.photos[0] && (
+                      <div className="w-1/3 relative">
+                        <img
+                          src={listing.photos[0]}
+                          alt={`${listing.title} thumbnail`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black/50 to-transparent w-full h-1/3" />
+                      </div>
+                    )}
+                    <div className="p-6 w-2/3 flex flex-col justify-around">
+                      <div>
+                        <div className="text-xl font-semibold text-gray-800 mb-2 text-center">
+                          {listing.title}
+                        </div>
+                        <div className="text-gray-600 flex items-center gap-2 justify-center mb-3">
+                          <span className="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full text-sm">
+                            {getRoomTypeIcon(listing.room_type)}{" "}
+                            {getRoomTypeName(listing.room_type)}
+                          </span>
+                          <span className="text-gray-400">•</span>
+                          <span>
+                            {listing.district}, {listing.province}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-center">
+                        <div className="text-2xl font-bold text-yellow-500">
+                          ₺{listing.price.toLocaleString()}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="col-span-3 text-center text-gray-500">
+                <div className="text-center text-gray-500">
                   Henüz ilan bulunamadı.
                 </div>
               )}

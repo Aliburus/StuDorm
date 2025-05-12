@@ -61,8 +61,8 @@ function RoomListingDetail() {
             <div className="h-[500px] w-full">
               {images.length > 0 && (
                 <img
-                  src={images[currentImageIndex]}
-                  alt={`Room view ${currentImageIndex + 1}`}
+                  src={`http://localhost:5000${images[currentImageIndex]}`}
+                  alt={`Oda görüntüsü ${currentImageIndex + 1}`}
                   className="w-full h-full object-cover"
                 />
               )}
@@ -84,16 +84,12 @@ function RoomListingDetail() {
                 <button
                   key={idx}
                   onClick={() => selectImage(idx)}
-                  className={`flex-1 h-24 overflow-hidden rounded ${
-                    idx === currentImageIndex
-                      ? "ring-2 ring-yellow-500"
-                      : "opacity-70"
-                  }`}
+                  className="…"
                 >
                   <img
-                    src={img}
-                    alt={`Thumb ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    src={`http://localhost:5000${img}`}
+                    alt={`Önizleme ${idx + 1}`}
+                    className="w-full h-full object-cover max-h-[100px] rounded-lg border-2 border-transparent hover:border-yellow-500 transition duration-200"
                   />
                 </button>
               ))}
