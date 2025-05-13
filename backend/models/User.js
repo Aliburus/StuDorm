@@ -13,6 +13,7 @@ const User = {
       throw new Error("Kullanıcı kaydı başarısız.");
     }
   },
+
   findByEmail: async (email) => {
     try {
       const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [
@@ -24,6 +25,7 @@ const User = {
       throw new Error("E-posta arama işlemi başarısız.");
     }
   },
+
   getUserById: async (userId) => {
     try {
       const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [
@@ -37,14 +39,32 @@ const User = {
   },
 
   updateProfile: async (userId, updateData) => {
-    const { name, surname, email, password } = updateData;
+    const { password } = updateData;
 
     try {
       const [result] = await db.query(
-        `UPDATE users 
-         SET name = ?, surname = ?, email = ?, password = ?
-         WHERE id = ?`,
-        [name, surname, email, password, userId]
+        `UPDATE users SET password = ? WHERE id = ?`,
+        [password, userId]
+      );
+
+      if (result.affectedRows === 0) {
+        throw new Error("User not found");
+      }
+
+      // Güncellenmiş kullanıcıyı tekrar çek
+      const updatedUser = await User.getUserById(userId);
+      return updatedUser;
+    } catch (error) {
+      console.error("Profile update error:", error);
+      throw new Error("Error updating profile");
+    }
+  },
+
+  upgradeToPremium: async (userId) => {
+    try {
+      const [result] = await db.query(
+        `UPDATE users SET user_type = 'premium' WHERE id = ?`,
+        [userId] // Kullanıcıyı premium yapıyoruz
       );
 
       if (result.affectedRows === 0) {
@@ -55,8 +75,42 @@ const User = {
       const updatedUser = await User.getUserById(userId);
       return updatedUser;
     } catch (error) {
-      console.error("Profil güncelleme hatası:", error);
-      throw new Error("Profil güncellenirken bir hata oluştu.");
+      console.error("Premium yapma hatası:", error);
+      throw new Error("Premium yapılırken bir hata oluştu.");
+    }
+  },
+
+  getUserById: async (userId) => {
+    try {
+      const [rows] = await db.execute("SELECT * FROM users WHERE id = ?", [
+        userId,
+      ]);
+      if (rows.length === 0) {
+        return null; // Kullanıcı bulunamadıysa null döndür
+      }
+      return rows[0];
+    } catch (err) {
+      console.error("Veritabanı hatası:", err);
+      throw new Error("Veritabanı hatası");
+    }
+  },
+  updateUserType: async (userId, newUserType) => {
+    try {
+      const [result] = await db.query(
+        `UPDATE users SET user_type = ? WHERE id = ?`,
+        [newUserType, userId]
+      );
+
+      if (result.affectedRows === 0) {
+        throw new Error("User not found");
+      }
+
+      // Güncellenmiş kullanıcıyı tekrar çek
+      const updatedUser = await User.getUserById(userId);
+      return updatedUser;
+    } catch (error) {
+      console.error("Error updating user type:", error);
+      throw new Error("Error updating user type");
     }
   },
 };

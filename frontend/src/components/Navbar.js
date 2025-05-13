@@ -11,20 +11,18 @@ const Navbar = () => {
   const location = useLocation(); // useLocation hook to detect page changes
 
   useEffect(() => {
-    // localStorage'dan token kontrolü
-    const token = sessionStorage.getItem("token");
-    setIsLoggedIn(!!token); // Token varsa true, yoksa false
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
   }, []);
 
   useEffect(() => {
-    // Whenever the page changes (i.e., location changes), close the menu
     setIsMenuOpen(false);
-  }, [location]); // Dependency on location change
+  }, [location]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("token"); // Token temizle
-    setIsLoggedIn(false); // Durumu güncelle
-    navigate("/"); // Login sayfasına yönlendir
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    navigate("/");
   };
 
   return (
@@ -43,14 +41,9 @@ const Navbar = () => {
             <Link to="/">Home</Link>
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/find-dorms">Find Dorms & Roommates</Link>
+            <Link to="/find">İlanlar</Link>
           </div>
-          <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/find-intern">Find Intern</Link>
-          </div>
-          <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/find-part-time">Find Part Time</Link>
-          </div>{" "}
+
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
             <Link to="/forumpage">Forum</Link>
           </div>

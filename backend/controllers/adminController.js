@@ -1,6 +1,7 @@
 // controllers/adminController.js
 const AdminModel = require("../models/AdminModel"); // `require` ile içe aktar
-
+const User = require("../models/User"); // Kullanıcı modelini içe aktar
+const bcrypt = require("bcrypt"); // Bcrypt'i içe aktar
 module.exports.getUsers = async (req, res) => {
   try {
     const users = await AdminModel.getAllUsers(); // AdminModel'den kullanıcıları al
@@ -76,5 +77,69 @@ module.exports.deleteUser = async (req, res) => {
   } catch (error) {
     console.error("Error deleting user:", error);
     res.status(500).json({ error: "Internal Server Error" }); // Hata durumunda yanıt döndür
+  }
+};
+module.exports.changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.user.id; // Admin ID'sini JWT'den alıyoruz
+
+  try {
+    // MySQL ile kullanıcıyı ID ile bul
+    const user = await User.getUserById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Mevcut şifreyi kontrol et
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // Yeni şifreyi hashle
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Yeni şifreyi kaydetmek için SQL sorgusu kullan
+    await User.updateProfile(userId, { password: hashedPassword });
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+  }
+};
+module.exports.updateUserType = async (req, res) => {
+  const { user_type, userId } = req.body; // Frontend'den gelen 'user_type' ve 'userId' değerlerini alıyoruz
+  const adminId = req.user.id; // Admin ID'sini JWT'den alıyoruz
+
+  try {
+    // Yalnızca adminlerin kullanıcı tipi güncellemesi yapılmasına izin veriyoruz
+    const admin = await User.getUserById(adminId);
+    if (!admin || admin.user_type !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "Sadece adminler kullanıcı tipi değiştirebilir" });
+    }
+
+    // Yeni kullanıcı tipi geçerli değerlerden biri olmalı
+    if (!["normal", "admin"].includes(user_type)) {
+      return res.status(400).json({ error: "Geçersiz kullanıcı tipi" });
+    }
+
+    // Kullanıcıyı güncelleme işlemi
+    const updatedUser = await User.updateUserType(userId, user_type); // User.js'deki fonksiyonu kullanıyoruz
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+    }
+
+    res.status(200).json({
+      message: "Kullanıcı tipi başarıyla güncellendi",
+      updatedUser,
+    });
+  } catch (error) {
+    console.error("Kullanıcı tipi güncellenirken hata:", error);
+    res.status(500).json({ error: `Sunucu hatası: ${error.message}` });
   }
 };

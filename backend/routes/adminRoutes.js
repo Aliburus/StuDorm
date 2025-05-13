@@ -9,11 +9,15 @@ const {
   getReportedContent,
   getAllPosts,
   deleteUser,
+  changePassword,
 } = require("../controllers/adminController");
 
 const authenticateAdmin = require("../middleware/authenticateAdmin");
 const router = express.Router();
 
+const { updateUserType } = require("../controllers/adminController");
+
+router.put("/users/:id/update-type", authenticateAdmin, updateUserType); // Yeni endpoint
 router.get("/overview-stats", authenticateAdmin, getOverviewStats);
 router.get("/users", authenticateAdmin, getUsers);
 router.get("/listings", authenticateAdmin, getAllListings);
@@ -24,7 +28,7 @@ router.put(
   authenticateAdmin,
   updateListingDetails
 );
-
+router.put("/change-password", authenticateAdmin, changePassword);
 router.get("/reported-content", authenticateAdmin, getReportedContent);
 router.get("/posts", authenticateAdmin, getAllPosts);
 router.delete("/users/:id", authenticateAdmin, deleteUser);

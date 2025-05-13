@@ -7,33 +7,38 @@ import "./index.css";
 import Homepage from "./pages/Homepage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import FindingRD from "./pages/FindingRD";
-import FindIntern from "./pages/FindIntern";
-import FindPartTime from "./pages/FindPartTime";
+
 import Login from "./pages/LoginPage";
 import AccountPage from "./pages/Users/AccountPage";
 import ForumPage from "./pages/ForumPages";
-import RoomListingDetails from "./pages/RoomListingDetails";
+
 import DormAdvertForm from "./components/DormAdvertForm";
 import DashboardPage from "./pages/AdminPages/DashboardPage";
 import PaymentPage from "./pages/Users/PaymentPage";
-import PartTimeJobDetails from "./pages/PartTimeJobDetails";
-import InternDetails from "./pages/InternDetails";
 
+import FindAll from "./pages/FİndAll";
+import ListingDetails from "./pages/ListingDetails";
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
+    console.log("Token:", token); // Token'ı konsola yazdırın
+
     if (token) {
       try {
         const decoded = JSON.parse(atob(token.split(".")[1]));
-        setIsAdmin(decoded.user_type === "admin");
+        console.log("Decoded JWT:", decoded); // Token içeriğini konsola yazdırın
+        setIsAdmin(decoded.user_type === "admin"); // Admin kontrolü
         setIsAuthenticated(true);
-      } catch {
+      } catch (error) {
+        console.error("Token decode hatası:", error);
         localStorage.removeItem("token");
+        setIsAuthenticated(false);
       }
+    } else {
+      setIsAuthenticated(false); // Token yoksa authenticated değil
     }
   }, []);
 
@@ -44,11 +49,10 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/find-dorms" element={<FindingRD />} />
-          <Route path="/find-intern" element={<FindIntern />} />
-          <Route path="/find-part-time" element={<FindPartTime />} />
+
           <Route path="/login" element={<Login />} />
           <Route path="/dormAdForm" element={<DormAdvertForm />} />
+          <Route path="/find" element={<FindAll />} />
 
           <Route
             path="/admin"
@@ -79,14 +83,9 @@ function App() {
 
           <Route path="/forumpage" element={<ForumPage />} />
           <Route
-            path="/part-time-details/:id"
-            element={<PartTimeJobDetails />}
+            path="/listing-details/:type/:id"
+            element={<ListingDetails />}
           />
-          <Route
-            path="/room-listing-details/:id"
-            element={<RoomListingDetails />}
-          />
-          <Route path="/intern-details/:id" element={<InternDetails />} />
         </Routes>
       </div>
     </Router>

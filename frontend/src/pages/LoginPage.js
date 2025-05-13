@@ -11,6 +11,8 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(""); // For handling error messages
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Add this line to define the state
+  const [isAdmin, setIsAdmin] = useState(false); // For admin check
 
   const navigate = useNavigate(); // React Router's useNavigate hook
 
@@ -19,10 +21,22 @@ function LoginPage() {
     setError(""); // Reset error state
 
     try {
-      const response = await login(email, password); // Call the login service
-      sessionStorage.setItem("token", response.token);
+      const response = await login(email, password); // Login işlemi
+      localStorage.setItem("token", response.token); // Token'ı localStorage'a kaydedin
       alert("Login successful!");
-      navigate("/"); // Redirect to the homepage or dashboard
+
+      // Token'ı decode edin ve admin kontrolü yapın
+      const decoded = JSON.parse(atob(response.token.split(".")[1]));
+      console.log("Decoded JWT:", decoded); // Token içeriğini kontrol edin
+
+      if (decoded.user_type === "admin") {
+        setIsAdmin(true); // Adminse setIsAdmin true yapın
+        setIsAuthenticated(true);
+        navigate("/admin"); // Adminse /admin sayfasına yönlendirin
+      } else {
+        setIsAuthenticated(true); // Kullanıcı doğrulandı
+        navigate("/"); // Admin değilse ana sayfaya yönlendir
+      }
     } catch (error) {
       console.error("Login error:", error);
       setError("Invalid credentials. Please try again.");
@@ -204,7 +218,7 @@ function LoginPage() {
                           type="email"
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="john@example.com"
+                          placeholder="Enter your email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                         />
@@ -220,7 +234,7 @@ function LoginPage() {
                           type="password"
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="••••••••"
+                          placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                         />
@@ -236,7 +250,7 @@ function LoginPage() {
                           type="password"
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="••••••••"
+                          placeholder="Confirm your password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                         />

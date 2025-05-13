@@ -31,7 +31,7 @@ function ForumPages() {
     fetchPosts(); // Call the function on mount
   }, []);
   const handlePostSubmit = async () => {
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
     if (!token) {
       console.error("Token bulunamadı.");
       return;

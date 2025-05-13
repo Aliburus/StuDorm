@@ -10,9 +10,11 @@ import {
 } from "lucide-react";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
-import { createIntern } from "../services/InternService"; // Adjust the import based on your file structure
-import { createPartTimeAdvert } from "../services/PartTimeAdvertServices"; // Adjust the import based on your file structure
-import { createYurtIlan } from "../services/DormAdServices"; // Adjust the import based on your file structure
+import {
+  createYurtIlan,
+  createIntern,
+  createPartTimeAdvert,
+} from "../services/ListingService"; // Adjust the import path as necessary
 const DormAdvertForm = () => {
   const [adType, setAdType] = useState("dorm"); // NEW: ad type selection
 

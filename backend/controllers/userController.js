@@ -1,5 +1,5 @@
 // controllers/userController.js
-const userModel = require("../models/userModel"); // userModel'i import et
+const userModel = require("../models/User"); // userModel'i import et
 const bcrypt = require("bcrypt"); // bcrypt'i import et
 const getUserProfile = async (req, res) => {
   const userId = req.user.id;
@@ -95,8 +95,6 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-// Ödeme işlemi başarılıysa, kullanıcıyı premium yap
-// Kullanıcıyı premium yap
 const upgradeToPremium = async (req, res) => {
   const userId = req.user.id; // Token'den alınan kullanıcı ID'si
   const paymentStatus = req.body.paymentStatus; // Ödeme durumu (başarılı/başarısız)

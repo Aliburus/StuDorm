@@ -1,5 +1,5 @@
 export const getUserForumPosts = async () => {
-  const token = sessionStorage.getItem("token");
+  const token = localStorage.getItem("token");
   if (!token) throw new Error("No authentication token found");
 
   const response = await fetch("http://localhost:5000/api/posts/user", {
@@ -26,7 +26,7 @@ export const getUserForumPosts = async () => {
   return JSON.parse(responseBody); // Gelen veriyi parse et
 };
 export const deleteUserForumPost = async (postId) => {
-  const token = sessionStorage.getItem("token");
+  const token = localStorage.getItem("token");
   if (!token) throw new Error("No authentication token found");
 
   const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
@@ -45,7 +45,7 @@ export const deleteUserForumPost = async (postId) => {
   return response.json();
 };
 export const updateUserForumPost = async (postId, updatedContent) => {
-  const token = sessionStorage.getItem("token");
+  const token = localStorage.getItem("token");
   if (!token) throw new Error("No authentication token found");
 
   const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {

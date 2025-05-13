@@ -1,6 +1,4 @@
 const db = require("../config/db");
-const { deleteUser } = require("../controllers/adminController");
-
 const AdminModel = {
   getAllUsers: async () => {
     const query = `SELECT id, name, surname, email, user_type, created_at FROM users`;
@@ -16,64 +14,63 @@ const AdminModel = {
     );
     return rows;
   },
-
   getAllListings: async () => {
     const [rows] = await db.query(`
-      SELECT
-        CONCAT('yurtads-', id) AS unique_id,
-        'yurtads' AS source,
-        title,
-        'dorm' AS category,
-        province,
-        district,
-        NULL AS contact,
-        description,
-        NULL AS duration,
-        NULL AS requirements,
-        created_at,
-        user_id,
-        price,
-        status
-      FROM yurtads
+    SELECT
+      CONCAT('yurtads-', id) AS unique_id,
+      'yurtads' AS source,
+      title,
+      'dorm' AS category,
+      province,
+      district,
+      NULL AS contact,  -- yurtads tablosunda contact sütunu kaldırıldı, NULL olarak bırakıldı
+      description,
+      NULL AS duration,
+      NULL AS requirements,
+      created_at,
+      user_id,
+      price,
+      status
+    FROM yurtads
 
-      UNION ALL
+    UNION ALL
 
-      SELECT
-        CONCAT('parttimeads-', id) AS unique_id,
-        'parttimeads' AS source,
-        title,
-        category,
-        province,
-        district,
-        contact,
-        description,
-        duration,
-        requirements,
-        created_at,
-        user_id,
-        price,
-        'active' AS status
-      FROM parttimeads
+    SELECT
+      CONCAT('parttimeads-', id) AS unique_id,
+      'parttimeads' AS source,
+      title,
+      category,
+      province,
+      district,
+      NULL AS contact,  -- parttimeads tablosunda contact sütunu kaldırıldı, NULL olarak bırakıldı
+      description,
+      duration,
+      requirements,
+      created_at,
+      user_id,
+      price,
+      'active' AS status
+    FROM parttimeads
 
-      UNION ALL
+    UNION ALL
 
-      SELECT
-        CONCAT('interns-', id) AS unique_id,
-        'interns' AS source,
-        title,
-        category,
-        province,
-        district,
-        contact,
-        description,
-        duration,
-        requirements,
-        created_at,
-        user_id,
-        NULL AS price,
-        'active' AS status
-      FROM interns
-    `);
+    SELECT
+      CONCAT('interns-', id) AS unique_id,
+      'interns' AS source,
+      title,
+      category,
+      province,
+      district,
+      NULL AS contact,  -- interns tablosunda contact sütunu kaldırıldı, NULL olarak bırakıldı
+      description,
+      duration,
+      requirements,
+      created_at,
+      user_id,
+      NULL AS price,
+      'active' AS status
+    FROM interns
+  `);
     return rows;
   },
 

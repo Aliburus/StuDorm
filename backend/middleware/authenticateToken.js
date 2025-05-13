@@ -2,7 +2,7 @@
 const jwt = require("jsonwebtoken");
 
 const authenticateToken = (req, res, next) => {
-  const token = req.header("Authorization")?.split(" ")[1]; // Token başlığını al
+  const token = req.header("Authorization")?.split(" ")[1]; // Bearer token'dan token'ı al
 
   if (!token) {
     return res.status(401).json({ message: "Token bulunamadı" });

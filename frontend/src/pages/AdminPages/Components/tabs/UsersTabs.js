@@ -6,6 +6,7 @@ function UsersTab() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false); // Admin kontrolü
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -21,6 +22,15 @@ function UsersTab() {
 
   useEffect(() => {
     fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    // Admin kontrolü
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = JSON.parse(atob(token.split(".")[1]));
+      setIsAdmin(decoded.user_type === "admin"); // Admin olup olmadığını kontrol et
+    }
   }, []);
 
   const formatDate = (dateString) => {
@@ -40,6 +50,29 @@ function UsersTab() {
       } catch (err) {
         alert("Kullanıcı silinirken bir hata oluştu.");
       }
+    }
+  };
+
+  const handleUserTypeChange = async (userId, newUserType) => {
+    if (!isAdmin) {
+      alert("Sadece adminler kullanıcı tipi değiştirebilir.");
+      return;
+    }
+
+    try {
+      // Bu kodu güncelledik: JSON formatında veri gönderimi yapılacak
+      const response = await AdminService.updateUserType(userId, {
+        user_type: newUserType,
+      });
+      if (response.status === 200) {
+        alert("Kullanıcı tipi başarıyla güncellendi.");
+        fetchUsers(); // Kullanıcılar güncellenmiş olarak tekrar al
+      } else {
+        alert("Kullanıcı tipi güncellenirken bir hata oluştu.");
+      }
+    } catch (err) {
+      console.error("API Error:", err);
+      alert("Bir hata oluştu. Lütfen tekrar deneyin.");
     }
   };
 
@@ -108,6 +141,20 @@ function UsersTab() {
                     >
                       {user.user_type}
                     </span>
+                    {isAdmin && user.user_type !== "admin" && (
+                      <div className="mt-2">
+                        <select
+                          onChange={(e) =>
+                            handleUserTypeChange(user.id, e.target.value)
+                          }
+                          value={user.user_type}
+                          className="p-2 border border-gray-300 rounded"
+                        >
+                          <option value="normal">Normal</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(user.created_at)}

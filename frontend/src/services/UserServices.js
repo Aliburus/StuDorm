@@ -1,85 +1,73 @@
+// services/UserServices.js
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/auth/";
+// Yetkilendirme ve kullanıcı API uç noktaları
+const AUTH_URL = "http://localhost:5000/api/auth/";
+const PROFILE_URL = "http://localhost:5000/api/user"; // /api/user/profile
+const USER_URL = "http://localhost:5000/api/user"; // /api/user/:id
 
-export const updateUserProfile = async (formData, token) => {
+// İlan sahibinin bilgilerini çekme
+export const getUserById = async (userId) => {
   try {
-    const response = await axios.put(
-      "http://localhost:5000/api/user/profile",
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Profil güncelleme hatası:",
-      error.response?.data || error.message
-    );
-    throw new Error("Profil güncellenirken bir hata oluştu.");
+    const { data } = await axios.get(`${USER_URL}/${userId}`);
+    return data;
+  } catch (err) {
+    console.warn(`Kullanıcı ${userId} bulunamadı, sahibi göstermeyeceğiz.`);
+    return null;
   }
 };
-// Kullanıcı kaydı
+
+// Kayıt olma
 export const register = async (name, surname, email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}register`, {
-      name,
-      surname,
-      email,
-      password,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Register hatası:", error.response?.data || error.message);
-    throw new Error(
-      error.response?.data?.message || "Register işlemi başarısız."
-    );
-  }
+  const { data } = await axios.post(`${AUTH_URL}register`, {
+    name,
+    surname,
+    email,
+    password,
+  });
+  return data;
 };
 
+// Giriş yapma
 export const login = async (email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}login`, {
-      email,
-      password,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Login hatası:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || "Login işlemi başarısız.");
-  }
+  const { data } = await axios.post(`${AUTH_URL}login`, { email, password });
+  return data;
 };
 
-// Çıkış işlemi
+// Çıkış yapma
 export const logout = async () => {
-  try {
-    const response = await axios.post(`${API_URL}logout`);
-    return response.data;
-  } catch (error) {
-    console.error("Logout hatası:", error.response?.data || error.message);
-    throw new Error(
-      error.response?.data?.message || "Logout işlemi başarısız."
-    );
-  }
+  const { data } = await axios.post(`${AUTH_URL}logout`);
+  return data;
 };
 
-// Kullanıcı bilgilerini al
+// Profil bilgilerini alma
 export const getUserInfo = async (token) => {
   try {
-    const response = await axios.get("http://localhost:5000/api/user/profile", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const { data } = await axios.get(`${PROFILE_URL}/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
-  } catch (error) {
+    return data;
+  } catch (err) {
     console.error(
-      "User info fetch error:",
-      error.response?.data || error.message
+      "Profil bilgisi alınırken hata:",
+      err.response?.data || err.message
     );
-    throw new Error("Kullanıcı bilgileri alınırken bir hata oluştu.");
+    throw new Error("Kullanıcı bilgileri alınırken bir sorun oluştu.");
+  }
+};
+
+// Profil güncelleme
+export const updateUserProfile = async (formData, token) => {
+  try {
+    const { data } = await axios.put(`${PROFILE_URL}/profile`, formData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return data;
+  } catch (err) {
+    console.error(
+      "Profil güncellenirken hata:",
+      err.response?.data || err.message
+    );
+    throw new Error("Profil güncellenirken bir hata oluştu.");
   }
 };

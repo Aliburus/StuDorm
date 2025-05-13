@@ -19,9 +19,9 @@ const app = express();
 // Middleware'ler
 app.use(
   cors({
-    origin: "http://localhost:3000", // Replace with your frontend URL
+    origin: "http://localhost:3000", // Frontend URL
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization"], // Authorization header'ını da ekleyin
   })
 );
 
