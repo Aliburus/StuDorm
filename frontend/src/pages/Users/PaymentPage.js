@@ -38,7 +38,7 @@ const PaymentPage = () => {
       });
 
       if (response.data.success) {
-        const userToken = sessionStorage.getItem("token");
+        const userToken = localStorage.getItem("token");
         if (userToken) {
           await axios.post(
             "http://localhost:5000/api/user/upgrade-to-premium",

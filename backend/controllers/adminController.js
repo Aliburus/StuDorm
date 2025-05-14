@@ -51,15 +51,7 @@ module.exports.updateListingDetails = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-module.exports.getReportedContent = async (req, res) => {
-  try {
-    const reportedContent = await AdminModel.getReportedContent(); // Modelden verileri al
-    res.status(200).json(reportedContent); // JSON olarak döndür
-  } catch (error) {
-    console.error("Error fetching reported content:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+
 module.exports.getAllPosts = async (req, res) => {
   try {
     const posts = await AdminModel.getAllPosts(); // Modelden verileri al
@@ -110,11 +102,12 @@ module.exports.changePassword = async (req, res) => {
   }
 };
 module.exports.updateUserType = async (req, res) => {
-  const { user_type, userId } = req.body; // Frontend'den gelen 'user_type' ve 'userId' değerlerini alıyoruz
-  const adminId = req.user.id; // Admin ID'sini JWT'den alıyoruz
+  const { user_type } = req.body; // body’den sadece yeni tipi alıyoruz
+  const userId = req.params.id; // URL parametresinden id’yi çekiyoruz
+  const adminId = req.user.id; // JWT’den gelen admin id
 
   try {
-    // Yalnızca adminlerin kullanıcı tipi güncellemesi yapılmasına izin veriyoruz
+    // Sadece admin’lerin bu işlemi yapmasına izin ver
     const admin = await User.getUserById(adminId);
     if (!admin || admin.user_type !== "admin") {
       return res
@@ -122,13 +115,13 @@ module.exports.updateUserType = async (req, res) => {
         .json({ error: "Sadece adminler kullanıcı tipi değiştirebilir" });
     }
 
-    // Yeni kullanıcı tipi geçerli değerlerden biri olmalı
+    // Geçerli tip mi kontrol et
     if (!["normal", "admin"].includes(user_type)) {
       return res.status(400).json({ error: "Geçersiz kullanıcı tipi" });
     }
 
-    // Kullanıcıyı güncelleme işlemi
-    const updatedUser = await User.updateUserType(userId, user_type); // User.js'deki fonksiyonu kullanıyoruz
+    // Veritabanında güncelle
+    const updatedUser = await User.updateUserType(userId, user_type);
 
     if (!updatedUser) {
       return res.status(404).json({ error: "Kullanıcı bulunamadı" });

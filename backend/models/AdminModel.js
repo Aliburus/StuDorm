@@ -6,14 +6,6 @@ const AdminModel = {
     return rows;
   },
 
-  getReportedContent: async () => {
-    const [rows] = await db.query(
-      `SELECT id, user_id, content, created_at, likes, dislikes
-       FROM forum_posts
-       WHERE dislikes >= 50`
-    );
-    return rows;
-  },
   getAllListings: async () => {
     const [rows] = await db.query(`
     SELECT

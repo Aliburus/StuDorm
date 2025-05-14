@@ -1,3 +1,4 @@
+const API = "http://localhost:5000/api/posts";
 export const getUserForumPosts = async () => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No authentication token found");
@@ -83,4 +84,63 @@ export const getTopForumPosts = async () => {
     console.error("Top gönderiler alınırken hata oluştu:", error);
     return []; // Hata durumunda boş array döndür
   }
+};
+export const getPosts = async () => {
+  const res = await fetch(API);
+  if (!res.ok) throw new Error("Gönderiler alınamadı.");
+  return res.json();
+};
+
+export const createPost = async (content) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ content }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || "Post eklenemedi.");
+  }
+  const { post } = await res.json();
+  return post;
+};
+
+export const toggleLike = async (postId, isLiked) => {
+  const token = localStorage.getItem("token");
+  const action = isLiked ? "unlike" : "like";
+  const res = await fetch(`${API}/${postId}/like`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ action }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || "Like işlemi başarısız");
+  }
+  return res.json();
+};
+
+export const toggleDislike = async (postId, isDisliked) => {
+  const token = localStorage.getItem("token");
+  const action = isDisliked ? "undislike" : "dislike";
+  const res = await fetch(`${API}/${postId}/dislike`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ action }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || "Dislike işlemi başarısız");
+  }
+  return res.json();
 };

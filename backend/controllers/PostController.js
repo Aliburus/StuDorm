@@ -4,63 +4,67 @@ const ForumPost = require("../models/ForumPosts"); // ForumPost modelini içe ak
 const createPost = async (req, res) => {
   const { content } = req.body;
   const user_id = req.user.id;
-
   if (!content) {
     return res.status(400).json({ message: "İçerik boş olamaz!" });
   }
-
   try {
-    const newPostId = await ForumPost.create({
-      user_id,
-      content,
-      likes: 0, // Varsayılan değer
-      dislikes: 0, // Varsayılan değer
-    });
-
-    // Yeni postu veritabanına ekledikten sonra, eklenen postun detaylarını döndürelim
+    const newPostId = await ForumPost.create({ user_id, content });
     const newPost = await ForumPost.getById(newPostId);
-
     return res
       .status(201)
       .json({ message: "Post başarıyla oluşturuldu", post: newPost });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error("createPost Hata:", error);
     return res
       .status(500)
       .json({ message: "Post oluşturulurken bir hata oluştu." });
   }
 };
 // Like işlemi
-const likePost = async (req, res) => {
+const toggleLike = async (req, res) => {
   const postId = req.params.id;
+  const { action } = req.body; // 'like' veya 'unlike'
 
   try {
-    const updated = await ForumPost.updateLikes(postId);
-    if (updated === 0) {
-      return res.status(404).json({ message: "Post bulunamadı!" });
+    if (action === "like") {
+      // Eğer like atılıyorsa: dislikes'ı -1, likes'ı +1
+      await ForumPost.updateDislikes(postId, -1);
+      await ForumPost.updateLikes(postId, 1);
+      return res.json({ message: "Beğenildi." });
+    } else {
+      // unlike
+      await ForumPost.updateLikes(postId, -1);
+      return res.json({ message: "Beğeni geri alındı." });
     }
-
-    res.status(200).json({ message: "Like verildi!" });
-  } catch (err) {
-    console.error("Like verirken hata:", err);
-    res.status(500).json({ message: "Bir hata oluştu." });
+  } catch (error) {
+    console.error("toggleLike Hata:", error);
+    return res
+      .status(500)
+      .json({ message: "Like işlemi sırasında hata oluştu." });
   }
 };
 
 // Dislike işlemi
-const dislikePost = async (req, res) => {
+const toggleDislike = async (req, res) => {
   const postId = req.params.id;
+  const { action } = req.body; // 'dislike' veya 'undislike'
 
   try {
-    const updated = await ForumPost.updateDislikes(postId);
-    if (updated === 0) {
-      return res.status(404).json({ message: "Post bulunamadı!" });
+    if (action === "dislike") {
+      // Eğer dislike atılıyorsa: likes'ı -1, dislikes'ı +1
+      await ForumPost.updateLikes(postId, -1);
+      await ForumPost.updateDislikes(postId, 1);
+      return res.json({ message: "Dislike yapıldı." });
+    } else {
+      // undislike
+      await ForumPost.updateDislikes(postId, -1);
+      return res.json({ message: "Dislike geri alındı." });
     }
-
-    res.status(200).json({ message: "Dislike verildi!" });
-  } catch (err) {
-    console.error("Dislike verirken hata:", err);
-    res.status(500).json({ message: "Bir hata oluştu." });
+  } catch (error) {
+    console.error("toggleDislike Hata:", error);
+    return res
+      .status(500)
+      .json({ message: "Dislike işlemi sırasında hata oluştu." });
   }
 };
 const getAllPosts = async (req, res) => {
@@ -167,7 +171,8 @@ const updatePost = async (req, res) => {
 const getTopPosts = async (req, res) => {
   const limit = parseInt(req.query.limit, 10) || 5;
   try {
-    const posts = await ForumPost.getTopPosts(limit);
+    // Burayı düzeltin:
+    const posts = await ForumPost.getTopPosts(limit); // Burada getTop yerine getTopPosts kullanılıyor
     return res.status(200).json(posts);
   } catch (err) {
     console.error("Error fetching top posts:", err);
@@ -176,8 +181,8 @@ const getTopPosts = async (req, res) => {
 };
 module.exports = {
   createPost,
-  likePost,
-  dislikePost,
+  toggleLike,
+  toggleDislike,
   getAllPosts,
   getPostByUserId,
   deletePost,

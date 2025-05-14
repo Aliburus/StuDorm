@@ -14,9 +14,9 @@ const apiClient = axios.create({
 // Token'ı almak ve isteklerde eklemek için interceptor ekliyoruz
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token"); // sessionStorage'dan token'ı al
+    const token = localStorage.getItem("token");
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`; // Authorization header'ına token'ı ekle
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
     return config;
   },
@@ -58,16 +58,6 @@ const updateListingDetails = async (source, id, data) => {
   return response.data;
 };
 
-const getReportedContent = async () => {
-  try {
-    const response = await apiClient.get("/reported-content");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching reported content:", error);
-    throw error;
-  }
-};
-
 const getAllPosts = async () => {
   try {
     const response = await apiClient.get("/posts");
@@ -94,26 +84,25 @@ const changePassword = async (currentPassword, newPassword) => {
     throw error;
   }
 };
-const updateUserType = async (userId, { user_type }) => {
+const updateUserType = async (userId, user_type) => {
   try {
     const response = await apiClient.put(`/users/${userId}/update-type`, {
-      user_type: user_type, // Yeni kullanıcı tipi burada gönderilecek
+      user_type,
     });
-    return response.data;
+    return response; // <- .data değil, tamamını döndür
   } catch (error) {
     console.error("Error updating user type:", error);
     throw error;
   }
 };
 
-// Export AdminService fonksiyonları
 export const AdminService = {
   getUsers,
   getAllListings,
   getOverviewStats,
   deleteListing,
   updateListingDetails,
-  getReportedContent,
+
   getAllPosts,
   deleteUser,
   changePassword,

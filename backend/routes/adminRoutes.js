@@ -6,7 +6,7 @@ const {
   getOverviewStats,
   deleteListing,
   updateListingDetails,
-  getReportedContent,
+
   getAllPosts,
   deleteUser,
   changePassword,
@@ -29,7 +29,7 @@ router.put(
   updateListingDetails
 );
 router.put("/change-password", authenticateAdmin, changePassword);
-router.get("/reported-content", authenticateAdmin, getReportedContent);
+
 router.get("/posts", authenticateAdmin, getAllPosts);
 router.delete("/users/:id", authenticateAdmin, deleteUser);
 

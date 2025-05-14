@@ -9,8 +9,8 @@ router.get("/", forumController.getAllPosts);
 router.get("/user", authenticateToken, forumController.getPostByUserId);
 router.delete("/:id", authenticateToken, forumController.deletePost);
 router.put("/:id", authenticateToken, forumController.updatePost);
-router.put("/:id/like", authenticateToken, forumController.likePost);
-router.put("/:id/dislike", authenticateToken, forumController.dislikePost);
+router.put("/:id/like", authenticateToken, forumController.toggleLike);
+router.put("/:id/dislike", authenticateToken, forumController.toggleDislike);
 
 // **Yeni eklenen**: Top N postu dönen endpoint
 router.get("/top", forumController.getTopPosts);

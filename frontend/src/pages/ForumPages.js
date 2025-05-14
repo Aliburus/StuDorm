@@ -8,139 +8,98 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import dayjs from "dayjs"; // Day.js kullanımı için
+import dayjs from "dayjs";
+import {
+  toggleLike,
+  toggleDislike,
+  createPost,
+  getPosts,
+} from "../services/ForumService";
 
 function ForumPages() {
   const [newPostContent, setNewPostContent] = useState("");
-  const [posts, setPosts] = useState([]); // Ensure posts is always an array
+  const [posts, setPosts] = useState([]);
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [dislikedPosts, setDislikedPosts] = useState([]);
+
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/posts"); // Assuming the API is hosted here
-        const data = await response.json();
-        if (response.ok) {
-          setPosts(data); // Set the posts to state
-        } else {
-          console.error("Failed to fetch posts:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
-
-    fetchPosts(); // Call the function on mount
+    fetchPosts();
   }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const data = await getPosts();
+      setPosts(data);
+    } catch (error) {
+      console.error("Postlar alınamadı:", error.message);
+    }
+  };
+
   const handlePostSubmit = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token bulunamadı.");
-      return;
-    }
-
     try {
-      const response = await fetch("http://localhost:5000/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const newPost = await createPost(newPostContent);
+      setPosts((prevPosts) => [
+        {
+          ...newPost,
+          userName: "Current User",
+          timestamp: "Just now",
         },
-        body: JSON.stringify({ content: newPostContent }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Yeni post ID'sini backend'den alıp burada ekle
-        setPosts((prevPosts) => [
-          {
-            ...data.post, // Backend'den gelen veriyi burada kullanıyoruz
-            userName: "Current User",
-            timestamp: "Just now",
-          },
-          ...prevPosts,
-        ]);
-        setNewPostContent(""); // Clear content after submit
-      } else {
-        console.error("API Error: ", data.message);
-        alert("Post eklenemedi: " + data.message);
-      }
+        ...prevPosts,
+      ]);
+      setNewPostContent("");
     } catch (error) {
-      console.error("Fetch error:", error);
-      alert("Post gönderilirken hata oluştu.");
+      console.error("Post eklenemedi:", error.message);
+      alert("Post eklenemedi: " + error.message);
+    }
+  };
+  const handleLike = async (postId) => {
+    const already = likedPosts.includes(postId);
+    try {
+      await toggleLike(postId, already);
+      await fetchPosts();
+      setLikedPosts((prev) =>
+        already ? prev.filter((id) => id !== postId) : [...prev, postId]
+      );
+      // Dislike varsa kaldır
+      setDislikedPosts((prev) => prev.filter((id) => id !== postId));
+    } catch (e) {
+      console.error("Like hatası:", e.message);
     }
   };
 
-  const handleLike = async (postId, index) => {
-    const token = sessionStorage.getItem("token");
-
+  const handleDislike = async (postId) => {
+    const already = dislikedPosts.includes(postId);
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/posts/${postId}/like`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      await toggleDislike(postId, already);
+      await fetchPosts();
+      setDislikedPosts((prev) =>
+        already ? prev.filter((id) => id !== postId) : [...prev, postId]
       );
-
-      if (response.ok) {
-        const updatedPosts = [...posts];
-        updatedPosts[index].likes += 1;
-        setPosts(updatedPosts);
-      } else {
-        console.error("Like işlemi başarısız oldu.");
-      }
-    } catch (error) {
-      console.error("Like hatası:", error);
-    }
-  };
-
-  const handleDislike = async (postId, index) => {
-    const token = sessionStorage.getItem("token");
-
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/posts/${postId}/dislike`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const updatedPosts = [...posts];
-        updatedPosts[index].dislikes += 1;
-        setPosts(updatedPosts);
-      } else {
-        console.error("Dislike işlemi başarısız oldu.");
-      }
-    } catch (error) {
-      console.error("Dislike hatası:", error);
+      setLikedPosts((prev) => prev.filter((id) => id !== postId));
+    } catch (e) {
+      console.error("Dislike hatası:", e.message);
     }
   };
 
   const sortedPosts = [...posts].sort(
     (a, b) => b.likes + b.dislikes - (a.likes + a.dislikes)
   );
+
   const formatDate = (dateString) => {
     return dayjs(dateString).format("DD.MM.YYYY HH:mm:ss");
   };
+
   return (
     <div>
       <Navbar />
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-6xl mx-auto p-6">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Main Content */}
             <div className="lg:w-2/3">
-              {/* Comment Form */}
               <div className="bg-white p-6 rounded-lg shadow-md mb-6">
                 <h2 className="text-xl font-semibold text-yellow-600 mb-4 flex items-center gap-2">
                   <MessageSquare className="w-5 h-5" />
-                  Yorum Yap
+                  Gönderi Paylaş
                 </h2>
                 <div className="relative">
                   <textarea
@@ -165,7 +124,7 @@ function ForumPages() {
                 {posts.length > 0 ? (
                   posts.map((post, index) => (
                     <div
-                      key={post.id}
+                      key={post.id || `temp-${index}`} // id yoksa geçici key
                       className="bg-white p-6 rounded-lg shadow-md"
                     >
                       <div className="flex items-center justify-between mb-4">
@@ -188,15 +147,23 @@ function ForumPages() {
                       </p>
                       <div className="flex gap-4">
                         <button
-                          onClick={() => handleLike(post.id, index)}
-                          className="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors duration-200"
+                          onClick={() => handleLike(post.id)}
+                          className={`flex items-center gap-2 ${
+                            likedPosts.includes(post.id)
+                              ? "text-yellow-600"
+                              : "text-gray-600 hover:text-yellow-600"
+                          } transition-colors duration-200`}
                         >
                           <ThumbsUp className="w-5 h-5" />
                           <span>{post.likes}</span>
                         </button>
                         <button
-                          onClick={() => handleDislike(post.id, index)}
-                          className="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors duration-200"
+                          onClick={() => handleDislike(post.id)}
+                          className={`flex items-center gap-2 ${
+                            dislikedPosts.includes(post.id)
+                              ? "text-yellow-600"
+                              : "text-gray-600 hover:text-yellow-600"
+                          } transition-colors duration-200`}
                         >
                           <ThumbsDown className="w-5 h-5" />
                           <span>{post.dislikes}</span>
@@ -212,22 +179,20 @@ function ForumPages() {
               </div>
             </div>
 
-            {/* Sidebar */}
             <div className="lg:w-1/3">
               <div className="bg-white p-6 rounded-lg shadow-md sticky top-6">
                 <h2 className="text-xl font-semibold text-yellow-600 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5" />
-                  Popüler Yorumlar
+                  Popüler Gönderiler
                 </h2>
                 <div className="space-y-4">
-                  {sortedPosts.slice(0, 3).map((post, index) => (
+                  {sortedPosts.slice(0, 3).map((post) => (
                     <div
-                      key={post.id} // Ensure a unique key is provided
+                      key={post.id}
                       className="p-4 rounded-lg bg-gray-50 border border-gray-100"
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-8 h-8 rounded-full bg-yellow-400 text-yellow-900 flex items-center justify-center text-sm font-semibold">
-                          {/* Check if userName exists and fall back to 'U' if not */}
                           {post.userName ? post.userName.charAt(0) : "U"}
                         </div>
                         <span className="font-medium text-yellow-600">
