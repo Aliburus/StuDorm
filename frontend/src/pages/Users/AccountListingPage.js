@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getYurtAdsByUserId,
   getInternsByUserId,
   getPartTimeAdsByUserId,
 } from "../../services/ListingService";
+import { Home, Briefcase, Clock, Image } from "lucide-react";
 
 const BASE_UPLOAD_URL = "http://localhost:5000";
 
@@ -12,6 +14,7 @@ const AccountListingsPage = ({ user }) => {
   const [interns, setInterns] = useState([]);
   const [partTimeAds, setPartTimeAds] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -27,13 +30,22 @@ const AccountListingsPage = ({ user }) => {
           getPartTimeAdsByUserId(user.id),
         ]);
 
-        const formattedYurtAds = yurtData.map((ad) => ({
-          ...ad,
-          photos:
-            ad.photos && Array.isArray(ad.photos)
-              ? ad.photos.map((photo) => BASE_UPLOAD_URL + photo)
-              : [],
-        }));
+        const formattedYurtAds = yurtData.map((ad) => {
+          console.log("ad:", ad);
+          let photoArr = [];
+          if (Array.isArray(ad.images)) {
+            photoArr = ad.images;
+          } else if (Array.isArray(ad.photos)) {
+            photoArr = ad.photos;
+          }
+          const photos = photoArr.map((p) =>
+            p.startsWith("http") ? p : `${BASE_UPLOAD_URL}${p}`
+          );
+          return {
+            ...ad,
+            photos,
+          };
+        });
 
         setYurtAds(formattedYurtAds);
         setInterns(internData);
@@ -55,8 +67,17 @@ const AccountListingsPage = ({ user }) => {
   const hasAnyAds = yurtAds.length || interns.length || partTimeAds.length;
   if (!hasAnyAds) {
     return (
-      <div className="p-6">
-        <h1 className="text-3xl font-bold">Mevcut ilanınız bulunmamaktadır.</h1>
+      <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+        <Home className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-600 text-lg mb-6">
+          Henüz ilan paylaşımınız bulunmuyor.
+        </p>
+        <button
+          onClick={() => navigate("/dormAdForm")}
+          className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 transform hover:-translate-y-1 shadow-md"
+        >
+          İlan Paylaş
+        </button>
       </div>
     );
   }
@@ -74,37 +95,73 @@ const AccountListingsPage = ({ user }) => {
               {yurtAds.map((ad) => (
                 <div
                   key={`yurt-${ad.id}`}
-                  className="border p-4 rounded-lg shadow hover:shadow-xl transition-all"
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 group overflow-hidden flex flex-col"
                 >
-                  <img
-                    src={ad.photos[0] || "/default-image.jpg"}
-                    alt={ad.title}
-                    className="w-full h-48 object-cover rounded-md mb-4"
-                  />
-                  <h3 className="text-xl font-semibold">{ad.title}</h3>
-                  <p className="mt-2 text-gray-600 line-clamp-3">
-                    {ad.description}
-                  </p>
-                  <div className="mt-4 flex justify-between items-center">
-                    <span className="text-gray-800 font-bold">
-                      Fiyat: {ad.price} ₺
-                    </span>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
-                      Detaylar
-                    </button>
+                  <div className="relative h-56 mb-4 bg-gray-100 flex items-center justify-center overflow-hidden">
+                    {ad.images && ad.images.length > 0 ? (
+                      <img
+                        src={
+                          ad.images[0].startsWith("http")
+                            ? ad.images[0]
+                            : `${BASE_UPLOAD_URL}${ad.images[0]}`
+                        }
+                        alt={ad.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://via.placeholder.com/400x300?text=No+Image";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <Image className="w-16 h-16 text-gray-300" />
+                      </div>
+                    )}
+                    {/* Küçük galeri önizlemesi */}
+                    {ad.images && ad.images.length > 1 && (
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 bg-white/70 px-2 py-1 rounded-lg shadow">
+                        {ad.images.slice(0, 4).map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={
+                              img.startsWith("http")
+                                ? img
+                                : `${BASE_UPLOAD_URL}${img}`
+                            }
+                            alt={`thumb-${idx}`}
+                            className="w-8 h-8 object-cover rounded-md border border-gray-200"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://via.placeholder.com/100x100?text=No+Image";
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  {ad.photos.length > 1 && (
-                    <div className="mt-4 flex space-x-2 overflow-x-auto">
-                      {ad.photos.slice(1, 4).map((photo, index) => (
-                        <img
-                          key={index}
-                          src={photo}
-                          alt={`Fotoğraf ${index + 2}`}
-                          className="w-20 h-20 object-cover rounded-md"
-                        />
-                      ))}
+                  <div className="flex-1 flex flex-col px-4 pb-4">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1 truncate">
+                      {ad.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      {ad.description}
+                    </p>
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                      <span className="text-lg font-bold text-yellow-600">
+                        {ad.price} ₺
+                      </span>
+                      <button
+                        onClick={() =>
+                          navigate(`/listing-details/room/${ad.id}`)
+                        }
+                        className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg font-semibold shadow hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 hover:scale-105"
+                      >
+                        Detaylar
+                      </button>
                     </div>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -119,17 +176,25 @@ const AccountListingsPage = ({ user }) => {
               {interns.map((intern) => (
                 <div
                   key={`intern-${intern.id}`}
-                  className="border p-4 rounded-lg shadow hover:shadow-xl transition-all"
+                  className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all duration-300"
                 >
-                  <h3 className="text-xl font-semibold">{intern.name}</h3>
-                  <p className="mt-2 text-gray-600 line-clamp-3">
+                  <div className="flex items-center mb-4">
+                    <Briefcase className="w-6 h-6 text-blue-500 mr-2" />
+                    <h3 className="text-xl font-semibold">{intern.name}</h3>
+                  </div>
+                  <p className="text-gray-600 line-clamp-3 mb-4">
                     {intern.description}
                   </p>
-                  <div className="mt-4 flex justify-between items-center">
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                     <span className="text-gray-800 font-bold">
-                      Şirket: {intern.company}
+                      {intern.company}
                     </span>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
+                    <button
+                      onClick={() =>
+                        navigate(`/listing-details/intern/${intern.id}`)
+                      }
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
                       Detaylar
                     </button>
                   </div>
@@ -147,17 +212,25 @@ const AccountListingsPage = ({ user }) => {
               {partTimeAds.map((ad) => (
                 <div
                   key={`pt-${ad.id}`}
-                  className="border p-4 rounded-lg shadow hover:shadow-xl transition-all"
+                  className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all duration-300"
                 >
-                  <h3 className="text-xl font-semibold">{ad.title}</h3>
-                  <p className="mt-2 text-gray-600 line-clamp-3">
+                  <div className="flex items-center mb-4">
+                    <Clock className="w-6 h-6 text-green-500 mr-2" />
+                    <h3 className="text-xl font-semibold">{ad.title}</h3>
+                  </div>
+                  <p className="text-gray-600 line-clamp-3 mb-4">
                     {ad.description}
                   </p>
-                  <div className="mt-4 flex justify-between items-center">
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                     <span className="text-gray-800 font-bold">
-                      Saatlik Ücret: {ad.hourlyRate} ₺
+                      {ad.hourlyRate} ₺/saat
                     </span>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
+                    <button
+                      onClick={() =>
+                        navigate(`/listing-details/parttime/${ad.id}`)
+                      }
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
                       Detaylar
                     </button>
                   </div>

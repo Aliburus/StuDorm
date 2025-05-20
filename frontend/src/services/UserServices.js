@@ -19,19 +19,39 @@ export const getUserById = async (userId) => {
 
 // Kayıt olma
 export const register = async (name, surname, email, password) => {
-  const { data } = await axios.post(`${AUTH_URL}register`, {
-    name,
-    surname,
-    email,
-    password,
-  });
-  return data;
+  try {
+    const { data } = await axios.post(`${AUTH_URL}register`, {
+      name,
+      surname,
+      email,
+      password,
+    });
+    return data;
+  } catch (err) {
+    if (err.response && err.response.data) {
+      throw err;
+    } else {
+      throw new Error(
+        "Kayıt işlemi sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+      );
+    }
+  }
 };
 
 // Giriş yapma
 export const login = async (email, password) => {
-  const { data } = await axios.post(`${AUTH_URL}login`, { email, password });
-  return data;
+  try {
+    const { data } = await axios.post(`${AUTH_URL}login`, { email, password });
+    return data;
+  } catch (err) {
+    if (err.response && err.response.data) {
+      throw err;
+    } else {
+      throw new Error(
+        "Giriş yapılırken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+      );
+    }
+  }
 };
 
 // Çıkış yapma

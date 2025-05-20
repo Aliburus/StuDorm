@@ -7,6 +7,7 @@ import "./index.css";
 import Homepage from "./pages/Homepage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import TermsConditions from "./pages/TermsConditions";
 
 import Login from "./pages/LoginPage";
 import AccountPage from "./pages/Users/AccountPage";
@@ -23,23 +24,44 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    console.log("Token:", token); // Token'ı konsola yazdırın
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      console.log("Token kontrol ediliyor:", token);
 
-    if (token) {
-      try {
-        const decoded = JSON.parse(atob(token.split(".")[1]));
-        console.log("Decoded JWT:", decoded); // Token içeriğini konsola yazdırın
-        setIsAdmin(decoded.user_type === "admin"); // Admin kontrolü
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Token decode hatası:", error);
-        localStorage.removeItem("token");
+      if (token) {
+        try {
+          const decoded = JSON.parse(atob(token.split(".")[1]));
+          const isTokenExpired = decoded.exp * 1000 < Date.now();
+
+          if (isTokenExpired) {
+            console.log("Token süresi dolmuş.");
+            localStorage.removeItem("token");
+            setIsAuthenticated(false);
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(decoded.user_type === "admin");
+            setIsAuthenticated(true);
+          }
+        } catch (error) {
+          console.error("Token decode hatası:", error);
+          localStorage.removeItem("token");
+          setIsAuthenticated(false);
+          setIsAdmin(false);
+        }
+      } else {
         setIsAuthenticated(false);
+        setIsAdmin(false);
       }
-    } else {
-      setIsAuthenticated(false); // Token yoksa authenticated değil
-    }
+    };
+
+    checkAuth();
+
+    // Sayfalar arası geçişlerde her zaman token kontrolü yap
+    window.addEventListener("focus", checkAuth);
+
+    return () => {
+      window.removeEventListener("focus", checkAuth);
+    };
   }, []);
 
   return (
@@ -49,6 +71,7 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/terms" element={<TermsConditions />} />
 
           <Route path="/login" element={<Login />} />
           <Route path="/dormAdForm" element={<DormAdvertForm />} />

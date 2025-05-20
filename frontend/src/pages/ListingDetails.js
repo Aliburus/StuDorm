@@ -37,7 +37,6 @@ export default function ListingDetails() {
         let result;
         if (type === "room") {
           result = await getYurtAdById(id);
-
           if (Array.isArray(result.images)) {
             result.images = result.images.map((img) => BASE_UPLOAD_URL + img);
           }
@@ -47,10 +46,7 @@ export default function ListingDetails() {
           result = await getPartTimeJobById(id);
         }
         setData(result);
-        if (result.user_id) {
-          const u = await getUserById(result.user_id);
-          setOwner(u);
-        }
+        setOwner(result.owner || null);
       } catch (err) {
         console.error("Error fetching details:", err);
       }
@@ -105,6 +101,15 @@ export default function ListingDetails() {
                 </span>
               </div>
             </div>
+            {/* Owner ad soyad */}
+            {owner && (
+              <div className="flex items-center gap-2 px-8 pt-4">
+                <User className="w-5 h-5 text-amber-600" />
+                <span className="font-medium">
+                  {owner.name} {owner.surname}
+                </span>
+              </div>
+            )}
             <div className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
                 <div className="transition-all duration-300 hover:bg-yellow-50/50 p-5 rounded-lg">
@@ -138,19 +143,6 @@ export default function ListingDetails() {
                         </p>
                         <p className="text-gray-800 font-medium">
                           {data.province} - {data.district}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start group">
-                      <div className="p-2 bg-yellow-50 rounded-lg mr-3 mt-0.5 transition-all duration-300 group-hover:bg-yellow-100">
-                        <UserCheck className="w-5 h-5 text-yellow-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">
-                          İletişim
-                        </p>
-                        <p className="text-gray-800 font-medium">
-                          {data.contact}
                         </p>
                       </div>
                     </div>
@@ -191,10 +183,34 @@ export default function ListingDetails() {
                   </p>
                 </div>
               </div>
-              <div className="flex justify-end">
-                <button className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-medium rounded-lg shadow-md hover:from-amber-600 hover:to-yellow-600 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50">
-                  Başvur
-                </button>
+
+              {/* İlan Sahibi İletişim */}
+              <div className="bg-amber-50 rounded-xl p-6 mb-6 border border-amber-200">
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <Phone className="w-5 h-5 text-amber-600 mr-2" />
+                  İlan Sahibi ile İletişim
+                </h2>
+                <div className="flex items-center p-3 bg-white rounded-lg shadow-sm hover:bg-green-50 transition-colors cursor-pointer">
+                  <a
+                    href={
+                      owner?.phone
+                        ? `https://wa.me/${owner.phone.replace(/[^0-9]/g, "")}`
+                        : "#"
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center ${
+                      !owner?.phone ? "pointer-events-none opacity-50" : ""
+                    }`}
+                  >
+                    <Phone className="w-5 h-5 text-amber-600 mr-3" />
+                    <span className="font-medium">
+                      {owner?.phone
+                        ? owner.phone
+                        : "Telefon numarası eklenmemiş"}
+                    </span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -215,6 +231,15 @@ export default function ListingDetails() {
                 </span>
               </div>
             </div>
+            {/* Owner ad soyad */}
+            {owner && (
+              <div className="flex items-center gap-2 px-8 pt-4">
+                <User className="w-5 h-5 text-amber-600" />
+                <span className="font-medium">
+                  {owner.name} {owner.surname}
+                </span>
+              </div>
+            )}
             <div className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
                 <div className="transition-all duration-300 hover:bg-yellow-50/50 p-5 rounded-lg">
@@ -251,19 +276,7 @@ export default function ListingDetails() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-start group">
-                      <div className="p-2 bg-yellow-50 rounded-lg mr-3 mt-0.5 transition-all duration-300 group-hover:bg-yellow-100">
-                        <UserCheck className="w-5 h-5 text-yellow-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">
-                          İletişim
-                        </p>
-                        <p className="text-gray-800 font-medium">
-                          {data.contact}
-                        </p>
-                      </div>
-                    </div>
+
                     <div className="flex items-start group">
                       <div className="p-2 bg-yellow-50 rounded-lg mr-3 mt-0.5 transition-all duration-300 group-hover:bg-yellow-100">
                         <DollarSign className="w-5 h-5 text-yellow-600" />
@@ -319,10 +332,34 @@ export default function ListingDetails() {
                   </p>
                 </div>
               </div>
-              <div className="flex justify-end">
-                <button className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-medium rounded-lg shadow-md hover:from-amber-600 hover:to-yellow-600 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50">
-                  Başvur
-                </button>
+
+              {/* İlan Sahibi İletişim */}
+              <div className="bg-amber-50 rounded-xl p-6 mb-6 border border-amber-200">
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <Phone className="w-5 h-5 text-amber-600 mr-2" />
+                  İlan Sahibi ile İletişim
+                </h2>
+                <div className="flex items-center p-3 bg-white rounded-lg shadow-sm hover:bg-green-50 transition-colors cursor-pointer">
+                  <a
+                    href={
+                      owner?.phone
+                        ? `https://wa.me/${owner.phone.replace(/[^0-9]/g, "")}`
+                        : "#"
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center ${
+                      !owner?.phone ? "pointer-events-none opacity-50" : ""
+                    }`}
+                  >
+                    <Phone className="w-5 h-5 text-amber-600 mr-3" />
+                    <span className="font-medium">
+                      {owner?.phone
+                        ? owner.phone
+                        : "Telefon numarası eklenmemiş"}
+                    </span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -382,13 +419,20 @@ export default function ListingDetails() {
 
             {/* Room Info */}
             <div className="p-8">
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">{data.title}</h1>
                 <span className="px-3 py-1 text-xs bg-amber-100 rounded-full">
                   {data.room_type}
                 </span>
               </div>
-
+              {owner && (
+                <div className="flex items-center gap-2 mb-6">
+                  <User className="w-5 h-5 text-amber-600" />
+                  <span className="font-medium">
+                    {owner.name} {owner.surname}
+                  </span>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
                 {/* Oda Bilgileri */}
                 <div className="bg-gray-50 rounded-xl p-6">
@@ -441,15 +485,21 @@ export default function ListingDetails() {
                   <Phone className="w-5 h-5 text-amber-600 mr-2" />
                   İlan Sahibi ile İletişim
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                <div className="flex items-center p-3 bg-white rounded-lg shadow-sm hover:bg-green-50 transition-colors cursor-pointer">
+                  <a
+                    href={`https://wa.me/${data.owner?.phone?.replace(
+                      /[^0-9]/g,
+                      ""
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center"
+                  >
                     <Phone className="w-5 h-5 text-amber-600 mr-3" />
-                    <span className="font-medium">{owner?.phone || "-"}</span>
-                  </div>
-                  <div className="flex items-center p-3 bg-white rounded-lg shadow-sm">
-                    <Mail className="w-5 h-5 text-amber-600 mr-3" />
-                    <span className="font-medium">{owner?.email || "-"}</span>
-                  </div>
+                    <span className="font-medium">
+                      {data.owner?.phone || "-"}
+                    </span>
+                  </a>
                 </div>
               </div>
             </div>

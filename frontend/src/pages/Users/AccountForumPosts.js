@@ -5,6 +5,14 @@ import {
   deleteUserForumPost,
 } from "../../services/ForumService";
 import EditPostModal from "./EditPostModal";
+import {
+  MessageSquare,
+  Edit,
+  Trash2,
+  ThumbsUp,
+  ThumbsDown,
+  Calendar,
+} from "lucide-react";
 
 const AccountForumPosts = () => {
   const [posts, setPosts] = useState([]);
@@ -53,16 +61,24 @@ const AccountForumPosts = () => {
     await fetchPosts();
   };
 
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (error)
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg">
+        {error}
+      </div>
+    );
 
   // Gönderi yoksa yönlendirme butonlu boş durum
   if (!posts.length)
     return (
-      <div className="text-center text-gray-500 space-y-4">
-        <p>Henüz paylaşımınız bulunmuyor.</p>
+      <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+        <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-600 text-lg mb-6">
+          Henüz paylaşımınız bulunmuyor.
+        </p>
         <button
           onClick={() => navigate("/forumpage")}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+          className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 transform hover:-translate-y-1 shadow-md"
         >
           Paylaşım Yap
         </button>
@@ -74,32 +90,47 @@ const AccountForumPosts = () => {
       {posts.map((post) => (
         <div
           key={post.id}
-          className="bg-white rounded-lg shadow-sm p-6 border border-gray-200"
+          className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all duration-300"
         >
-          <div className="flex justify-between items-center">
-            <p className="text-gray-700">{post.content}</p>
-            <div className="flex space-x-4">
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-gray-700 text-lg leading-relaxed">
+              {post.content}
+            </p>
+            <div className="flex space-x-3">
               <button
-                className="text-blue-500"
+                className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                 onClick={() => handleEdit(post.id, post.content)}
               >
-                ✏️ Düzenle
+                <Edit className="w-5 h-5" />
               </button>
               <button
-                className="text-red-500"
+                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 onClick={() => handleDelete(post.id)}
               >
-                🗑️ Sil
+                <Trash2 className="w-5 h-5" />
               </button>
             </div>
           </div>
-          <div className="flex justify-between items-center mt-4">
-            <span className="text-sm text-gray-500">
-              {new Date(post.created_at).toLocaleDateString()}
-            </span>
-            <div className="flex items-center space-x-2">
-              <span className="text-green-500">👍 {post.likes}</span>
-              <span className="text-red-500">👎 {post.dislikes}</span>
+          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+            <div className="flex items-center text-gray-500">
+              <Calendar className="w-4 h-4 mr-2" />
+              <span className="text-sm">
+                {new Date(post.created_at).toLocaleDateString("tr-TR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center text-green-500">
+                <ThumbsUp className="w-4 h-4 mr-1" />
+                <span className="text-sm font-medium">{post.likes}</span>
+              </div>
+              <div className="flex items-center text-red-500">
+                <ThumbsDown className="w-4 h-4 mr-1" />
+                <span className="text-sm font-medium">{post.dislikes}</span>
+              </div>
             </div>
           </div>
         </div>

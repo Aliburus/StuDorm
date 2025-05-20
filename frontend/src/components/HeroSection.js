@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { ArrowRight, BookOpen, Briefcase, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  // İlanlar sayfasına yönlendirme fonksiyonu
+  const handleExploreClick = () => {
+    navigate("/find"); // Find All sayfasına yönlendir
+  };
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-yellow-600 to-yellow-500 py-20 md:py-28">
@@ -61,7 +68,10 @@ const HeroSection = () => {
             </div>
 
             {/* Call to action */}
-            <button className="group flex items-center space-x-2 bg-orange-900 hover:bg-orange-950 text-yellow-50 font-medium px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105">
+            <button
+              onClick={handleExploreClick}
+              className="group flex items-center space-x-2 bg-orange-900 hover:bg-orange-950 text-yellow-50 font-medium px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105"
+            >
               <span>Şimdi Keşfet</span>
               <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
             </button>

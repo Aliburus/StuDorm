@@ -1,3 +1,4 @@
+const db = require("../config/db");
 const PartTimeAdvert = require("../models/PartTimeAdvert");
 
 const createAdvert = async (req, res) => {
@@ -60,13 +61,20 @@ const getAllAdverts = async (req, res) => {
 const getAdvertById = async (req, res) => {
   try {
     const { id } = req.params;
-    const advert = await PartTimeAdvert.getById(id);
-
-    if (advert.length === 0) {
+    const advertArr = await PartTimeAdvert.getById(id);
+    if (advertArr.length === 0) {
       return res.status(404).json({ message: "İlan bulunamadı" });
     }
-
-    res.status(200).json(advert[0]);
+    const advert = advertArr[0];
+    // owner bilgisi ekle
+    const [user] = await db.query(
+      "SELECT name, surname, email, phone FROM users WHERE id = ?",
+      [advert.user_id]
+    );
+    res.status(200).json({
+      ...advert,
+      owner: user[0],
+    });
   } catch (error) {
     console.error("İlan getirilirken hata oluştu:", error);
     res.status(500).json({ message: "İlan getirilirken hata oluştu", error });

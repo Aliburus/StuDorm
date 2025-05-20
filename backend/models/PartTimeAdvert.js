@@ -57,8 +57,12 @@ const PartTimeAdvert = {
 
   getById: async (id) => {
     try {
-      const query =
-        "SELECT id, title, category, province, district, description, duration, requirements, price, created_at, user_id FROM parttimeads WHERE id = ?";
+      const query = `
+        SELECT p.*, u.phone, u.email 
+        FROM parttimeads p 
+        LEFT JOIN users u ON p.user_id = u.id 
+        WHERE p.id = ?
+      `;
       const [rows] = await db.query(query, [id]);
       return rows;
     } catch (err) {

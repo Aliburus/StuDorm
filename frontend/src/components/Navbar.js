@@ -11,9 +11,37 @@ const Navbar = () => {
   const location = useLocation(); // useLocation hook to detect page changes
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
+    const checkToken = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const decoded = JSON.parse(atob(token.split(".")[1]));
+          const isTokenExpired = decoded.exp * 1000 < Date.now();
+
+          if (isTokenExpired) {
+            localStorage.removeItem("token");
+            setIsLoggedIn(false);
+          } else {
+            setIsLoggedIn(true);
+          }
+        } catch (error) {
+          localStorage.removeItem("token");
+          setIsLoggedIn(false);
+        }
+      } else {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkToken();
+
+    // Sayfa değişimlerinde token kontrolü yap
+    window.addEventListener("focus", checkToken);
+
+    return () => {
+      window.removeEventListener("focus", checkToken);
+    };
+  }, [location.pathname]);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -38,7 +66,7 @@ const Navbar = () => {
         {/* Menü Linkleri (Büyük Ekran) */}
         <div className="hidden md:flex space-x-8">
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/">Home</Link>
+            <Link to="/">Ana Sayfa</Link>
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
             <Link to="/find">İlanlar</Link>
@@ -48,10 +76,10 @@ const Navbar = () => {
             <Link to="/forumpage">Forum</Link>
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/about">About Us</Link>
+            <Link to="/about">Hakkımızda</Link>
           </div>
           <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-            <Link to="/contact">Contact</Link>
+            <Link to="/contact">İletişim</Link>
           </div>
           {/* Giriş Yapılmışsa Account Iconu */}
           {isLoggedIn ? (
@@ -66,26 +94,26 @@ const Navbar = () => {
                     onClick={() => navigate("/account")}
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
                   >
-                    My Account
+                    Hesabım
                   </button>
                   <button
                     onClick={() => navigate("/dormAdForm")}
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
                   >
-                    Advert{" "}
+                    İlan Ver
                   </button>
                   <button
                     onClick={handleLogout}
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
                   >
-                    Logout
+                    Çıkış Yap
                   </button>
                 </div>
               )}
             </div>
           ) : (
             <div className="text-md font-semibold hover:text-yellow-500 transition duration-300">
-              <Link to="/login">Login</Link>
+              <Link to="/login">Giriş Yap</Link>
             </div>
           )}
         </div>
@@ -121,25 +149,25 @@ const Navbar = () => {
             className="block text-lg font-semibold hover:text-yellow-500"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Link to="/">Home</Link>
+            <Link to="/">Ana Sayfa</Link>
           </div>
           <div
             className="block text-lg font-semibold hover:text-yellow-500"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Link to="/find-dorms">Find Dorms & Roommates</Link>
+            <Link to="/find">İlanlar</Link>
           </div>
           <div
             className="block text-lg font-semibold hover:text-yellow-500"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Link to="/about">About Us</Link>
+            <Link to="/about">Hakkımızda</Link>
           </div>
           <div
             className="block text-lg font-semibold hover:text-yellow-500"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Link to="/contact">Contact</Link>
+            <Link to="/contact">İletişim</Link>
           </div>
 
           {/* Mobilde Giriş Durumu */}
@@ -149,28 +177,28 @@ const Navbar = () => {
                 className="block text-lg font-semibold hover:text-yellow-500"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  navigate("/account"); // My Account yönlendirmesi
+                  navigate("/account");
                 }}
               >
-                My Account
+                Hesabım
               </div>
               <div
                 className="block text-lg font-semibold hover:text-yellow-500"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  navigate("/dormAdForm"); // My Account yönlendirmesi
+                  navigate("/dormAdForm");
                 }}
               >
-                Advert
+                İlan Ver
               </div>
               <div
                 className="block text-lg font-semibold hover:text-yellow-500"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  handleLogout(); // Logout işlemi
+                  handleLogout();
                 }}
               >
-                Logout
+                Çıkış Yap
               </div>
             </>
           ) : (
@@ -178,10 +206,10 @@ const Navbar = () => {
               className="block text-lg font-semibold hover:text-yellow-500"
               onClick={() => {
                 setIsMenuOpen(false);
-                navigate("/login"); // Login yönlendirmesi
+                navigate("/login");
               }}
             >
-              Login
+              Giriş Yap
             </div>
           )}
         </div>

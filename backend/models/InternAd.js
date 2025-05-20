@@ -13,14 +13,22 @@ const InternAd = {
   },
   getById: async (id) => {
     try {
-      const [rows] = await db.query("SELECT * FROM interns WHERE id = ?", [id]);
+      const [rows] = await db.query(
+        `
+        SELECT i.*, u.phone, u.email 
+        FROM interns i 
+        LEFT JOIN users u ON i.user_id = u.id 
+        WHERE i.id = ?
+      `,
+        [id]
+      );
       if (!rows || rows.length === 0) {
         throw new Error("Intern not found");
       }
       return rows;
     } catch (error) {
       console.error("Error fetching intern:", error);
-      throw error; // Re-throw to propagate the error to the controller
+      throw error;
     }
   },
   // Belirli bir kullanıcıya ait ilanları döner

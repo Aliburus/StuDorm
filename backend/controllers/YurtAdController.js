@@ -1,5 +1,6 @@
 const YurtAd = require("../models/YurtAd");
 const YurtAdPhoto = require("../models/YurtAdPhoto");
+const db = require("../config/db");
 
 const createYurtAd = async (req, res) => {
   // JWT'den gelen user_id
@@ -87,7 +88,17 @@ const getAllYurtAdsWithPhotos = async (req, res) => {
 const getYurtAdsByUserId = async (req, res) => {
   try {
     const ads = await YurtAd.getByUserId(req.params.userId);
-    return res.status(200).json(ads);
+    // Her ilan için photoları ekle
+    const adsWithPhotos = await Promise.all(
+      ads.map(async (ad) => {
+        const photos = await YurtAdPhoto.getPhotosByYurtAdId(ad.id);
+        return {
+          ...ad,
+          images: photos.map((p) => p.photo_url),
+        };
+      })
+    );
+    return res.status(200).json(adsWithPhotos);
   } catch (error) {
     console.error("Error fetching user yurt ads:", error);
     return res
@@ -102,10 +113,16 @@ const getYurtAdById = async (req, res) => {
     if (!ad) return res.status(404).json({ message: "İlan bulunamadı" });
 
     const photos = await YurtAdPhoto.getPhotosByYurtAdId(ad.id);
+    const [user] = await db.query(
+      "SELECT name, surname, email, phone FROM users WHERE id = ?",
+      [ad.user_id]
+    );
+
     res.json({
       ...ad,
       images: photos.map((p) => p.photo_url),
       features: ad.features?.split(","),
+      owner: user[0],
     });
   } catch (err) {
     console.error(err);

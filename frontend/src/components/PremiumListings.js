@@ -1,12 +1,15 @@
 import React from "react";
 import Slider from "react-slick";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Crown, MapPin, DollarSign, Star } from "lucide-react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { PremiumService } from "../services/PremiumService";
+
 const PremiumListings = () => {
+  const navigate = useNavigate();
   const [premiumListings, setPremiumListings] = useState([]);
   const placeholderImages = [
     "https://img.freepik.com/free-vector/internship-job-concept_23-2148737067.jpg",
@@ -47,6 +50,12 @@ const PremiumListings = () => {
     };
     fetchListings();
   }, []);
+
+  const handleListingClick = (listing) => {
+    const type = listing.type === "dorm" ? "room" : listing.type;
+    navigate(`/listing-details/${type}/${listing.id}`);
+  };
+
   return (
     <div className="bg-gray-100 py-16">
       <div className="container mx-auto px-6">
@@ -112,7 +121,10 @@ const PremiumListings = () => {
                         <strong>Duration:</strong> {ad.duration}
                       </div>
                     )}
-                    <button className="mt-auto w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600">
+                    <button
+                      onClick={() => handleListingClick(ad)}
+                      className="mt-auto w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600"
+                    >
                       Detayları Görüntüle
                     </button>
                   </div>

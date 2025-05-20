@@ -1,4 +1,5 @@
 // controllers/InternController.js
+const db = require("../config/db");
 const InternAd = require("../models/InternAd");
 
 const InternController = {
@@ -17,7 +18,14 @@ const InternController = {
       if (intern.length === 0) {
         return res.status(404).json({ message: "Intern not found" });
       }
-      res.status(200).json(intern[0]);
+      const [user] = await db.query(
+        "SELECT name, surname, email, phone FROM users WHERE id = ?",
+        [intern[0].user_id]
+      );
+      res.status(200).json({
+        ...intern[0],
+        owner: user[0],
+      });
     } catch (err) {
       res.status(500).json({ message: "Error fetching intern", error: err });
     }

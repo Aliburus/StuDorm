@@ -34,21 +34,39 @@ const AccountPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const checkTokenAndFetchData = async () => {
       const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const userData = await getUserInfo(token);
-          setUser(userData);
-          setFormData(userData);
-        } catch (err) {
-          setError(err.message);
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        // Token geçerlilik kontrolü
+        const decoded = JSON.parse(atob(token.split(".")[1]));
+        const isTokenExpired = decoded.exp * 1000 < Date.now();
+
+        if (isTokenExpired) {
+          console.log("Token süresi dolmuş!");
+          localStorage.removeItem("token");
+          navigate("/login");
+          return;
         }
+
+        // Token geçerli, kullanıcı bilgilerini çek
+        const userData = await getUserInfo(token);
+        setUser(userData);
+        setFormData(userData);
+      } catch (err) {
+        console.error("Hata:", err);
+        localStorage.removeItem("token");
+        navigate("/login");
       }
     };
 
-    fetchUserData();
-  }, []);
+    checkTokenAndFetchData();
+  }, [navigate]);
 
   const handleLogout = async () => {
     try {

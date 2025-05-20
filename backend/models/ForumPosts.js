@@ -28,7 +28,7 @@ const ForumPost = {
   getAll: async () => {
     const query = `
       SELECT p.id, p.user_id, p.content, p.likes, p.dislikes, p.created_at, p.updated_at,
-             u.name, u.surname
+             u.name, u.surname, u.phone, u.email
       FROM forum_posts p
       JOIN users u ON p.user_id = u.id
       ORDER BY p.created_at DESC
@@ -130,14 +130,45 @@ const ForumPost = {
   // Top N postları getirme
   getTopPosts: async (limit = 5) => {
     const query = `
-    SELECT p.id, p.content, p.likes, p.dislikes, p.created_at, u.name, u.surname
-    FROM forum_posts p
-    JOIN users u ON p.user_id = u.id
-    ORDER BY p.likes DESC, p.created_at DESC
-    LIMIT ?
-  `;
+      SELECT p.id, p.content, p.likes, p.dislikes, p.created_at, 
+             u.name, u.surname, u.phone, u.email
+      FROM forum_posts p
+      JOIN users u ON p.user_id = u.id
+      ORDER BY p.likes DESC, p.created_at DESC
+      LIMIT ?
+    `;
     const [rows] = await db.query(query, [limit]);
     return rows;
+  },
+
+  // Kullanıcının postlarını getirme
+  getPostByUserId: async (user_id) => {
+    const query = `
+      SELECT p.id, p.user_id, p.content, p.likes, p.dislikes, p.created_at, p.updated_at
+      FROM forum_posts p
+      WHERE p.user_id = ?
+      ORDER BY p.created_at DESC
+    `;
+    const [rows] = await db.query(query, [user_id]);
+    return rows;
+  },
+
+  // Post silme
+  delete: async (id) => {
+    const query = `DELETE FROM forum_posts WHERE id = ?`;
+    const [result] = await db.query(query, [id]);
+    return result;
+  },
+
+  // Post güncelleme
+  update: async (id, content) => {
+    const query = `
+      UPDATE forum_posts
+      SET content = ?, updated_at = NOW()
+      WHERE id = ?
+    `;
+    const [result] = await db.query(query, [content, id]);
+    return result;
   },
 };
 

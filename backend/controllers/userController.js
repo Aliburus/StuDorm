@@ -112,9 +112,22 @@ const upgradeToPremium = async (req, res) => {
   }
 };
 
+const getUserById = async (req, res) => {
+  try {
+    const user = await userModel.getUserById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Veritabanı hatası" });
+  }
+};
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
   upgradeToPremium,
   accessPremiumContent,
+  getUserById,
 };
