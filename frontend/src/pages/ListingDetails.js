@@ -17,6 +17,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  Star,
 } from "lucide-react";
 import {
   getYurtAdById,
@@ -107,6 +108,14 @@ export default function ListingDetails() {
                 <User className="w-5 h-5 text-amber-600" />
                 <span className="font-medium">
                   {owner.name} {owner.surname}
+                  {(owner.isPremium || owner.user_type === "premium") && (
+                    <Star
+                      className="w-4 h-4 ml-1 text-yellow-400"
+                      fill="#facc15"
+                      stroke="#facc15"
+                      title="Premium Üye"
+                    />
+                  )}
                 </span>
               </div>
             )}
@@ -237,6 +246,14 @@ export default function ListingDetails() {
                 <User className="w-5 h-5 text-amber-600" />
                 <span className="font-medium">
                   {owner.name} {owner.surname}
+                  {(owner.isPremium || owner.user_type === "premium") && (
+                    <Star
+                      className="w-4 h-4 ml-1 text-yellow-400"
+                      fill="#facc15"
+                      stroke="#facc15"
+                      title="Premium Üye"
+                    />
+                  )}
                 </span>
               </div>
             )}
@@ -430,6 +447,14 @@ export default function ListingDetails() {
                   <User className="w-5 h-5 text-amber-600" />
                   <span className="font-medium">
                     {owner.name} {owner.surname}
+                    {(owner.isPremium || owner.user_type === "premium") && (
+                      <Star
+                        className="w-4 h-4 ml-1 text-yellow-400"
+                        fill="#facc15"
+                        stroke="#facc15"
+                        title="Premium Üye"
+                      />
+                    )}
                   </span>
                 </div>
               )}

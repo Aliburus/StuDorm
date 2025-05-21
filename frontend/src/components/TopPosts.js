@@ -2,7 +2,7 @@ import React from "react";
 import { getTopForumPosts } from "../services/ForumService";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ThumbsDown } from "lucide-react";
+import { Heart, ThumbsDown, Star } from "lucide-react";
 
 const TopPosts = () => {
   const [topPosts, setTopPosts] = useState([]);
@@ -50,8 +50,16 @@ const TopPosts = () => {
                   </span>
                 </div>
                 <div className="ml-3">
-                  <p className="font-semibold text-gray-800">
+                  <p className="font-semibold text-gray-800 flex items-center">
                     {post.name} {post.surname}
+                    {(post.isPremium || post.user_type === "premium") && (
+                      <Star
+                        className="w-4 h-4 ml-1 text-yellow-400"
+                        fill="#facc15"
+                        stroke="#facc15"
+                        title="Premium Üye"
+                      />
+                    )}
                   </p>
                   <p className="text-sm text-gray-500">
                     {new Date(post.created_at).toLocaleDateString("tr-TR", {

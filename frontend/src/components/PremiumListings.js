@@ -70,11 +70,24 @@ const PremiumListings = () => {
         <Slider {...sliderSettings}>
           {premiumListings.map((ad, index) => {
             // Fotoğraf ve fiyat verilerinin kontrolü
-            const imageToShow =
-              ad.photos && ad.photos.length > 0
-                ? ad.photos.split(",")[0] // fotosu birden fazla ise, ilkini alıyoruz
-                : placeholderImages[index % placeholderImages.length];
-
+            let imageToShow =
+              placeholderImages[index % placeholderImages.length];
+            if (ad.type === "dorm" && ad.photos) {
+              const firstPhoto = Array.isArray(ad.photos)
+                ? ad.photos[0]
+                : (ad.photos || "").split(",")[0];
+              if (
+                firstPhoto &&
+                firstPhoto !== "null" &&
+                firstPhoto !== "undefined"
+              ) {
+                imageToShow = firstPhoto.startsWith("http")
+                  ? firstPhoto
+                  : `http://localhost:5000${firstPhoto}`;
+              }
+            } else if (ad.photos && ad.photos.length > 0) {
+              imageToShow = ad.photos.split(",")[0];
+            }
             // Location bilgisi: province ve district'i birleştiriyoruz
             const location = `${ad.province}, ${ad.district}`;
 
@@ -86,6 +99,11 @@ const PremiumListings = () => {
                       src={imageToShow}
                       alt={ad.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src =
+                          placeholderImages[index % placeholderImages.length];
+                      }}
                     />
                   </div>
                   <div className="p-6 flex flex-col flex-grow">
@@ -104,11 +122,12 @@ const PremiumListings = () => {
                     <h3 className="text-xl font-semibold mb-2">{ad.title}</h3>
                     <div className="flex items-center mb-2 text-gray-600">
                       <MapPin className="w-4 h-4 mr-1" />
-                      {location} {/* location bilgisi burada gösterilecek */}
+                      {location}
                     </div>
                     {ad.price && (
                       <div className="flex items-center mb-4 text-gray-600">
-                        <DollarSign className="w-4 h-4 mr-1" /> {ad.price}
+                        <span className="mr-1 text-lg font-bold">₺</span>{" "}
+                        {ad.price}
                       </div>
                     )}
                     {ad.description && (
@@ -119,6 +138,22 @@ const PremiumListings = () => {
                     {ad.duration && (
                       <div className="mb-4 text-gray-600 text-sm">
                         <strong>Duration:</strong> {ad.duration}
+                      </div>
+                    )}
+                    {/* Kullanıcı adı ve rozet */}
+                    {ad.owner_name && (
+                      <div className="flex items-center mt-2">
+                        <span className="font-medium text-gray-800">
+                          {ad.owner_name}
+                        </span>
+                        {(ad.user_isPremium || ad.user_type === "premium") && (
+                          <Star
+                            className="w-4 h-4 ml-1 text-yellow-400"
+                            fill="#facc15"
+                            stroke="#facc15"
+                            title="Premium Üye"
+                          />
+                        )}
                       </div>
                     )}
                     <button

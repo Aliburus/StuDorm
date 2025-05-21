@@ -23,11 +23,13 @@ import ListingDetails from "./pages/ListingDetails";
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
       console.log("Token kontrol ediliyor:", token);
+      const isLoginPage = window.location.pathname === "/login";
 
       if (token) {
         try {
@@ -39,6 +41,10 @@ function App() {
             localStorage.removeItem("token");
             setIsAuthenticated(false);
             setIsAdmin(false);
+            if (!isLoginPage) {
+              alert("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
+              window.location.href = "/login";
+            }
           } else {
             setIsAdmin(decoded.user_type === "admin");
             setIsAuthenticated(true);
@@ -48,11 +54,16 @@ function App() {
           localStorage.removeItem("token");
           setIsAuthenticated(false);
           setIsAdmin(false);
+          if (!isLoginPage) {
+            alert("Oturum doğrulama hatası, lütfen tekrar giriş yapın.");
+            window.location.href = "/login";
+          }
         }
       } else {
         setIsAuthenticated(false);
         setIsAdmin(false);
       }
+      setLoading(false);
     };
 
     checkAuth();
@@ -91,6 +102,7 @@ function App() {
               <PrivateRoute
                 element={<AccountPage />}
                 isAuthenticated={isAuthenticated}
+                loading={loading}
               />
             }
           />
@@ -101,6 +113,7 @@ function App() {
               <PrivateRoute
                 element={<PaymentPage />}
                 isAuthenticated={isAuthenticated}
+                loading={loading}
               />
             }
           />
@@ -116,6 +129,7 @@ function App() {
               <PrivateRoute
                 element={<UpdateForm />}
                 isAuthenticated={isAuthenticated}
+                loading={loading}
               />
             }
           />

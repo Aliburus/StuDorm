@@ -12,6 +12,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Calendar,
+  Star,
 } from "lucide-react";
 
 const AccountForumPosts = () => {
@@ -93,9 +94,19 @@ const AccountForumPosts = () => {
           className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all duration-300"
         >
           <div className="flex justify-between items-start mb-4">
-            <p className="text-gray-700 text-lg leading-relaxed">
-              {post.content}
-            </p>
+            <div className="flex items-center mb-2">
+              <span className="font-semibold text-gray-800">
+                {post.name} {post.surname}
+              </span>
+              {(post.isPremium || post.user_type === "premium") && (
+                <Star
+                  className="w-4 h-4 ml-1 text-yellow-400"
+                  fill="#facc15"
+                  stroke="#facc15"
+                  title="Premium Üye"
+                />
+              )}
+            </div>
             <div className="flex space-x-3">
               <button
                 className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"

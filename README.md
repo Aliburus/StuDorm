@@ -175,3 +175,30 @@ Projeye katkı sağlamak istiyorsanız:
 - Intern ve parttime ilan güncelleme endpointleri, frontend ve backend tam uyumlu hale getirildi.
 - Intern güncelleme endpointine JWT koruması (verifyToken) eklendi.
 - Artık tüm ilan tiplerinde güncelleme işlemleri güvenli ve eksiksiz çalışıyor.
+
+## Yeni Özellikler
+
+### Premium Rozet
+
+- Premium kullanıcılar, adlarının yanında sarı yıldız rozeti ile gösterilir.
+- Rozet; profil, ilanlar, forum postları, PremiumListings, TopPosts ve forum ana sayfasında görünür.
+
+### Premium Avantajları Dinamik Yönetim
+
+- Premium avantajları ve metinleri admin panelinden ve veritabanından yönetilebilir.
+- Avantajlar GoPremiumBox bileşeninde otomatik olarak güncellenir.
+
+### GoPremiumBox
+
+- Premium avantajları veritabanından dinamik olarak çekilir.
+- Avantajlar, kullanıcıya madde madde ve güncel şekilde gösterilir.
+
+## Kurulum ve Kullanım
+
+- Proje standart şekilde çalışır, ek olarak premium avantajları için `premium_benefits` tablosu gereklidir.
+- Premium kullanıcılar için `user_type` alanı `premium` olmalıdır.
+
+## Geliştirici Notları
+
+- Premium rozet ve avantajlar için yapılan tüm kodlar günceldir.
+- Herhangi bir yerde kullanıcı adı gösteriliyorsa, premium ise yanında rozet otomatik çıkar.

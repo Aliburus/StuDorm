@@ -5,7 +5,7 @@ import {
   getInternsByUserId,
   getPartTimeAdsByUserId,
 } from "../../services/ListingService";
-import { Home, Briefcase, Clock, Image, Edit } from "lucide-react";
+import { Home, Briefcase, Clock, Image, Edit, Star } from "lucide-react";
 
 const BASE_UPLOAD_URL = "http://localhost:5000";
 
@@ -87,6 +87,21 @@ const AccountListingsPage = ({ user }) => {
       <h1 className="text-3xl font-bold mb-6">İlanlarım</h1>
 
       <div className="space-y-12">
+        {/* Kullanıcı adı ve rozet */}
+        <div className="flex items-center mt-2">
+          <span className="font-medium text-gray-800">
+            {user.name} {user.surname}
+          </span>
+          {(user.isPremium || user.user_type === "premium") && (
+            <Star
+              className="w-4 h-4 ml-1 text-yellow-400"
+              fill="#facc15"
+              stroke="#facc15"
+              title="Premium Üye"
+            />
+          )}
+        </div>
+
         {/* Yurt İlanları */}
         {yurtAds.length > 0 && (
           <section>

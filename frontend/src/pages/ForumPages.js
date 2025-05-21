@@ -5,6 +5,7 @@ import {
   ThumbsDown,
   Send,
   TrendingUp,
+  Star,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -131,8 +132,17 @@ function ForumPages() {
                           {post.name ? post.name[0] : "U"}
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-gray-800">
+                          <h3 className="text-lg font-bold text-gray-800 flex items-center">
                             {post.name} {post.surname}
+                            {(post.isPremium ||
+                              post.user_type === "premium") && (
+                              <Star
+                                className="w-4 h-4 ml-1 text-yellow-400"
+                                fill="#facc15"
+                                stroke="#facc15"
+                                title="Premium Üye"
+                              />
+                            )}
                           </h3>
                           <span className="text-sm text-gray-500 flex items-center gap-2">
                             {formatDate(post.created_at)}
@@ -200,8 +210,16 @@ function ForumPages() {
                         {post.name ? post.name.charAt(0) : "U"}
                       </div>
                       <div>
-                        <span className="font-bold text-gray-800">
+                        <span className="font-bold text-gray-800 flex items-center">
                           {post.name} {post.surname}
+                          {(post.isPremium || post.user_type === "premium") && (
+                            <Star
+                              className="w-4 h-4 ml-1 text-yellow-400"
+                              fill="#facc15"
+                              stroke="#facc15"
+                              title="Premium Üye"
+                            />
+                          )}
                         </span>
                         <p className="text-sm text-gray-500">
                           {formatDate(post.created_at)}
