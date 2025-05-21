@@ -15,6 +15,7 @@
 - [Kullanım](#-kullanım)
 - [Proje Yapısı](#-proje-yapısı)
 - [Katkı Sağlama](#-katkı-sağlama)
+- [🆕 Son Güncellemeler](#-son-güncellemeler)
 
 ## 🎓 Proje Hakkında
 
@@ -168,3 +169,9 @@ Projeye katkı sağlamak istiyorsanız:
 3. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
 4. Branch'e push edin (`git push origin feature/amazing-feature`)
 5. Pull request açın
+
+## 🆕 Son Güncellemeler
+
+- Intern ve parttime ilan güncelleme endpointleri, frontend ve backend tam uyumlu hale getirildi.
+- Intern güncelleme endpointine JWT koruması (verifyToken) eklendi.
+- Artık tüm ilan tiplerinde güncelleme işlemleri güvenli ve eksiksiz çalışıyor.
