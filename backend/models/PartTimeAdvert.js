@@ -86,6 +86,36 @@ const PartTimeAdvert = {
     );
     return rows;
   },
+  updateById: async (id, advert) => {
+    try {
+      const query = `
+        UPDATE parttimeads SET
+          title = ?,
+          category = ?,
+          province = ?,
+          district = ?,
+          description = ?,
+          duration = ?,
+          requirements = ?,
+          price = ?
+        WHERE id = ?
+      `;
+      const [result] = await db.query(query, [
+        advert.title,
+        advert.category,
+        advert.province,
+        advert.district,
+        advert.description,
+        advert.duration,
+        advert.requirements,
+        advert.price,
+        id,
+      ]);
+      return result.affectedRows;
+    } catch (err) {
+      throw err;
+    }
+  },
 };
 
 module.exports = PartTimeAdvert;

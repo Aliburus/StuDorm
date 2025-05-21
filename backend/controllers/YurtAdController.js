@@ -130,9 +130,91 @@ const getYurtAdById = async (req, res) => {
   }
 };
 
+const updateYurtAd = async (req, res) => {
+  const userId = req.user.id;
+  const yurtAdId = req.params.id;
+  const uploadedFiles = req.files || [];
+
+  try {
+    // İlanın var olduğunu ve kullanıcıya ait olduğunu kontrol et
+    const [existingAd] = await YurtAd.getById(yurtAdId);
+    if (!existingAd) {
+      return res.status(404).json({ message: "İlan bulunamadı" });
+    }
+    if (existingAd.user_id !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Bu ilanı güncelleme yetkiniz yok" });
+    }
+
+    const {
+      title,
+      description,
+      price,
+      gender_required,
+      province,
+      district,
+      room_type,
+    } = req.body;
+
+    // Zorunlu alanları kontrol et
+    if (
+      !title ||
+      !description ||
+      !price ||
+      !gender_required ||
+      !province ||
+      !district ||
+      !room_type
+    ) {
+      return res.status(400).json({ message: "Tüm alanları doldurmalısınız" });
+    }
+
+    // Mevcut fotoğrafları al
+    const existingPhotos = await YurtAdPhoto.getPhotosByYurtAdId(yurtAdId);
+    const totalPhotos = existingPhotos.length + uploadedFiles.length;
+
+    // Fotoğraf sayısı kontrolü
+    if (totalPhotos < 5) {
+      return res.status(400).json({ message: "En az 5 fotoğraf olmalıdır" });
+    }
+    if (totalPhotos > 15) {
+      return res.status(400).json({ message: "En fazla 15 fotoğraf olabilir" });
+    }
+
+    // İlanı güncelle
+    await YurtAd.update(yurtAdId, {
+      title,
+      description,
+      price,
+      gender_required,
+      province,
+      district,
+      room_type,
+    });
+
+    // Yeni fotoğraflar varsa ekle
+    if (uploadedFiles.length > 0) {
+      const photos = uploadedFiles.map((file) => `/uploads/${file.filename}`);
+      await YurtAdPhoto.addPhotos(yurtAdId, photos);
+    }
+
+    return res.status(200).json({
+      message: "İlan başarıyla güncellendi",
+      ilan_id: yurtAdId,
+    });
+  } catch (err) {
+    console.error("Controller hata:", err);
+    return res
+      .status(500)
+      .json({ message: "İlan güncellenemedi", error: err.message });
+  }
+};
+
 module.exports = {
   createYurtAd,
   getAllYurtAdsWithPhotos,
   getYurtAdsByUserId,
   getYurtAdById,
+  updateYurtAd,
 };

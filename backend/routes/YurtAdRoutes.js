@@ -7,6 +7,7 @@ const {
   getAllYurtAdsWithPhotos,
   getYurtAdsByUserId,
   getYurtAdById,
+  updateYurtAd,
 } = require("../controllers/YurtAdController");
 
 const storage = multer.diskStorage({
@@ -30,5 +31,11 @@ router.post(
 router.get("/yurt-ilanlar/user/:userId", getYurtAdsByUserId);
 router.get("/yurt-ilanlar", getAllYurtAdsWithPhotos);
 router.get("/yurt-ilanlar/:id", getYurtAdById);
+router.put(
+  "/yurt-ilanlar/:id",
+  verifyToken,
+  upload.array("photos", 15),
+  updateYurtAd
+);
 
 module.exports = router;

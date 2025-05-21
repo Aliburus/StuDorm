@@ -5,7 +5,7 @@ import {
   getInternsByUserId,
   getPartTimeAdsByUserId,
 } from "../../services/ListingService";
-import { Home, Briefcase, Clock, Image } from "lucide-react";
+import { Home, Briefcase, Clock, Image, Edit } from "lucide-react";
 
 const BASE_UPLOAD_URL = "http://localhost:5000";
 
@@ -152,14 +152,22 @@ const AccountListingsPage = ({ user }) => {
                       <span className="text-lg font-bold text-yellow-600">
                         {ad.price} ₺
                       </span>
-                      <button
-                        onClick={() =>
-                          navigate(`/listing-details/room/${ad.id}`)
-                        }
-                        className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg font-semibold shadow hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 hover:scale-105"
-                      >
-                        Detaylar
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => navigate(`/update/yurt/${ad.id}`)}
+                          className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() =>
+                            navigate(`/listing-details/room/${ad.id}`)
+                          }
+                          className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg font-semibold shadow hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 hover:scale-105"
+                        >
+                          Detaylar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -189,14 +197,22 @@ const AccountListingsPage = ({ user }) => {
                     <span className="text-gray-800 font-bold">
                       {intern.company}
                     </span>
-                    <button
-                      onClick={() =>
-                        navigate(`/listing-details/intern/${intern.id}`)
-                      }
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      Detaylar
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => navigate(`/update/intern/${intern.id}`)}
+                        className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          navigate(`/listing-details/intern/${intern.id}`)
+                        }
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      >
+                        Detaylar
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -225,14 +241,22 @@ const AccountListingsPage = ({ user }) => {
                     <span className="text-gray-800 font-bold">
                       {ad.hourlyRate} ₺/saat
                     </span>
-                    <button
-                      onClick={() =>
-                        navigate(`/listing-details/parttime/${ad.id}`)
-                      }
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      Detaylar
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => navigate(`/update/parttime/${ad.id}`)}
+                        className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          navigate(`/listing-details/parttime/${ad.id}`)
+                        }
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      >
+                        Detaylar
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

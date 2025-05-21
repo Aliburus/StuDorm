@@ -96,6 +96,7 @@ const deleteAdvertById = async (req, res) => {
     res.status(500).json({ message: "İlan silinirken hata oluştu", error });
   }
 };
+
 const getAdvertsByUserId = async (req, res) => {
   try {
     const adverts = await PartTimeAdvert.getByUserId(req.params.userId);
@@ -108,10 +109,60 @@ const getAdvertsByUserId = async (req, res) => {
   }
 };
 
+const updateAdvertById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      category,
+      province,
+      district,
+      description,
+      duration,
+      requirements,
+      price,
+    } = req.body;
+
+    if (
+      !title ||
+      !category ||
+      !province ||
+      !district ||
+      !description ||
+      !duration ||
+      !requirements ||
+      !price
+    ) {
+      return res.status(400).json({ message: "Tüm alanlar zorunludur!" });
+    }
+
+    const affectedRows = await PartTimeAdvert.updateById(id, {
+      title,
+      category,
+      province,
+      district,
+      description,
+      duration,
+      requirements,
+      price,
+    });
+
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "İlan bulunamadı" });
+    }
+
+    res.status(200).json({ message: "İlan başarıyla güncellendi" });
+  } catch (error) {
+    console.error("İlan güncellenirken hata oluştu:", error);
+    res.status(500).json({ message: "İlan güncellenirken hata oluştu", error });
+  }
+};
+
 module.exports = {
   getAdvertsByUserId,
   createAdvert,
   getAllAdverts,
   getAdvertById,
   deleteAdvertById,
+  updateAdvertById,
 };

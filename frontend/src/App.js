@@ -8,6 +8,7 @@ import Homepage from "./pages/Homepage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import TermsConditions from "./pages/TermsConditions";
+import UpdateForm from "./pages/UpdateForm";
 
 import Login from "./pages/LoginPage";
 import AccountPage from "./pages/Users/AccountPage";
@@ -108,6 +109,15 @@ function App() {
           <Route
             path="/listing-details/:type/:id"
             element={<ListingDetails />}
+          />
+          <Route
+            path="/update/:type/:id"
+            element={
+              <PrivateRoute
+                element={<UpdateForm />}
+                isAuthenticated={isAuthenticated}
+              />
+            }
           />
         </Routes>
       </div>

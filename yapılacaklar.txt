@@ -1,0 +1,5 @@
+admin sayfası eksikleri
+intern(update )
+premiumlist deki yurt foto 
+premium kullanıcı mantık düzenleme 
+güvenlik düzenleme

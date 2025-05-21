@@ -15,7 +15,7 @@ router.get("/:id", InternController.getInternById);
 router.post("/", InternController.createIntern);
 
 // Update an existing intern
-router.put("/:id", InternController.updateIntern);
+router.put("/:id", verifyToken, InternController.updateIntern);
 
 // Delete an intern
 router.delete("/:id", InternController.deleteIntern);

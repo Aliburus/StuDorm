@@ -79,6 +79,43 @@ const YurtAd = {
     );
     return rows;
   },
+
+  update: async (id, data) => {
+    const {
+      title,
+      description,
+      price,
+      gender_required,
+      province,
+      district,
+      room_type,
+    } = data;
+
+    const [result] = await db.query(
+      `UPDATE YurtAds SET 
+        title = ?,
+        description = ?,
+        price = ?,
+        gender_required = ?,
+        province = ?,
+        district = ?,
+        room_type = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?`,
+      [
+        title,
+        description,
+        price,
+        gender_required,
+        province,
+        district,
+        room_type,
+        id,
+      ]
+    );
+
+    return result;
+  },
 };
 
 module.exports = YurtAd;
