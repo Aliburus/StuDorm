@@ -12,7 +12,7 @@ const postRoutes = require("./routes/PostRoutes");
 const internRoutes = require("./routes/InternRoutes");
 const paymentRoutes = require("./routes/PaymentRoutes");
 const homepageRoutes = require("./routes/homepageRoutes");
-const contactRoutes = require("./routes/ContactRoutes"); // İletişim rotasını import et
+const contactRoutes = require("./routes/contactRoutes");
 const premiumBenefitRoutes = require("./routes/PremiumBenefitRoutes");
 
 const app = express();
@@ -40,6 +40,7 @@ app.use("/api/interns", internRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api/homepage", homepageRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/contact-messages", contactRoutes);
 app.use("/api/premium-benefits", premiumBenefitRoutes);
 
 // Sunucuyu başlatma

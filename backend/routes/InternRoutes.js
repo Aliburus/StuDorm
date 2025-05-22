@@ -18,7 +18,7 @@ router.post("/", InternController.createIntern);
 router.put("/:id", verifyToken, InternController.updateIntern);
 
 // Delete an intern
-router.delete("/:id", InternController.deleteIntern);
+router.delete("/:id", verifyToken, InternController.deleteIntern);
 router.get("/user/:userId", InternController.getInternsByUserId);
 router.get("/api/interns/:id", InternController.getInternById);
 module.exports = router;

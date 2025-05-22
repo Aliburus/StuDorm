@@ -25,15 +25,15 @@ const createContactMessage = async (req, res) => {
   }
 };
 
-const getAllMessages = async (req, res) => {
+const getAllContactMessages = async (req, res) => {
   try {
     const messages = await contactModel.getAllMessages();
-    res.status(200).json(messages);
+    res.json(messages);
   } catch (err) {
-    console.error("Mesajları alma hatası:", err);
-    res.status(500).json({ message: "Veritabanı hatası." });
+    res.status(500).json({ message: "Mesajlar alınamadı." });
   }
 };
+
 const getUserMessages = async (req, res) => {
   try {
     const userEmail = req.user.email; // auth middleware has set req.user
@@ -44,4 +44,9 @@ const getUserMessages = async (req, res) => {
     return res.status(500).json({ message: "Veritabanı hatası." });
   }
 };
-module.exports = { createContactMessage, getAllMessages, getUserMessages };
+
+module.exports = {
+  createContactMessage,
+  getAllContactMessages,
+  getUserMessages,
+};

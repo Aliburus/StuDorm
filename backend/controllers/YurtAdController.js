@@ -1,9 +1,9 @@
 const YurtAd = require("../models/YurtAd");
 const YurtAdPhoto = require("../models/YurtAdPhoto");
 const db = require("../config/db");
+const User = require("../models/User");
 
 const createYurtAd = async (req, res) => {
-  // JWT'den gelen user_id
   const userId = req.user.id;
   const uploadedFiles = req.files || [];
   if (uploadedFiles.length < 5) {
@@ -20,14 +20,42 @@ const createYurtAd = async (req, res) => {
     district,
     room_type,
   } = req.body;
-
-  // Defaults
   const status = "active";
   const is_hidden = false;
-
   const photos = (req.files || []).map((file) => `/uploads/${file.filename}`);
 
   try {
+    // Kullanıcıyı çek
+    const [userRows] = await db.query(
+      "SELECT premium_start, premium_end FROM users WHERE id = ?",
+      [userId]
+    );
+    const user = userRows[0];
+    const now = new Date();
+    let isPremium = false;
+    if (user.premium_start && user.premium_end) {
+      const start = new Date(user.premium_start);
+      const end = new Date(user.premium_end);
+      isPremium = now >= start && now <= end;
+    }
+    // Son 6 ayda eklenen ilan sayısı
+    const [countRows] = await db.query(
+      "SELECT COUNT(*) as count FROM yurtads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH)",
+      [userId]
+    );
+    const adCount = countRows[0].count;
+    if ((isPremium && adCount >= 6) || (!isPremium && adCount >= 1)) {
+      return res.status(400).json({
+        message: isPremium
+          ? "6 ayda en fazla 6 ilan ekleyebilirsiniz (Premium)!"
+          : "6 ayda en fazla 1 ilan ekleyebilirsiniz (Normal)!",
+      });
+    }
+    // expires_at hesapla
+    const expiresAt = new Date(
+      now.getTime() + (isPremium ? 45 : 7) * 24 * 60 * 60 * 1000
+    );
+    const expiresAtStr = expiresAt.toISOString().slice(0, 19).replace("T", " ");
     const yurtAdId = await YurtAd.create({
       user_id: userId,
       title,
@@ -39,12 +67,18 @@ const createYurtAd = async (req, res) => {
       room_type,
       status,
       is_hidden,
+      expires_at: expiresAtStr,
     });
-
     if (photos.length) {
       await YurtAdPhoto.addPhotos(yurtAdId, photos);
     }
-
+    await User.logUserAction(userId, "YURT_AD_CREATE", {
+      ilan_id: yurtAdId,
+      title,
+      price,
+      province,
+      district,
+    });
     return res.status(200).json({
       message: "İlan ve fotoğraflar başarıyla kaydedildi.",
       ilan_id: yurtAdId,
@@ -199,6 +233,15 @@ const updateYurtAd = async (req, res) => {
       await YurtAdPhoto.addPhotos(yurtAdId, photos);
     }
 
+    // Log ekle
+    await User.logUserAction(userId, "YURT_AD_UPDATE", {
+      ilan_id: yurtAdId,
+      title,
+      price,
+      province,
+      district,
+    });
+
     return res.status(200).json({
       message: "İlan başarıyla güncellendi",
       ilan_id: yurtAdId,
@@ -211,10 +254,39 @@ const updateYurtAd = async (req, res) => {
   }
 };
 
+const deleteYurtAd = async (req, res) => {
+  const userId = req.user.id;
+  const yurtAdId = req.params.id;
+  try {
+    const [ad] = await YurtAd.getById(yurtAdId);
+    if (!ad) {
+      return res.status(404).json({ message: "İlan bulunamadı" });
+    }
+    if (ad.user_id !== userId) {
+      return res.status(403).json({ message: "Bu ilanı silme yetkiniz yok" });
+    }
+    await YurtAd.delete(yurtAdId);
+    await User.logUserAction(userId, "YURT_AD_DELETE", {
+      ilan_id: yurtAdId,
+      title: ad.title,
+      price: ad.price,
+      province: ad.province,
+      district: ad.district,
+    });
+    return res.status(200).json({ message: "İlan başarıyla silindi" });
+  } catch (err) {
+    console.error("Yurt ilan silme hata:", err);
+    return res
+      .status(500)
+      .json({ message: "İlan silinemedi", error: err.message });
+  }
+};
+
 module.exports = {
   createYurtAd,
   getAllYurtAdsWithPhotos,
   getYurtAdsByUserId,
   getYurtAdById,
   updateYurtAd,
+  deleteYurtAd,
 };

@@ -22,6 +22,7 @@ function ForumPages() {
   const [posts, setPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
   const [dislikedPosts, setDislikedPosts] = useState([]);
+  const [expandedPosts, setExpandedPosts] = useState([]);
 
   useEffect(() => {
     fetchPosts();
@@ -80,6 +81,14 @@ function ForumPages() {
     } catch (e) {
       console.error("Dislike hatası:", e.message);
     }
+  };
+
+  const toggleExpand = (postId) => {
+    setExpandedPosts((prev) =>
+      prev.includes(postId)
+        ? prev.filter((id) => id !== postId)
+        : [...prev, postId]
+    );
   };
 
   const sortedPosts = [...posts].sort(
@@ -150,9 +159,25 @@ function ForumPages() {
                         </div>
                       </div>
                     </div>
-                    <p className="text-gray-700 text-lg mb-6 leading-relaxed border-l-4 border-yellow-400 pl-6 py-3 bg-yellow-50 rounded-r-lg">
-                      {post.content}
+                    <p
+                      className="text-gray-700 text-lg mb-6 leading-relaxed border-l-4 border-yellow-400 pl-6 py-3 bg-yellow-50 rounded-r-lg"
+                      style={{ wordBreak: "break-word" }}
+                    >
+                      {expandedPosts.includes(post.id)
+                        ? post.content
+                        : post.content.slice(0, 50) +
+                          (post.content.length > 50 ? "..." : "")}
                     </p>
+                    {post.content.length > 50 && (
+                      <button
+                        className="text-yellow-600 underline text-sm mb-2"
+                        onClick={() => toggleExpand(post.id)}
+                      >
+                        {expandedPosts.includes(post.id)
+                          ? "Küçült"
+                          : "Devamını Göster"}
+                      </button>
+                    )}
                     <div className="flex gap-6 pt-4 border-t border-gray-100">
                       <button
                         onClick={() => handleLike(post.id)}

@@ -59,6 +59,19 @@ export const createYurtIlan = async (formData) => {
   }
 };
 
+export const deleteYurtAd = async (id) => {
+  try {
+    const response = await axios.delete(`${BASE_URL}/yurt-ilanlar/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // --------------------- Staj İlanları ---------------------
 
 export const getInterns = async () => {
@@ -119,6 +132,19 @@ export const deleteIntern = async (id) => {
   }
 };
 
+export const deleteInternAd = async (id) => {
+  try {
+    const response = await axios.delete(`${BASE_URL}/interns/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // --------------------- Part-Time İlanları ---------------------
 
 export const getPartTimeJobs = async () => {
@@ -158,5 +184,18 @@ export const createPartTimeAdvert = async (advertData) => {
     throw new Error(
       error.response ? error.response.data.message : "Something went wrong!"
     );
+  }
+};
+
+export const deletePartTimeAd = async (id) => {
+  try {
+    const response = await axios.delete(`${BASE_URL}/parttimeads/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
   }
 };

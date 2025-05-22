@@ -7,63 +7,79 @@ const AdminModel = {
   },
 
   getAllListings: async () => {
-    const [rows] = await db.query(`
-    SELECT
-      CONCAT('yurtads-', id) AS unique_id,
-      'yurtads' AS source,
-      title,
-      'dorm' AS category,
-      province,
-      district,
-      NULL AS contact,  -- yurtads tablosunda contact sütunu kaldırıldı, NULL olarak bırakıldı
-      description,
-      NULL AS duration,
-      NULL AS requirements,
-      created_at,
-      user_id,
-      price,
-      status
-    FROM yurtads
+    try {
+      const [rows] = await db.query(`
+      SELECT
+        CONCAT('yurtads-', y.id) AS unique_id,
+        'yurtads' AS source,
+        y.title,
+        'Yurt İlanı' AS category,
+        y.province,
+        y.district,
+        NULL AS contact,
+        y.description,
+        NULL AS duration,
+        NULL AS requirements,
+        y.created_at,
+        y.user_id,
+        y.price,
+        'active' AS status,
+        (
+          SELECT GROUP_CONCAT(photo_url)
+          FROM YurtAdPhotos
+          WHERE yurt_ad_id = y.id
+        ) as photos
+      FROM yurtads y
 
-    UNION ALL
+      UNION ALL
 
-    SELECT
-      CONCAT('parttimeads-', id) AS unique_id,
-      'parttimeads' AS source,
-      title,
-      category,
-      province,
-      district,
-      NULL AS contact,  -- parttimeads tablosunda contact sütunu kaldırıldı, NULL olarak bırakıldı
-      description,
-      duration,
-      requirements,
-      created_at,
-      user_id,
-      price,
-      'active' AS status
-    FROM parttimeads
+      SELECT
+        CONCAT('parttimeads-', id) AS unique_id,
+        'parttimeads' AS source,
+        title,
+        'Part-time İş' AS category,
+        province,
+        district,
+        NULL AS contact,
+        description,
+        duration,
+        requirements,
+        created_at,
+        user_id,
+        price,
+        'active' AS status,
+        NULL as photos
+      FROM parttimeads
 
-    UNION ALL
+      UNION ALL
 
-    SELECT
-      CONCAT('interns-', id) AS unique_id,
-      'interns' AS source,
-      title,
-      category,
-      province,
-      district,
-      NULL AS contact,  -- interns tablosunda contact sütunu kaldırıldı, NULL olarak bırakıldı
-      description,
-      duration,
-      requirements,
-      created_at,
-      user_id,
-      NULL AS price,
-      'active' AS status
-    FROM interns
-  `);
-    return rows;
+      SELECT
+        CONCAT('interns-', id) AS unique_id,
+        'interns' AS source,
+        title,
+        'Staj İlanı' AS category,
+        province,
+        district,
+        NULL AS contact,
+        description,
+        duration,
+        requirements,
+        created_at,
+        user_id,
+        NULL AS price,
+        'active' AS status,
+        NULL as photos
+      FROM interns
+    `);
+      console.log(
+        "AdminModel getAllListings result:",
+        JSON.stringify(rows, null, 2)
+      );
+      return rows;
+    } catch (error) {
+      console.error("AdminModel getAllListings error:", error);
+      throw error;
+    }
   },
 
   getOverviewStats: async () => {
@@ -93,11 +109,24 @@ const AdminModel = {
       FROM forum_posts
     `);
 
+    // Premium gelir hesaplama
+    const [[premiumStats]] = await db.query(`
+      SELECT 
+        pb.price,
+        COUNT(*) as premium_count,
+        (pb.price * COUNT(*)) as total_revenue
+      FROM premium_benefits pb
+      JOIN users u ON u.user_type = 'premium'
+      GROUP BY pb.price
+    `);
+
     return {
       ...userStats,
       ...listingCounts,
       ...forumStats,
       roommateListings: 0,
+      premiumRevenue: premiumStats?.total_revenue || 0,
+      premiumPrice: premiumStats?.price || 0,
     };
   },
 
@@ -188,6 +217,98 @@ const AdminModel = {
   deleteUser: async (id) => {
     const query = `DELETE FROM users WHERE id = ?`;
     await db.query(query, [id]);
+  },
+  deleteForumPost: async (id) => {
+    const query = `DELETE FROM forum_posts WHERE id = ?`;
+    await db.query(query, [id]);
+  },
+  getListingStatsByCity: async () => {
+    const [rows] = await db.query(`
+      SELECT 
+        province as city,
+        COUNT(*) as total_listings,
+        SUM(CASE WHEN source = 'yurtads' THEN 1 ELSE 0 END) as dorm_listings,
+        SUM(CASE WHEN source = 'parttimeads' THEN 1 ELSE 0 END) as parttime_listings,
+        SUM(CASE WHEN source = 'interns' THEN 1 ELSE 0 END) as intern_listings
+      FROM (
+        SELECT 'yurtads' as source, province FROM yurtads
+        UNION ALL
+        SELECT 'parttimeads' as source, province FROM parttimeads
+        UNION ALL
+        SELECT 'interns' as source, province FROM interns
+      ) as all_listings
+      GROUP BY province
+      ORDER BY total_listings DESC
+    `);
+    return rows;
+  },
+
+  getPremiumRevenueByMonth: async () => {
+    const [rows] = await db.query(`
+      SELECT 
+        DATE_FORMAT(u.updated_at, '%Y-%m') as month,
+        COUNT(*) * pb.price as total_revenue
+      FROM users u
+      JOIN premium_benefits pb ON pb.id = 1
+      WHERE u.user_type = 'premium'
+      GROUP BY month
+      ORDER BY month ASC
+    `);
+    return rows;
+  },
+
+  getPremiumRevenueByCity: async () => {
+    const [rows] = await db.query(`
+      SELECT 
+        COALESCE(province, 'Belirtilmemiş') as city,
+        COUNT(*) * pb.price as total_revenue
+      FROM (
+        SELECT province, user_id FROM yurtads
+        UNION ALL
+        SELECT province, user_id FROM parttimeads
+        UNION ALL
+        SELECT province, user_id FROM interns
+      ) as all_listings
+      JOIN users u ON u.id = all_listings.user_id
+      JOIN premium_benefits pb ON pb.id = 1
+      WHERE u.user_type = 'premium'
+      GROUP BY province
+      ORDER BY total_revenue DESC
+    `);
+    return rows;
+  },
+
+  getUserAndListingTrendsByMonth: async () => {
+    const [userRows] = await db.query(`
+      SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as new_users
+      FROM users
+      GROUP BY month
+      ORDER BY month ASC
+    `);
+    const [listingRows] = await db.query(`
+      SELECT month, SUM(count) as total_listings FROM (
+        SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count FROM yurtads GROUP BY month
+        UNION ALL
+        SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count FROM parttimeads GROUP BY month
+        UNION ALL
+        SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count FROM interns GROUP BY month
+      ) as all_listings
+      GROUP BY month
+      ORDER BY month ASC
+    `);
+    // Ayları birleştir
+    const allMonths = Array.from(
+      new Set([
+        ...userRows.map((r) => r.month),
+        ...listingRows.map((r) => r.month),
+      ])
+    ).sort();
+    return allMonths.map((month) => ({
+      month,
+      new_users: userRows.find((r) => r.month === month)?.new_users || 0,
+      total_listings:
+        listingRows.find((r) => r.month === month)?.total_listings || 0,
+    }));
   },
 };
 

@@ -1,10 +1,10 @@
 const db = require("../config/db");
 const PartTimeAdvert = require("../models/PartTimeAdvert");
+const User = require("../models/User");
 
 const createAdvert = async (req, res) => {
   try {
-    const userId = req.user.id; // ✅ JWT'den gelen user_id
-
+    const userId = req.user.id;
     const {
       title,
       category,
@@ -29,6 +29,40 @@ const createAdvert = async (req, res) => {
       return res.status(400).json({ message: "Tüm alanlar zorunludur!" });
     }
 
+    // Kullanıcıyı çek
+    const [userRows] = await db.query(
+      "SELECT premium_start, premium_end FROM users WHERE id = ?",
+      [userId]
+    );
+    const user = userRows[0];
+    const now = new Date();
+    let isPremium = false;
+    if (user.premium_start && user.premium_end) {
+      const start = new Date(user.premium_start);
+      const end = new Date(user.premium_end);
+      isPremium = now >= start && now <= end;
+    }
+
+    // Son 6 ayda eklenen ilan sayısı
+    const [countRows] = await db.query(
+      "SELECT COUNT(*) as count FROM parttimeads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH)",
+      [userId]
+    );
+    const adCount = countRows[0].count;
+    if ((isPremium && adCount >= 6) || (!isPremium && adCount >= 1)) {
+      return res.status(400).json({
+        message: isPremium
+          ? "6 ayda en fazla 6 ilan ekleyebilirsiniz (Premium)!"
+          : "6 ayda en fazla 1 ilan ekleyebilirsiniz (Normal)!",
+      });
+    }
+
+    // expires_at hesapla
+    const expiresAt = new Date(
+      now.getTime() + (isPremium ? 45 : 7) * 24 * 60 * 60 * 1000
+    );
+    const expiresAtStr = expiresAt.toISOString().slice(0, 19).replace("T", " ");
+
     const advertId = await PartTimeAdvert.create({
       title,
       category,
@@ -38,7 +72,17 @@ const createAdvert = async (req, res) => {
       duration,
       requirements,
       price,
-      user_id: userId, // ✅ doğrudan token'dan
+      user_id: userId,
+      expires_at: expiresAtStr,
+    });
+
+    await User.logUserAction(userId, "PARTTIME_AD_CREATE", {
+      ilan_id: advertId,
+      title,
+      category,
+      province,
+      district,
+      price,
     });
 
     res.status(201).json({ message: "İlan başarıyla oluşturuldu", advertId });
@@ -83,17 +127,34 @@ const getAdvertById = async (req, res) => {
 
 const deleteAdvertById = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { id } = req.params;
-    const affectedRows = await PartTimeAdvert.deleteById(id);
 
-    if (affectedRows === 0) {
+    // İlanın var olduğunu ve kullanıcıya ait olduğunu kontrol et
+    const [advert] = await PartTimeAdvert.getById(id);
+    if (!advert) {
       return res.status(404).json({ message: "İlan bulunamadı" });
     }
+    if (advert.user_id !== userId) {
+      return res.status(403).json({ message: "Bu ilanı silme yetkiniz yok" });
+    }
+
+    const affectedRows = await PartTimeAdvert.deleteById(id);
+
+    // Log ekle
+    await User.logUserAction(userId, "PARTTIME_AD_DELETE", {
+      ilan_id: id,
+      title: advert.title,
+      province: advert.province,
+      district: advert.district,
+    });
 
     res.status(200).json({ message: "İlan başarıyla silindi" });
   } catch (error) {
     console.error("İlan silinirken hata oluştu:", error);
-    res.status(500).json({ message: "İlan silinirken hata oluştu", error });
+    res
+      .status(500)
+      .json({ message: "İlan silinirken hata oluştu", error: error.message });
   }
 };
 
@@ -150,6 +211,16 @@ const updateAdvertById = async (req, res) => {
     if (affectedRows === 0) {
       return res.status(404).json({ message: "İlan bulunamadı" });
     }
+
+    // Log ekle
+    await User.logUserAction(req.user.id, "PARTTIME_AD_UPDATE", {
+      ilan_id: id,
+      title,
+      category,
+      province,
+      district,
+      price,
+    });
 
     res.status(200).json({ message: "İlan başarıyla güncellendi" });
   } catch (error) {

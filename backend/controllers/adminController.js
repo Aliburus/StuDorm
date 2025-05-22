@@ -43,7 +43,7 @@ module.exports.deleteListing = async (req, res) => {
 module.exports.updateListingDetails = async (req, res) => {
   try {
     const { source, id } = req.params;
-    // body’de tüm güncellenmiş alanlar geliyor
+    // body'de tüm güncellenmiş alanlar geliyor
     await AdminModel.updateListingDetails(source, id, req.body);
     res.status(200).json({ message: "Listing details updated" });
   } catch (err) {
@@ -63,12 +63,26 @@ module.exports.getAllPosts = async (req, res) => {
 };
 module.exports.deleteUser = async (req, res) => {
   try {
-    const { id } = req.params; // Kullanıcı ID'sini al
-    await AdminModel.deleteUser(id); // Modelden silme işlemini yap
-    res.status(200).json({ message: "User deleted successfully" }); // Başarılı yanıt döndür
+    const { id } = req.params;
+    const user = await User.getUserById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await AdminModel.deleteUser(id);
+
+    // Silme işlemini logla
+    await User.logUserAction(req.user.id, "USER_DELETED", {
+      deletedUserId: id,
+      deletedUserName: user.name,
+      deletedUserEmail: user.email,
+    });
+
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     console.error("Error deleting user:", error);
-    res.status(500).json({ error: "Internal Server Error" }); // Hata durumunda yanıt döndür
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 module.exports.changePassword = async (req, res) => {
@@ -102,12 +116,11 @@ module.exports.changePassword = async (req, res) => {
   }
 };
 module.exports.updateUserType = async (req, res) => {
-  const { user_type } = req.body; // body’den sadece yeni tipi alıyoruz
-  const userId = req.params.id; // URL parametresinden id’yi çekiyoruz
-  const adminId = req.user.id; // JWT’den gelen admin id
+  const { user_type } = req.body;
+  const userId = req.params.id;
+  const adminId = req.user.id;
 
   try {
-    // Sadece admin’lerin bu işlemi yapmasına izin ver
     const admin = await User.getUserById(adminId);
     if (!admin || admin.user_type !== "admin") {
       return res
@@ -115,17 +128,25 @@ module.exports.updateUserType = async (req, res) => {
         .json({ error: "Sadece adminler kullanıcı tipi değiştirebilir" });
     }
 
-    // Geçerli tip mi kontrol et
-    if (!["normal", "admin"].includes(user_type)) {
+    if (!["normal", "admin", "premium"].includes(user_type)) {
       return res.status(400).json({ error: "Geçersiz kullanıcı tipi" });
     }
 
-    // Veritabanında güncelle
-    const updatedUser = await User.updateUserType(userId, user_type);
-
-    if (!updatedUser) {
+    const user = await User.getUserById(userId);
+    if (!user) {
       return res.status(404).json({ error: "Kullanıcı bulunamadı" });
     }
+
+    const updatedUser = await User.updateUserType(userId, user_type);
+
+    // Kullanıcı tipi değişikliğini logla
+    await User.logUserAction(adminId, "USER_TYPE_CHANGED", {
+      targetUserId: userId,
+      targetUserName: user.name,
+      targetUserEmail: user.email,
+      oldUserType: user.user_type,
+      newUserType: user_type,
+    });
 
     res.status(200).json({
       message: "Kullanıcı tipi başarıyla güncellendi",
@@ -134,5 +155,69 @@ module.exports.updateUserType = async (req, res) => {
   } catch (error) {
     console.error("Kullanıcı tipi güncellenirken hata:", error);
     res.status(500).json({ error: `Sunucu hatası: ${error.message}` });
+  }
+};
+
+module.exports.deleteForumPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await AdminModel.deleteForumPost(id);
+    res.status(200).json({ message: "Post başarıyla silindi" });
+  } catch (error) {
+    console.error("Post silinirken hata:", error);
+    res.status(500).json({ message: "Post silinirken bir hata oluştu" });
+  }
+};
+
+module.exports.getPremiumRevenueByMonth = async (req, res) => {
+  try {
+    const data = await AdminModel.getPremiumRevenueByMonth();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching premium revenue by month:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.getPremiumRevenueByCity = async (req, res) => {
+  try {
+    const data = await AdminModel.getPremiumRevenueByCity();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching premium revenue by city:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.getListingStatsByCity = async (req, res) => {
+  try {
+    const stats = await AdminModel.getListingStatsByCity();
+    res.json(stats);
+  } catch (error) {
+    console.error("Şehir bazlı ilan istatistikleri alınamadı:", error);
+    res
+      .status(500)
+      .json({ message: "Şehir bazlı ilan istatistikleri alınamadı" });
+  }
+};
+
+module.exports.getUserAndListingTrendsByMonth = async (req, res) => {
+  try {
+    const data = await AdminModel.getUserAndListingTrendsByMonth();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Trend verileri alınamadı:", error);
+    res.status(500).json({ error: "Trend verileri alınamadı" });
+  }
+};
+
+module.exports.getUserLogs = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const logs = await User.getUserLogs(userId);
+    res.status(200).json(logs);
+  } catch (error) {
+    console.error("Error fetching user logs:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

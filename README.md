@@ -1,204 +1,86 @@
-# StuDorm - Öğrenci Yaşam Platformu
+# StuDorm
 
 <div align="center">
-  <img src="frontend/src/assets/Logo1.jpeg" alt="StuDorm Logo" width="200"/>
-  <h3>Öğrenci Yaşamını Kolaylaştıran Çözüm</h3>
+  <img src="frontend/src/assets/Logo1.jpeg" alt="StuDorm Logo" width="120" />
+  <h2>Öğrenciler için Yurt, Oda, İş ve Staj Platformu</h2>
 </div>
 
-## 📑 İçindekiler
+---
 
-- [Proje Hakkında](#-proje-hakkında)
-- [Özellikler](#-özellikler)
-- [Teknolojiler](#-teknolojiler)
-- [Başlangıç](#-başlangıç)
-- [Kurulum](#-kurulum)
-- [Kullanım](#-kullanım)
-- [Proje Yapısı](#-proje-yapısı)
-- [Katkı Sağlama](#-katkı-sağlama)
-- [🆕 Son Güncellemeler](#-son-güncellemeler)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![React](https://img.shields.io/badge/frontend-React-blue)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/backend-Node.js-green)](https://nodejs.org/)
+[![MySQL](https://img.shields.io/badge/database-MySQL-blue)](https://www.mysql.com/)
 
-## 🎓 Proje Hakkında
+---
 
-StuDorm, öğrencilerin yurt bulma, part-time iş ve staj imkanlarına erişmelerini kolaylaştıran kapsamlı bir platformdur. Sistemde öğrenciler yurt, part-time ve staj ilanları paylaşabilir, forumlarda etkileşime geçebilir ve diğer öğrencilerle iletişim kurabilirler.
+## 🚀 Kısa Özet
 
-## ✨ Özellikler
+StuDorm, öğrencilerin yurt, oda, part-time iş ve staj ilanlarını kolayca bulup paylaşabildiği, premium üyelik ve güçlü bir admin paneli sunan modern bir platformdur.
 
-- **Kullanıcı Yönetimi**
-
-  - Kayıt ve giriş sistemi
-  - Profil yönetimi
-  - Premium üyelik seçenekleri
-
-- **İlan Yönetimi**
-
-  - Yurt ilanları oluşturma ve görüntüleme
-  - Part-time iş ilanları oluşturma ve görüntüleme
-  - Staj ilanları oluşturma ve görüntüleme
-
-- **Forum Sistemi**
-
-  - Gönderiler oluşturma
-  - Beğenme ve beğenmeme fonksiyonları
-  - Trend konuları görüntüleme
-
-- **İletişim**
-
-  - İlan sahipleriyle WhatsApp üzerinden iletişim
-  - İletişim formu
-
-- **Admin Paneli**
-  - Kullanıcı yönetimi
-  - İlan yönetimi
-  - Forum gönderilerinin yönetimi
-
-## 🛠 Teknolojiler
-
-### Frontend
-
-- React.js
-- Tailwind CSS
-- React Router
-- Axios
-- Lucide Icons
-- React Slick
-
-### Backend
-
-- Node.js
-- Express.js
-- MySQL
-- JWT Authentication
-- Multer (dosya yükleme)
-- Bcrypt (şifreleme)
-
-## 🚀 Başlangıç
-
-### Gereksinimler
-
-- Node.js (v16+)
-- npm veya yarn
-- MySQL veritabanı
-
-## 🔧 Kurulum
-
-### 1. Projeyi klonlayın
+## 🔥 Hızlı Başlat
 
 ```bash
-git clone https://github.com/aliburus/studorm.git
-cd studorm
-```
+# 1. Projeyi klonla
+git clone <repo-link>
+cd StuDorm
 
-### 2. Backend kurulumu
-
-```bash
+# 2. Backend bağımlılıklarını yükle
 cd backend
 npm install
-```
 
-`.env` dosyası oluşturun ve aşağıdaki çevre değişkenlerini ayarlayın:
-
-```
-PORT=5000
-JWT_SECRET=your_jwt_secret
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=studorm
-```
-
-### 3. Frontend kurulumu
-
-```bash
+# 3. Frontend bağımlılıklarını yükle
 cd ../frontend
 npm install
-```
 
-### 4. Veritabanını oluşturun
-
-- MySQL veritabanı oluşturun
-- Sağlanan SQL dosyasını içe aktarın veya migration'ları çalıştırın
-
-## 💻 Kullanım
-
-### Backend'i çalıştırma
-
-```bash
-cd backend
+# 4. Veritabanı ayarlarını yap (backend/config/db.js)
+# 5. Backend'i başlat
+cd ../backend
+npm run dev
+# veya
 node server.js
-```
 
-### Frontend'i çalıştırma
-
-```bash
-cd frontend
+# 6. Frontend'i başlat
+cd ../frontend
 npm start
 ```
 
-Uygulama http://localhost:3000 adresinde çalışacaktır.
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5000
 
-## 📂 Proje Yapısı
+## ✨ Özellikler
 
-```
-studorm/
-├── backend/              # Backend kodları
-│   ├── config/           # Veritabanı ve uygulama yapılandırması
-│   ├── controllers/      # Controller fonksiyonları
-│   ├── middleware/       # Express middleware'leri
-│   ├── models/           # Veritabanı modelleri
-│   ├── routes/           # API rotaları
-│   └── server.js         # Ana uygulama dosyası
-│
-└── frontend/             # Frontend kodları
-    ├── public/           # Statik dosyalar
-    └── src/              # Kaynak kodları
-        ├── assets/       # Görseller ve medya dosyaları
-        ├── components/   # Yeniden kullanılabilir React bileşenleri
-        ├── pages/        # Sayfa bileşenleri
-        │   ├── AdminPages/ # Admin paneli sayfaları
-        │   └── Users/      # Kullanıcı profil sayfaları
-        ├── services/     # API istek fonksiyonları
-        └── App.js        # Ana React uygulaması
-```
+- ✅ Kullanıcı kayıt & giriş (telefon, e-posta, şifre validasyonlu)
+- ✅ Yurt, part-time staj ilanı ekleme/güncelleme
+- ✅ Premium & normal kullanıcı ayrımı, avantajlar
+- ✅ Premium ödeme ve üyelik yönetimi
+- ✅ Admin paneli: kullanıcı, ilan, forum, premium benefits, iletişim mesajları
+- ✅ Forum ve mesajlaşma
+- ✅ Tüm işlemlerde detaylı validasyon ve loglama
+- ✅ Modern, responsive ve kullanıcı dostu arayüz
 
-## 👥 Katkı Sağlama
+## 🛠️ Kullanılan Teknolojiler
 
-Projeye katkı sağlamak istiyorsanız:
+- **Frontend:** React, Tailwind CSS, Axios, Recharts
+- **Backend:** Node.js, Express.js, MySQL
+- **Diğer:** JWT Auth, Multer, Nodemailer, bcrypt
 
-1. Bu depoyu forklayın
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
-4. Branch'e push edin (`git push origin feature/amazing-feature`)
-5. Pull request açın
+## 🖼️ Ekran Görüntüleri
 
-## 🆕 Son Güncellemeler
+> Örnek ekran görüntüleri için `screenshots/` klasörüne bakabilirsiniz.
 
-- Intern ve parttime ilan güncelleme endpointleri, frontend ve backend tam uyumlu hale getirildi.
-- Intern güncelleme endpointine JWT koruması (verifyToken) eklendi.
-- Artık tüm ilan tiplerinde güncelleme işlemleri güvenli ve eksiksiz çalışıyor.
+![Örnek Ekran](screenshots/overview.png)
 
-## Yeni Özellikler
+## 🤝 Katkı ve Lisans
 
-### Premium Rozet
+- Katkı yapmak için PR gönderebilirsin.
+- MIT Lisansı ile açık kaynak.
 
-- Premium kullanıcılar, adlarının yanında sarı yıldız rozeti ile gösterilir.
-- Rozet; profil, ilanlar, forum postları, PremiumListings, TopPosts ve forum ana sayfasında görünür.
+## 📬 İletişim
 
-### Premium Avantajları Dinamik Yönetim
+Her türlü soru, öneri ve katkı için iletişime geçebilirsiniz!
 
-- Premium avantajları ve metinleri admin panelinden ve veritabanından yönetilebilir.
-- Avantajlar GoPremiumBox bileşeninde otomatik olarak güncellenir.
+---
 
-### GoPremiumBox
-
-- Premium avantajları veritabanından dinamik olarak çekilir.
-- Avantajlar, kullanıcıya madde madde ve güncel şekilde gösterilir.
-
-## Kurulum ve Kullanım
-
-- Proje standart şekilde çalışır, ek olarak premium avantajları için `premium_benefits` tablosu gereklidir.
-- Premium kullanıcılar için `user_type` alanı `premium` olmalıdır.
-
-## Geliştirici Notları
-
-- Premium rozet ve avantajlar için yapılan tüm kodlar günceldir.
-- Herhangi bir yerde kullanıcı adı gösteriliyorsa, premium ise yanında rozet otomatik çıkar.
+> Geliştirici: [Senin Adın]
+> Proje: StuDorm - Öğrenci Yaşam Platformu

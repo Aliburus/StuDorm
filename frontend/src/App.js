@@ -20,60 +20,43 @@ import PaymentPage from "./pages/Users/PaymentPage";
 
 import FindAll from "./pages/FİndAll";
 import ListingDetails from "./pages/ListingDetails";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import UserLogDetails from "./pages/AdminPages/Components/tabs/UserLogDetails";
+
 function App() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = JSON.parse(atob(token.split(".")[1]));
+        return decoded.user_type === "admin";
+      } catch (error) {
+        return false;
+      }
+    }
+    return false;
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("token");
+  });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      console.log("Token kontrol ediliyor:", token);
-      const isLoginPage = window.location.pathname === "/login";
-
-      if (token) {
-        try {
-          const decoded = JSON.parse(atob(token.split(".")[1]));
-          const isTokenExpired = decoded.exp * 1000 < Date.now();
-
-          if (isTokenExpired) {
-            console.log("Token süresi dolmuş.");
-            localStorage.removeItem("token");
-            setIsAuthenticated(false);
-            setIsAdmin(false);
-            if (!isLoginPage) {
-              alert("Oturumunuz sona erdi, lütfen tekrar giriş yapın.");
-              window.location.href = "/login";
-            }
-          } else {
-            setIsAdmin(decoded.user_type === "admin");
-            setIsAuthenticated(true);
-          }
-        } catch (error) {
-          console.error("Token decode hatası:", error);
-          localStorage.removeItem("token");
-          setIsAuthenticated(false);
-          setIsAdmin(false);
-          if (!isLoginPage) {
-            alert("Oturum doğrulama hatası, lütfen tekrar giriş yapın.");
-            window.location.href = "/login";
-          }
-        }
-      } else {
-        setIsAuthenticated(false);
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = JSON.parse(atob(token.split(".")[1]));
+        setIsAdmin(decoded.user_type === "admin");
+        setIsAuthenticated(true);
+      } catch (error) {
         setIsAdmin(false);
+        setIsAuthenticated(false);
+        localStorage.removeItem("token");
       }
-      setLoading(false);
-    };
-
-    checkAuth();
-
-    // Sayfalar arası geçişlerde her zaman token kontrolü yap
-    window.addEventListener("focus", checkAuth);
-
-    return () => {
-      window.removeEventListener("focus", checkAuth);
-    };
+    }
+    setLoading(false);
   }, []);
 
   return (
@@ -133,6 +116,8 @@ function App() {
               />
             }
           />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/admin/logs/:userId" element={<UserLogDetails />} />
         </Routes>
       </div>
     </Router>

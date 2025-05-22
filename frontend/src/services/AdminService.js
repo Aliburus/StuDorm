@@ -96,6 +96,30 @@ const updateUserType = async (userId, user_type) => {
   }
 };
 
+const deleteForumPost = async (postId) => {
+  try {
+    const response = await apiClient.delete(`/posts/${postId}`);
+    if (!response.data) {
+      throw new Error("Post silinemedi");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting forum post:", error);
+    throw new Error("Post silinemedi");
+  }
+};
+
+const getUserLogs = async (userId) => {
+  try {
+    const url = userId ? `/user-logs?userId=${userId}` : "/user-logs";
+    const response = await apiClient.get(url);
+    return response;
+  } catch (error) {
+    console.error("Error fetching user logs:", error);
+    throw error;
+  }
+};
+
 export const AdminService = {
   getUsers,
   getAllListings,
@@ -107,4 +131,6 @@ export const AdminService = {
   deleteUser,
   changePassword,
   updateUserType,
+  deleteForumPost,
+  getUserLogs,
 };

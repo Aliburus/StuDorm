@@ -18,12 +18,13 @@ export const getUserById = async (userId) => {
 };
 
 // Kayıt olma
-export const register = async (name, surname, email, password) => {
+export const register = async (name, surname, email, phone, password) => {
   try {
     const { data } = await axios.post(`${AUTH_URL}register`, {
       name,
       surname,
       email,
+      phone,
       password,
     });
     return data;

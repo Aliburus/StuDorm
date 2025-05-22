@@ -9,9 +9,11 @@ import {
   AlertCircle,
   CheckCircle,
   X,
+  Phone,
 } from "lucide-react";
 import { register, login } from "../services/UserServices"; // Assuming these functions exist
 import { useNavigate } from "react-router-dom"; // For navigation
+import axios from "axios";
 
 function LoginPage() {
   const [activeForm, setActiveForm] = useState("login");
@@ -24,6 +26,11 @@ function LoginPage() {
   const [success, setSuccess] = useState(""); // For handling success messages
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [modalEmail, setModalEmail] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [phone, setPhone] = useState("");
 
   const navigate = useNavigate();
 
@@ -41,6 +48,27 @@ function LoginPage() {
     e.preventDefault();
     setError(""); // Reset error state
     setSuccess(""); // Reset success state
+
+    // E-posta validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email) {
+      setError("E-posta adresi boş bırakılamaz");
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      setError("Geçerli bir e-posta adresi giriniz");
+      return;
+    }
+
+    // Şifre validation
+    if (!password) {
+      setError("Şifre boş bırakılamaz");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Şifre en az 6 karakter olmalıdır");
+      return;
+    }
 
     try {
       const response = await login(email, password);
@@ -70,8 +98,89 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error state
-    setSuccess(""); // Reset success state
+    setError("");
+    setSuccess("");
+
+    // İsim ve soyisim kontrolü ve düzenleme
+    if (name.length < 2) {
+      setError("İsim en az 2 karakter olmalıdır");
+      return;
+    }
+    if (surname.length < 2) {
+      setError("Soyisim en az 2 karakter olmalıdır");
+      return;
+    }
+
+    // İsim ve soyadı düzenleme
+    const formattedName = name
+      .trim()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
+    const formattedSurname = surname
+      .trim()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
+    // E-posta validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email) {
+      setError("E-posta adresi boş bırakılamaz");
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      setError("Geçerli bir e-posta adresi giriniz (örn: ornek@mail.com)");
+      return;
+    }
+
+    // Telefon numarası validation
+    if (!phone) {
+      setError("Telefon numarası boş bırakılamaz");
+      return;
+    }
+
+    // Türk numarası kontrolü
+    const turkishPhoneRegex = /^(\+90|0)?[5][0-9][0-9][1-9]([0-9]){6}$/;
+    // Uluslararası numara kontrolü
+    const internationalPhoneRegex = /^\+[1-9]\d{1,14}$/;
+
+    if (
+      !turkishPhoneRegex.test(phone) &&
+      !internationalPhoneRegex.test(phone)
+    ) {
+      setError(
+        "Geçerli bir telefon numarası giriniz:\nTürk numarası: +905551234567 veya 05551234567\nUluslararası numara: +1234567890"
+      );
+      return;
+    }
+
+    // Telefon numarasını WhatsApp formatına dönüştür
+    let formattedPhone = phone;
+    if (phone.startsWith("0")) {
+      formattedPhone = "90" + phone.substring(1);
+    } else if (phone.startsWith("+")) {
+      formattedPhone = phone.substring(1);
+    }
+
+    // Şifre validation
+    if (!password) {
+      setError("Şifre boş bırakılamaz");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Şifre en az 6 karakter olmalıdır");
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      setError("Şifre en az bir büyük harf içermelidir");
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      setError("Şifre en az bir rakam içermelidir");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Şifreler eşleşmiyor!");
@@ -79,17 +188,22 @@ function LoginPage() {
     }
 
     try {
-      await register(name, surname, email, password);
+      await register(
+        formattedName,
+        formattedSurname,
+        email,
+        formattedPhone,
+        password
+      );
       setSuccess("Kayıt işlemi başarılı! Giriş yapabilirsiniz.");
 
-      // Başarılı kayıt sonrası form alanlarını temizle
       setName("");
       setSurname("");
       setEmail("");
+      setPhone("");
       setPassword("");
       setConfirmPassword("");
 
-      // Kullanıcıya mesajı gösterdikten sonra login formuna geç
       setTimeout(() => {
         setActiveForm("login");
       }, 2000);
@@ -97,6 +211,42 @@ function LoginPage() {
       setError(
         error.response?.data?.error ||
           "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin."
+      );
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!modalEmail) {
+      setError("Lütfen e-posta adresinizi girin.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Şifreler eşleşmiyor!");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/forgot-password",
+        {
+          email: modalEmail,
+          newPassword,
+          confirmPassword,
+        }
+      );
+      setSuccess("Şifreniz başarıyla güncellendi.");
+      setShowForgotPassword(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      setModalEmail("");
+    } catch (error) {
+      setError(
+        error.response?.data?.error || "Bir hata oluştu. Lütfen tekrar deneyin."
       );
     }
   };
@@ -162,7 +312,7 @@ function LoginPage() {
                     <User className="w-6 h-6 mr-2" />
                     Giriş Yap
                   </h3>
-                  <form onSubmit={handleLogin} className="space-y-6">
+                  <form onSubmit={handleLogin} className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         E-posta Adresi
@@ -194,6 +344,15 @@ function LoginPage() {
                           onChange={(e) => setPassword(e.target.value)}
                         />
                       </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-sm text-yellow-500 hover:text-yellow-600"
+                      >
+                        Şifremi Unuttum
+                      </button>
                     </div>
                     <button
                       type="submit"
@@ -264,7 +423,7 @@ function LoginPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        E-posta Adresi
+                        E-posta
                       </label>
                       <div className="relative">
                         <Mail className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -272,9 +431,25 @@ function LoginPage() {
                           type="email"
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="E-posta adresinizi girin"
+                          placeholder="E-posta adresiniz"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Telefon
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="tel"
+                          required
+                          className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                          placeholder="+90 5XX XXX XX XX"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
                         />
                       </div>
                     </div>
@@ -333,6 +508,68 @@ function LoginPage() {
             </div>
           </div>
         </div>
+
+        {/* Şifremi Unuttum Modal */}
+        {showForgotPassword && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-8 rounded-lg w-96">
+              <h3 className="text-xl font-bold mb-4">Şifre Sıfırlama</h3>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    E-posta Adresi
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    value={modalEmail}
+                    onChange={(e) => setModalEmail(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Yeni Şifre
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Şifre Tekrarı
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
+                  >
+                    Şifreyi Güncelle
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

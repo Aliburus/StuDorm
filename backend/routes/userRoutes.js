@@ -8,6 +8,7 @@ const {
   upgradeToPremium,
   getUserById,
 } = require("../controllers/userController");
+const { checkAdEligibility } = require("../controllers/UserControllers");
 
 // Kullanıcı profilini al (Token doğrulama ile)
 router.get("/profile", authenticateToken, getUserProfile);
@@ -17,6 +18,8 @@ router.put("/profile", authenticateToken, updateUserProfile);
 
 // Ödeme işlemi başarılıysa kullanıcıyı premium yap
 router.post("/upgrade-to-premium", authenticateToken, upgradeToPremium);
+
+router.get("/ad-eligibility", authenticateToken, checkAdEligibility);
 
 router.get(":id", getUserById);
 

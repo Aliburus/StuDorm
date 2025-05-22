@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Users,
   FileText,
@@ -10,9 +10,81 @@ import {
   Crown,
   UserCheck,
   Clock8,
+  MessageSquare,
+  DollarSign,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+} from "recharts";
+import axios from "axios";
+import { format as d3format } from "d3-format";
 
 function OverviewTab({ stats }) {
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+  const [cityStats, setCityStats] = useState([]);
+  const [trendData, setTrendData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        const [revenueRes, cityRes, trendRes] = await Promise.all([
+          axios.get(
+            "http://localhost:5000/api/admin/premium-revenue-by-month",
+            config
+          ),
+          axios.get(
+            "http://localhost:5000/api/admin/listing-stats-by-city",
+            config
+          ),
+          axios.get(
+            "http://localhost:5000/api/admin/user-listing-trends-by-month",
+            config
+          ),
+        ]);
+
+        setMonthlyRevenue(revenueRes.data);
+        setCityStats(cityRes.data);
+        setTrendData(trendRes.data);
+      } catch (error) {
+        console.error("Veri alınamadı:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const listingData = [
+    { name: "Yurt İlanları", value: stats.dormListings },
+    { name: "Part-time İşler", value: stats.partTimeListings },
+    { name: "Staj İlanları", value: stats.internListings },
+  ];
+
+  const userData = [
+    { name: "Premium", value: stats.premiumUsers },
+    { name: "Normal", value: stats.basicUsers },
+  ];
+
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -20,7 +92,52 @@ function OverviewTab({ stats }) {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Total Users</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Premium Gelir
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900 mt-1">
+                  {stats.premiumRevenue?.toLocaleString("tr-TR", {
+                    style: "currency",
+                    currency: "TRY",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </h3>
+              </div>
+              <div className="bg-green-100 p-3 rounded-xl">
+                <span className="text-green-600 font-bold">₺</span>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <Crown className="h-4 w-4 text-purple-500" />
+                <span className="text-sm text-gray-600">
+                  Premium Üye: {stats.premiumUsers}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-green-600 font-bold">₺</span>
+                <span className="text-sm text-gray-600">
+                  Üyelik:{" "}
+                  {stats.premiumPrice?.toLocaleString("tr-TR", {
+                    style: "currency",
+                    currency: "TRY",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Toplam Kullanıcı
+                </p>
                 <h3 className="text-2xl font-bold text-gray-900 mt-1">
                   {stats.totalUsers.toLocaleString()}
                 </h3>
@@ -39,15 +156,45 @@ function OverviewTab({ stats }) {
               <div className="flex items-center space-x-2">
                 <UserCheck className="h-4 w-4 text-green-500" />
                 <span className="text-sm text-gray-600">
-                  Basic: {stats.basicUsers}
+                  Normal: {stats.basicUsers}
                 </span>
               </div>
             </div>
           </div>
-          <div className="px-6 py-3 bg-gradient-to-r from-blue-50 to-blue-100">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
-              <span className="text-sm text-blue-600">Active Growth</span>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">Toplam İlan</p>
+                <h3 className="text-2xl font-bold text-gray-900 mt-1">
+                  {stats.totalListings.toLocaleString()}
+                </h3>
+              </div>
+              <div className="bg-green-100 p-3 rounded-xl">
+                <FileText className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-4">
+              <div className="flex items-center space-x-2">
+                <Building className="h-4 w-4 text-blue-500" />
+                <span className="text-sm text-gray-600">
+                  Yurt: {stats.dormListings}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Briefcase className="h-4 w-4 text-yellow-500" />
+                <span className="text-sm text-gray-600">
+                  Part-time: {stats.partTimeListings}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="h-4 w-4 text-purple-500" />
+                <span className="text-sm text-gray-600">
+                  Staj: {stats.internListings}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -57,112 +204,211 @@ function OverviewTab({ stats }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  Total Listings
+                  Forum İstatistikleri
                 </p>
-                <h3 className="text-2xl font-bold text-gray-900 mt-1">
-                  {stats.totalListings.toLocaleString()}
-                </h3>
-              </div>
-              <div className="bg-yellow-100 p-3 rounded-xl">
-                <FileText className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div className="flex items-center space-x-2">
-                <UserCheck className="h-4 w-4 text-green-500" />
-                <span className="text-sm text-gray-600">
-                  Active: {stats.activeUsers}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Clock8 className="h-4 w-4 text-orange-500" />
-                <span className="text-sm text-gray-600">
-                  Pending: {stats.pendingApprovals}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="px-6 py-3 bg-gradient-to-r from-yellow-50 to-yellow-100">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm text-yellow-600">Listing Growth</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Forum Posts</p>
                 <h3 className="text-2xl font-bold text-gray-900 mt-1">
                   {stats.totalPosts.toLocaleString()}
                 </h3>
               </div>
-              <div className="bg-green-100 p-3 rounded-xl">
-                <FileText className="h-6 w-6 text-green-600" />
+              <div className="bg-purple-100 p-3 rounded-xl">
+                <MessageSquare className="h-6 w-6 text-purple-600" />
               </div>
-            </div>
-          </div>
-          <div className="px-6 py-3 bg-gradient-to-r from-green-50 to-green-100">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-green-600">Engagement Rate</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Listing Categories
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">Aylık Premium Gelir</h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={monthlyRevenue}
+                margin={{ left: 40, right: 20, top: 20, bottom: 20 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis
+                  tickFormatter={(value) =>
+                    value.toLocaleString("tr-TR", {
+                      style: "currency",
+                      currency: "TRY",
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  }
+                />
+                <Tooltip
+                  formatter={(value) =>
+                    value.toLocaleString("tr-TR", {
+                      style: "currency",
+                      currency: "TRY",
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  }
+                />
+                <Bar
+                  dataKey="total_revenue"
+                  name="Gelir"
+                  fill="#8884d8"
+                  radius={[6, 6, 0, 0]}
+                  barSize={32}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">
+            Şehir Bazlı İlan Dağılımı
+          </h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={cityStats}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="city" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="dorm_listings"
+                  name="Yurt İlanları"
+                  fill="#8884d8"
+                />
+                <Bar
+                  dataKey="parttime_listings"
+                  name="Part-time İlanları"
+                  fill="#82ca9d"
+                />
+                <Bar
+                  dataKey="intern_listings"
+                  name="Staj İlanları"
+                  fill="#ffc658"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Kullanıcı ve ilan trendi grafiği */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 mt-8">
+        <h3 className="text-xl font-bold mb-6 text-gray-800">
+          Aylara Göre Kullanıcı ve İlan Artışı
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-white p-2 rounded-lg">
-                <Building className="h-6 w-6 text-blue-600" />
-              </div>
-              <span className="text-2xl font-bold text-blue-600">
-                {stats.dormListings.toLocaleString()}
-              </span>
-            </div>
-            <h4 className="text-sm font-medium text-gray-900">Dorm Listings</h4>
-            <p className="text-xs text-gray-500 mt-1">
-              Available accommodations
-            </p>
-          </div>
+        <div className="h-[500px] w-full xl:w-[1100px] mx-auto">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={trendData}
+              margin={{ top: 30, right: 40, left: 0, bottom: 10 }}
+            >
+              <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
+              <XAxis dataKey="month" tick={{ fontSize: 14, fill: "#6b7280" }} />
+              <YAxis
+                tick={{ fontSize: 14, fill: "#6b7280" }}
+                allowDecimals={false}
+                tickFormatter={(value) => d3format("~s")(value)}
+                domain={[
+                  0,
+                  (dataMax) => {
+                    if (dataMax < 10) return 10;
+                    if (dataMax < 100) return Math.ceil(dataMax / 10) * 10;
+                    if (dataMax < 1000) return Math.ceil(dataMax / 100) * 100;
+                    if (dataMax < 10000)
+                      return Math.ceil(dataMax / 1000) * 1000;
+                    return Math.ceil(dataMax / 10000) * 10000;
+                  },
+                ]}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: "#fff",
+                  borderRadius: 12,
+                  border: "1px solid #e5e7eb",
+                  fontSize: 15,
+                }}
+                labelStyle={{ color: "#6366f1", fontWeight: "bold" }}
+                itemStyle={{ fontWeight: "bold" }}
+                formatter={(value, name) => [
+                  d3format("~s")(value),
+                  name === "new_users"
+                    ? "Yeni Kullanıcı"
+                    : name === "total_listings"
+                    ? "Toplam İlan"
+                    : name,
+                ]}
+              />
+              <Legend
+                iconType="circle"
+                wrapperStyle={{ fontSize: 15, marginBottom: 10 }}
+              />
+              <Bar
+                dataKey="new_users"
+                name="Yeni Kullanıcı"
+                fill="#6366f1"
+                radius={[6, 6, 0, 0]}
+                barSize={32}
+              />
+              <Bar
+                dataKey="total_listings"
+                name="Toplam İlan"
+                fill="#10b981"
+                radius={[6, 6, 0, 0]}
+                barSize={32}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-white p-2 rounded-lg">
-                <Briefcase className="h-6 w-6 text-green-600" />
-              </div>
-              <span className="text-2xl font-bold text-green-600">
-                {stats.internListings.toLocaleString()}
-              </span>
-            </div>
-            <h4 className="text-sm font-medium text-gray-900">
-              Intern Listings
-            </h4>
-            <p className="text-xs text-gray-500 mt-1">
-              Internship opportunities
-            </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4">İlan Dağılımı</h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={listingData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {listingData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
+        </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-white p-2 rounded-lg">
-                <Clock className="h-6 w-6 text-purple-600" />
-              </div>
-              <span className="text-2xl font-bold text-purple-600">
-                {stats.partTimeListings.toLocaleString()}
-              </span>
-            </div>
-            <h4 className="text-sm font-medium text-gray-900">
-              Part-time Jobs
-            </h4>
-            <p className="text-xs text-gray-500 mt-1">Flexible work options</p>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4">Kullanıcı Dağılımı</h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={userData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

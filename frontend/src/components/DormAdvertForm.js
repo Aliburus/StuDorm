@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LocationSelector from "./LocationSelector";
 import {
   DollarSign,
@@ -15,8 +15,12 @@ import {
   createIntern,
   createPartTimeAdvert,
 } from "../services/ListingService"; // Adjust the import path as necessary
+import axios from "axios";
+
 const DormAdvertForm = () => {
   const [adType, setAdType] = useState("dorm"); // NEW: ad type selection
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [premiumError, setPremiumError] = useState("");
 
   const [formData, setFormData] = useState({
     user_id: "",
@@ -103,9 +107,33 @@ const DormAdvertForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const checkEligibility = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/users/check-ad-eligibility",
+        {
+          params: { adType },
+        }
+      );
+      return response.data.eligible;
+    } catch (error) {
+      console.error("Eligibility check error:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    const isEligible = await checkEligibility();
+    if (!isEligible) {
+      setPremiumError(
+        "İlan ekleme limitinize ulaştınız veya premium üye değilsiniz."
+      );
+      setShowPremiumModal(true);
+      return;
+    }
 
     setIsSubmitting(true);
     const location = `${formData.province}, ${formData.district}`;
@@ -159,7 +187,7 @@ const DormAdvertForm = () => {
   };
 
   return (
-    <div>
+    <>
       <Navbar />
       <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
@@ -418,7 +446,34 @@ const DormAdvertForm = () => {
         </div>
       </div>
       <Footer />
-    </div>
+
+      {/* Premium Modal */}
+      {showPremiumModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">Premium Üyelik Gerekli</h2>
+            <p className="text-gray-600 mb-6">{premiumError}</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowPremiumModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Kapat
+              </button>
+              <button
+                onClick={() => {
+                  setShowPremiumModal(false);
+                  window.location.href = "/payment";
+                }}
+                className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+              >
+                Premium Ol
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

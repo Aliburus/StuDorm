@@ -7,6 +7,9 @@ import ListingsTab from "./Components/tabs/ListingTabs";
 import SettingsTab from "./Components/tabs/SettingTabs";
 import { AdminService } from "../../services/AdminService";
 import ForumPosts from "./Components/tabs/ForumPosts";
+import LogsTab from "./Components/tabs/LogsTab";
+import PremiumBenefitsTab from "./Components/tabs/PremiumBenefitsTab";
+import ContactMessagesTab from "./Components/tabs/ContactMessagesTab";
 
 function DashboardPage() {
   const [selectedTab, setSelectedTab] = useState("overview");
@@ -17,6 +20,19 @@ function DashboardPage() {
   const [statsError, setStatsError] = useState(null);
 
   const [AllPosts, setAllPosts] = useState([]);
+
+  const refreshListings = async () => {
+    setLoading(true);
+    try {
+      const data = await AdminService.getAllListings();
+      setListings(data);
+    } catch (err) {
+      console.error("❌ Error fetching listings:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (selectedTab === "overview") {
@@ -45,17 +61,7 @@ function DashboardPage() {
   }, [selectedTab]);
   useEffect(() => {
     if (selectedTab === "listings") {
-      setLoading(true);
-      AdminService.getAllListings()
-        .then((data) => {
-          console.log("✅ Listings data:", data);
-          setListings(data);
-        })
-        .catch((err) => {
-          console.error("❌ Error fetching listings:", err);
-          setError(err);
-        })
-        .finally(() => setLoading(false));
+      refreshListings();
     }
   }, [selectedTab]);
 
@@ -92,12 +98,20 @@ function DashboardPage() {
                 Failed to load listings.
               </div>
             )}
-            {!loading && !error && <ListingsTab listings={listings} />}
+            {!loading && !error && (
+              <ListingsTab
+                listings={listings}
+                refreshListings={refreshListings}
+              />
+            )}
           </>
         )}
         {selectedTab === "settings" && <SettingsTab />}
 
         {selectedTab === "posts" && <ForumPosts AllPosts={AllPosts} />}
+        {selectedTab === "logs" && <LogsTab />}
+        {selectedTab === "premium" && <PremiumBenefitsTab />}
+        {selectedTab === "contact" && <ContactMessagesTab />}
       </div>
     </div>
   );

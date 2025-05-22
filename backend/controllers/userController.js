@@ -67,22 +67,36 @@ const updateUserProfile = async (req, res) => {
     // Yeni şifreyi hash'leyip güncelle
     let hashedPassword = user.password;
     if (newPassword) {
-      const salt = await bcrypt.genSalt(10); // Hash için salt üret
-      hashedPassword = await bcrypt.hash(newPassword, salt); // Yeni şifreyi hash'le
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(newPassword, salt);
+      await userModel.logUserAction(userId, "PASSWORD_CHANGE", {
+        oldEmail: user.email,
+        newEmail: email,
+      });
     }
 
     // Kullanıcı bilgilerini güncelle
     user.name = name || user.name;
     user.surname = surname || user.surname;
     user.email = email || user.email;
-    user.password = hashedPassword; // Şifreyi de burada güncelliyoruz
+    user.password = hashedPassword;
 
     // Kullanıcıyı veritabanında güncelle
     await userModel.updateProfile(user.id, {
       name: user.name,
       surname: user.surname,
       email: user.email,
-      password: user.password, // Şifreyi de burada güncelliyoruz
+      password: user.password,
+    });
+
+    // Profil güncelleme logunu kaydet
+    await userModel.logUserAction(userId, "PROFILE_UPDATE", {
+      oldName: user.name,
+      oldSurname: user.surname,
+      oldEmail: user.email,
+      newName: name,
+      newSurname: surname,
+      newEmail: email,
     });
 
     return res.status(200).json({ message: "User updated successfully" });

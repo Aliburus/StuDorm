@@ -195,6 +195,7 @@ function UsersTab() {
                             className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all duration-200"
                           >
                             <option value="normal">Normal</option>
+                            <option value="premium">Premium</option>
                             <option value="admin">Admin</option>
                           </select>
                           {processingId === user.id && (

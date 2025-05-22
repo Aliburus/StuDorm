@@ -21,6 +21,7 @@ const AccountForumPosts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editPostId, setEditPostId] = useState(null);
   const [currentContent, setCurrentContent] = useState("");
+  const [expandedPosts, setExpandedPosts] = useState([]);
   const navigate = useNavigate();
 
   // Gönderileri sunucudan çeker
@@ -62,6 +63,14 @@ const AccountForumPosts = () => {
     await fetchPosts();
   };
 
+  const toggleExpand = (postId) => {
+    setExpandedPosts((prev) =>
+      prev.includes(postId)
+        ? prev.filter((id) => id !== postId)
+        : [...prev, postId]
+    );
+  };
+
   if (error)
     return (
       <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg">
@@ -87,14 +96,15 @@ const AccountForumPosts = () => {
     );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {posts.map((post) => (
         <div
           key={post.id}
-          className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all duration-300"
+          className="bg-white rounded-xl shadow-sm p-3 border border-gray-100 hover:shadow-md transition-all duration-300"
+          style={{ marginTop: 0, marginBottom: 0 }}
         >
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center mb-2">
+          <div className="flex justify-between items-center mb-1">
+            <div className="flex items-center">
               <span className="font-semibold text-gray-800">
                 {post.name} {post.surname}
               </span>
@@ -107,43 +117,58 @@ const AccountForumPosts = () => {
                 />
               )}
             </div>
-            <div className="flex space-x-3">
+            <div className="flex space-x-1">
               <button
-                className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-1 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                 onClick={() => handleEdit(post.id, post.content)}
               >
-                <Edit className="w-5 h-5" />
+                <Edit className="w-4 h-4" />
               </button>
               <button
-                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-1 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 onClick={() => handleDelete(post.id)}
               >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
-          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-            <div className="flex items-center text-gray-500">
-              <Calendar className="w-4 h-4 mr-2" />
-              <span className="text-sm">
-                {new Date(post.created_at).toLocaleDateString("tr-TR", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
+          <div className="flex items-center text-gray-500 mb-1">
+            <Calendar className="w-4 h-4 mr-2" />
+            <span className="text-sm">
+              {new Date(post.created_at).toLocaleDateString("tr-TR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </span>
+          </div>
+          <div className="flex items-center space-x-3 mb-1">
+            <div className="flex items-center text-green-500">
+              <ThumbsUp className="w-4 h-4 mr-1" />
+              <span className="text-sm font-medium">{post.likes}</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center text-green-500">
-                <ThumbsUp className="w-4 h-4 mr-1" />
-                <span className="text-sm font-medium">{post.likes}</span>
-              </div>
-              <div className="flex items-center text-red-500">
-                <ThumbsDown className="w-4 h-4 mr-1" />
-                <span className="text-sm font-medium">{post.dislikes}</span>
-              </div>
+            <div className="flex items-center text-red-500">
+              <ThumbsDown className="w-4 h-4 mr-1" />
+              <span className="text-sm font-medium">{post.dislikes}</span>
             </div>
           </div>
+          <p
+            className="text-gray-700 text-base mb-2 border-l-4 border-yellow-400 pl-4 py-2 bg-yellow-50 rounded-r-lg"
+            style={{ wordBreak: "break-word" }}
+          >
+            {expandedPosts.includes(post.id)
+              ? post.content
+              : post.content.slice(0, 50) +
+                (post.content.length > 50 ? "..." : "")}
+          </p>
+          {post.content.length > 50 && (
+            <button
+              className="text-yellow-600 underline text-sm mb-2"
+              onClick={() => toggleExpand(post.id)}
+            >
+              {expandedPosts.includes(post.id) ? "Küçült" : "Devamını Göster"}
+            </button>
+          )}
         </div>
       ))}
       {isModalOpen && (

@@ -1,11 +1,11 @@
 const db = require("../config/db");
 
 const User = {
-  create: async ({ name, surname, email, password }) => {
+  create: async ({ name, surname, email, phone, password }) => {
     try {
       const [result] = await db.query(
-        "INSERT INTO users (name, surname, email, password) VALUES (?, ?, ?, ?)",
-        [name, surname, email, password]
+        "INSERT INTO users (name, surname, email, phone, password) VALUES (?, ?, ?, ?, ?)",
+        [name, surname, email, phone, password]
       );
       return result;
     } catch (error) {
@@ -26,6 +26,18 @@ const User = {
     }
   },
 
+  findByPhone: async (phone) => {
+    try {
+      const [rows] = await db.query("SELECT * FROM users WHERE phone = ?", [
+        phone,
+      ]);
+      return rows[0];
+    } catch (error) {
+      console.error("Telefon araması sırasında hata:", error);
+      throw new Error("Telefon arama işlemi başarısız.");
+    }
+  },
+
   getUserById: async (userId) => {
     try {
       const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [
@@ -39,12 +51,30 @@ const User = {
   },
 
   updateProfile: async (userId, updateData) => {
-    const { password } = updateData;
+    const { password, resetToken } = updateData;
+    const updates = [];
+    const values = [];
+
+    if (password) {
+      updates.push("password = ?");
+      values.push(password);
+    }
+
+    if (resetToken !== undefined) {
+      updates.push("resetToken = ?");
+      values.push(resetToken);
+    }
+
+    if (updates.length === 0) {
+      throw new Error("No fields to update");
+    }
+
+    values.push(userId);
 
     try {
       const [result] = await db.query(
-        `UPDATE users SET password = ? WHERE id = ?`,
-        [password, userId]
+        `UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
+        values
       );
 
       if (result.affectedRows === 0) {
@@ -80,20 +110,6 @@ const User = {
     }
   },
 
-  getUserById: async (userId) => {
-    try {
-      const [rows] = await db.execute("SELECT * FROM users WHERE id = ?", [
-        userId,
-      ]);
-      if (rows.length === 0) {
-        return null; // Kullanıcı bulunamadıysa null döndür
-      }
-      return rows[0];
-    } catch (err) {
-      console.error("Veritabanı hatası:", err);
-      throw new Error("Veritabanı hatası");
-    }
-  },
   updateUserType: async (userId, newUserType) => {
     try {
       const [result] = await db.query(
@@ -111,6 +127,43 @@ const User = {
     } catch (error) {
       console.error("Error updating user type:", error);
       throw new Error("Error updating user type");
+    }
+  },
+
+  logUserAction: async (userId, action, details) => {
+    try {
+      const [result] = await db.query(
+        "INSERT INTO user_logs (user_id, action, details, created_at) VALUES (?, ?, ?, NOW())",
+        [userId, action, JSON.stringify(details)]
+      );
+      return result;
+    } catch (error) {
+      console.error("Log kaydı sırasında hata:", error);
+      throw new Error("Log kaydı başarısız.");
+    }
+  },
+
+  getUserLogs: async (userId = null) => {
+    try {
+      let query = `
+        SELECT ul.*, u.name, u.surname, u.email 
+        FROM user_logs ul 
+        JOIN users u ON ul.user_id = u.id
+      `;
+      let params = [];
+
+      if (userId) {
+        query += " WHERE ul.user_id = ?";
+        params.push(userId);
+      }
+
+      query += " ORDER BY ul.created_at DESC";
+
+      const [rows] = await db.query(query, params);
+      return rows;
+    } catch (error) {
+      console.error("Log kayıtları alınırken hata:", error);
+      throw new Error("Log kayıtları alınamadı.");
     }
   },
 };

@@ -56,12 +56,8 @@ const UpdateForm = () => {
           setFormData({
             title: data.title || "",
             description: data.description || "",
-            price: "",
             province: data.province || "",
             district: data.district || "",
-            images: [],
-            gender_required: "herkes",
-            room_type: "single",
             category: data.category || "",
             duration: data.duration || "",
             requirements: data.requirements || "",
@@ -100,9 +96,6 @@ const UpdateForm = () => {
     if (!formData.description.trim()) {
       newErrors.description = "Bu alan zorunludur";
     }
-    if (!formData.price) {
-      newErrors.price = "Bu alan zorunludur";
-    }
     if (!formData.province) {
       newErrors.province = "Bu alan zorunludur";
     }
@@ -111,6 +104,9 @@ const UpdateForm = () => {
     }
 
     if (type === "yurt") {
+      if (!formData.price) {
+        newErrors.price = "Bu alan zorunludur";
+      }
       if (!formData.gender_required) {
         newErrors.gender_required = "Bu alan zorunludur";
       }
@@ -132,6 +128,10 @@ const UpdateForm = () => {
       if (!formData.requirements) {
         newErrors.requirements = "Bu alan zorunludur";
       }
+    }
+
+    if (type === "parttime" && !formData.price) {
+      newErrors.price = "Bu alan zorunludur";
     }
 
     setErrors(newErrors);

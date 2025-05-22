@@ -62,30 +62,34 @@ const InternAd = {
 
   // Var olan ilanı günceller
   update: async (id, internData) => {
-    const result = await db.query(
-      `UPDATE interns SET 
-        title = ?, 
-        province = ?, 
-        district = ?, 
-        category = ?, 
-    
-        description = ?, 
-        duration = ?, 
-        requirements = ? 
-      WHERE id = ?`,
-      [
-        internData.title,
-        internData.province,
-        internData.district,
-        internData.category,
-
-        internData.description,
-        internData.duration,
-        internData.requirements,
-        id,
-      ]
-    );
-    return result[0].affectedRows;
+    try {
+      const result = await db.query(
+        `UPDATE interns SET 
+          title = ?, 
+          province = ?, 
+          district = ?, 
+          category = ?, 
+          description = ?, 
+          duration = ?, 
+          requirements = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?`,
+        [
+          internData.title,
+          internData.province,
+          internData.district,
+          internData.category,
+          internData.description,
+          internData.duration,
+          internData.requirements,
+          id,
+        ]
+      );
+      return result[0].affectedRows;
+    } catch (error) {
+      console.error("Staj ilanı güncellenirken hata:", error);
+      throw error;
+    }
   },
 
   // İlanı siler
