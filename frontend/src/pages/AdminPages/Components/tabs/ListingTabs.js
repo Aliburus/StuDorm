@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AdminService } from "../../../../services/AdminService";
 import { X } from "lucide-react";
+import LocationSelector from "../../../../components/LocationSelector";
 
 const BASE_UPLOAD_URL = "http://localhost:5000";
 
@@ -15,6 +16,11 @@ function ListingsTab({
   const [editingListing, setEditingListing] = useState(null);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [formData, setFormData] = useState({
+    province: "",
+    district: "",
+  });
+  const [districts, setDistricts] = useState([]);
 
   useEffect(() => {
     setFilteredListings(
@@ -29,6 +35,48 @@ function ListingsTab({
       })
     );
   }, [listings, selectedType, searchTerm]);
+
+  useEffect(() => {
+    if (editingListing) {
+      setFormData({
+        province: editingListing.province || "",
+        district: editingListing.district || "",
+      });
+      // İl seçiliyse district listesini doldur
+      if (editingListing.province) {
+        const data = require("../../../../data.json");
+        const selectedProvinceData = data.find(
+          (item) => item.text === editingListing.province
+        );
+        if (selectedProvinceData) {
+          setDistricts(selectedProvinceData.districts.map((d) => d.text));
+        } else {
+          setDistricts([]);
+        }
+      } else {
+        setDistricts([]);
+      }
+    }
+  }, [editingListing]);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    if (e.target.name === "province") {
+      const data = require("../../../../data.json");
+      const selectedProvinceData = data.find(
+        (item) => item.text === e.target.value
+      );
+      if (selectedProvinceData) {
+        setDistricts(selectedProvinceData.districts.map((d) => d.text));
+      } else {
+        setDistricts([]);
+      }
+      setFormData((prev) => ({ ...prev, district: "" }));
+    }
+  };
 
   const openEditModal = (listing) => {
     console.log("Gelen listing verisi:", listing);
@@ -50,6 +98,12 @@ function ListingsTab({
     setEditingListing({
       ...listing,
       images: photos,
+      province: listing.province || "",
+      district: listing.district || "",
+    });
+    setFormData({
+      province: listing.province || "",
+      district: listing.district || "",
     });
     setPreviewUrls(photos);
     setEditModalOpen(true);
@@ -98,28 +152,30 @@ function ListingsTab({
   const handleUpdate = async (e) => {
     e.preventDefault();
     const form = e.target;
-    const formData = new FormData();
+    const formDataToSend = new FormData();
 
     // Tüm form alanlarını FormData'ya ekle
     Array.from(form.elements).forEach((el) => {
       if (el.name && el.value !== undefined) {
         if (el.type === "file") {
-          // Dosya alanları için tüm dosyaları ekle
           Array.from(el.files).forEach((file) => {
-            formData.append("photos", file);
+            formDataToSend.append("photos", file);
           });
         } else {
-          formData.append(el.name, el.value);
+          formDataToSend.append(el.name, el.value);
         }
       }
     });
+    // İl ve ilçe değerlerini güncel state'ten ekle
+    formDataToSend.set("province", formData.province);
+    formDataToSend.set("district", formData.district);
 
     try {
       const [source, id] = editingListing.unique_id.split("-");
-      await AdminService.updateListingDetails(source, id, formData);
+      await AdminService.updateListingDetails(source, id, formDataToSend);
       alert("İlan güncellendi");
       setEditModalOpen(false);
-      refreshListings(); // Sayfa yenileme yerine refreshListings kullan
+      refreshListings();
     } catch (err) {
       console.error(err);
       alert("İlan güncellenirken bir hata oluştu");
@@ -271,26 +327,11 @@ function ListingsTab({
               {/* Yurt ilanları için özel alanlar */}
               {editingListing.source === "yurtads" && (
                 <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      İl
-                    </label>
-                    <input
-                      name="province"
-                      defaultValue={editingListing.province}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      İlçe
-                    </label>
-                    <input
-                      name="district"
-                      defaultValue={editingListing.district}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
+                  <LocationSelector
+                    formData={formData}
+                    handleChange={handleChange}
+                    districts={districts}
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Fiyat
@@ -386,6 +427,11 @@ function ListingsTab({
               {/* Staj ilanları için özel alanlar */}
               {editingListing.source === "interns" && (
                 <>
+                  <LocationSelector
+                    formData={formData}
+                    handleChange={handleChange}
+                    districts={districts}
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Kategori
@@ -433,6 +479,11 @@ function ListingsTab({
               {/* Part-time ilanları için özel alanlar */}
               {editingListing.source === "parttimeads" && (
                 <>
+                  <LocationSelector
+                    formData={formData}
+                    handleChange={handleChange}
+                    districts={districts}
+                  />
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Kategori

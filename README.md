@@ -1,86 +1,78 @@
-# StuDorm
+# StuDorm - Öğrenci Yurt ve İlan Yönetim Sistemi
 
-<div align="center">
-  <img src="frontend/src/assets/Logo1.jpeg" alt="StuDorm Logo" width="120" />
-  <h2>Öğrenciler için Yurt, Oda, İş ve Staj Platformu</h2>
-</div>
+## Proje Hakkında
 
----
+StuDorm, öğrencilere ve yöneticilere yönelik bir yurt, ilan ve kullanıcı yönetim platformudur. Admin paneli, kullanıcı yönetimi, ilan yönetimi, iletişim mesajları ve şifre işlemleri gibi birçok özelliği içerir.
 
-[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![React](https://img.shields.io/badge/frontend-React-blue)](https://react.dev/)
-[![Node.js](https://img.shields.io/badge/backend-Node.js-green)](https://nodejs.org/)
-[![MySQL](https://img.shields.io/badge/database-MySQL-blue)](https://www.mysql.com/)
+## Özellikler
 
----
+- Kullanıcı kayıt & giriş sistemi (JWT tabanlı)
+- Admin paneli (kullanıcı, ilan, mesaj ve ayar yönetimi)
+- İl/ilçe seçimi ve güncelleme
+- Kullanıcıya özel mesajlaşma ve admin cevabı
+- Şifre değiştirme
+- Premium kullanıcı yönetimi
+- Modern ve responsive arayüz (React + Tailwind CSS)
 
-## 🚀 Kısa Özet
+## Kurulum
 
-StuDorm, öğrencilerin yurt, oda, part-time iş ve staj ilanlarını kolayca bulup paylaşabildiği, premium üyelik ve güçlü bir admin paneli sunan modern bir platformdur.
+### Gereksinimler
 
-## 🔥 Hızlı Başlat
+- Node.js (v16+ önerilir)
+- MySQL
+
+### 1. Veritabanı
+
+- `contact_messages` ve `contact_answers` gibi gerekli tabloları oluşturun.
+- Örnek tablo oluşturma:
+
+```sql
+CREATE TABLE contact_messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE contact_answers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  contact_message_id INT NOT NULL,
+  answer TEXT NOT NULL,
+  answered_email VARCHAR(255) NOT NULL,
+  answered_by VARCHAR(255) NOT NULL,
+  answered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (contact_message_id) REFERENCES contact_messages(id)
+);
+```
+
+### 2. Backend
 
 ```bash
-# 1. Projeyi klonla
-git clone <repo-link>
-cd StuDorm
-
-# 2. Backend bağımlılıklarını yükle
 cd backend
 npm install
-
-# 3. Frontend bağımlılıklarını yükle
-cd ../frontend
-npm install
-
-# 4. Veritabanı ayarlarını yap (backend/config/db.js)
-# 5. Backend'i başlat
-cd ../backend
-npm run dev
-# veya
-node server.js
-
-# 6. Frontend'i başlat
-cd ../frontend
 npm start
 ```
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:5000
+- `.env` dosyası ile veritabanı ve JWT ayarlarını yapın.
 
-## ✨ Özellikler
+### 3. Frontend
 
-- ✅ Kullanıcı kayıt & giriş (telefon, e-posta, şifre validasyonlu)
-- ✅ Yurt, part-time staj ilanı ekleme/güncelleme
-- ✅ Premium & normal kullanıcı ayrımı, avantajlar
-- ✅ Premium ödeme ve üyelik yönetimi
-- ✅ Admin paneli: kullanıcı, ilan, forum, premium benefits, iletişim mesajları
-- ✅ Forum ve mesajlaşma
-- ✅ Tüm işlemlerde detaylı validasyon ve loglama
-- ✅ Modern, responsive ve kullanıcı dostu arayüz
+```bash
+cd frontend
+npm install
+npm start
+```
 
-## 🛠️ Kullanılan Teknolojiler
+## Kullanım
 
-- **Frontend:** React, Tailwind CSS, Axios, Recharts
-- **Backend:** Node.js, Express.js, MySQL
-- **Diğer:** JWT Auth, Multer, Nodemailer, bcrypt
+- `http://localhost:3000` üzerinden kullanıcı arayüzüne erişebilirsiniz.
+- `http://localhost:3000/admin` üzerinden admin paneline erişebilirsiniz.
 
-## 🖼️ Ekran Görüntüleri
+## Katkı ve Geliştirme
 
-> Örnek ekran görüntüleri için `screenshots/` klasörüne bakabilirsiniz.
+- Pull request ve issue açabilirsiniz.
+- Kod standartlarına ve proje yapısına uygun katkı beklenmektedir.
 
-![Örnek Ekran](screenshots/overview.png)
+## Lisans
 
-## 🤝 Katkı ve Lisans
-
-- Katkı yapmak için PR gönderebilirsin.
-- MIT Lisansı ile açık kaynak.
-
-## 📬 İletişim
-
-Her türlü soru, öneri ve katkı için iletişime geçebilirsiniz!
-
----
-
-> Geliştirici: [Senin Adın]
-> Proje: StuDorm - Öğrenci Yaşam Platformu
+MIT

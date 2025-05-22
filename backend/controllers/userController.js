@@ -118,7 +118,13 @@ const upgradeToPremium = async (req, res) => {
   }
 
   try {
-    const updatedUser = await userModel.upgradeToPremium(userId);
+    // O anki premium fiyatını çek
+    const [[benefit]] = await db.query(
+      "SELECT price FROM premium_benefits ORDER BY id DESC LIMIT 1"
+    );
+    const premiumPrice = benefit?.price || 0;
+    // Kullanıcıyı premium yaparken fiyatı da kaydet
+    const updatedUser = await userModel.upgradeToPremium(userId, premiumPrice);
     res.json({ message: "Hesabınız premium olmuştur", user: updatedUser });
   } catch (err) {
     console.error("Hata:", err.message);

@@ -1,4 +1,5 @@
 const contactModel = require("../models/ContactModel");
+const ContactAnswer = require("../models/ContactAnswer");
 
 const createContactMessage = async (req, res) => {
   // Payload sadece email & message gönderecek
@@ -45,8 +46,36 @@ const getUserMessages = async (req, res) => {
   }
 };
 
+const replyToContactMessage = async (req, res) => {
+  try {
+    const { contact_message_id, email, message } = req.body;
+    const answered_by = req.user.email;
+    await ContactAnswer.create({
+      contact_message_id,
+      answer: message,
+      answered_email: email,
+      answered_by,
+    });
+    res.status(200).json({ message: "Cevap kaydedildi ve gönderildi." });
+  } catch (err) {
+    res.status(500).json({ error: "Cevap kaydedilemedi." });
+  }
+};
+
+const getContactAnswerByMessageId = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const answers = await ContactAnswer.getByMessageId(messageId);
+    res.json(answers);
+  } catch (err) {
+    res.status(500).json({ error: "Cevaplar alınamadı." });
+  }
+};
+
 module.exports = {
   createContactMessage,
   getAllContactMessages,
   getUserMessages,
+  replyToContactMessage,
+  getContactAnswerByMessageId,
 };

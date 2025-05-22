@@ -1,15 +1,35 @@
 import React, { useState, useEffect } from "react";
 import data from "../data.json";
 
-const LocationSelector = ({ formData, handleChange }) => {
+const LocationSelector = ({
+  formData,
+  handleChange,
+  districts: districtsProp,
+}) => {
   const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
+  const [districtsState, setDistrictsState] = useState([]);
+  const districts =
+    districtsProp !== undefined ? districtsProp : districtsState;
 
   // İlleri (provinces) filtrele
   useEffect(() => {
     const uniqueProvinces = data.map((item) => item.text); // Verilerinizde "text" ile il bilgisine erişim sağlanıyor
     setProvinces(uniqueProvinces);
   }, []);
+
+  // formData içinde province değeri varsa, ilçeleri otomatik yükle
+  useEffect(() => {
+    if (formData.province) {
+      const selectedProvinceData = data.find(
+        (item) => item.text === formData.province
+      );
+      if (selectedProvinceData) {
+        setDistrictsState(
+          selectedProvinceData.districts.map((district) => district.text)
+        );
+      }
+    }
+  }, [formData.province]);
 
   // İl (province) seçildiğinde ilçeleri filtrele
   const handleProvinceChange = (e) => {
@@ -20,11 +40,11 @@ const LocationSelector = ({ formData, handleChange }) => {
       (item) => item.text === selectedProvince
     ); // İle ait veriyi buluyoruz
     if (selectedProvinceData) {
-      setDistricts(
+      setDistrictsState(
         selectedProvinceData.districts.map((district) => district.text)
       ); // İlçeleri set ediyoruz
     } else {
-      setDistricts([]);
+      setDistrictsState([]);
     }
   };
 

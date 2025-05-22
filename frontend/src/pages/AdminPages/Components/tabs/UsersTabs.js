@@ -17,6 +17,7 @@ function UsersTab() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [processingId, setProcessingId] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -159,12 +160,18 @@ function UsersTab() {
                   key={user.id}
                   className="hover:bg-gray-50 transition-colors duration-150"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td
+                    className="px-6 py-4 whitespace-nowrap cursor-pointer"
+                    onClick={() => setSelectedUser(user)}
+                  >
                     <div className="text-sm font-medium text-gray-900">
                       {user.name} {user.surname}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td
+                    className="px-6 py-4 whitespace-nowrap cursor-pointer"
+                    onClick={() => setSelectedUser(user)}
+                  >
                     <div className="text-sm text-gray-600">{user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -183,13 +190,13 @@ function UsersTab() {
                         )}
                         {user.user_type}
                       </span>
-
                       {isAdmin && (
                         <div className="mt-1">
                           <select
-                            onChange={(e) =>
-                              handleUserTypeChange(user.id, e.target.value)
-                            }
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleUserTypeChange(user.id, e.target.value);
+                            }}
                             value={user.user_type}
                             disabled={processingId === user.id}
                             className="w-full py-1.5 px-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all duration-200"
@@ -208,30 +215,84 @@ function UsersTab() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-500">
                       {formatDate(user.created_at)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
-                      onClick={() => handleDelete(user.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(user.id);
+                      }}
+                      className="text-red-600 hover:text-red-900"
                       disabled={processingId === user.id}
-                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
                     >
-                      {processingId === user.id ? (
-                        <Loader className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Sil
-                        </>
-                      )}
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Kullanıcı Detayları</h2>
+            <table className="w-full text-sm mb-4">
+              <tbody>
+                <tr>
+                  <td className="font-semibold py-1 pr-2">ID:</td>
+                  <td>{selectedUser.id}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold py-1 pr-2">Ad:</td>
+                  <td>{selectedUser.name}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold py-1 pr-2">Soyad:</td>
+                  <td>{selectedUser.surname}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold py-1 pr-2">E-posta:</td>
+                  <td>{selectedUser.email}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold py-1 pr-2">Kullanıcı Tipi:</td>
+                  <td>{selectedUser.user_type}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold py-1 pr-2">Kayıt Tarihi:</td>
+                  <td>{formatDate(selectedUser.created_at)}</td>
+                </tr>
+                {selectedUser.premium_price !== undefined &&
+                  selectedUser.premium_price !== null && (
+                    <tr>
+                      <td className="font-semibold py-1 pr-2">
+                        Premium Fiyatı:
+                      </td>
+                      <td>
+                        {Number(selectedUser.premium_price).toLocaleString(
+                          "tr-TR",
+                          { style: "currency", currency: "TRY" }
+                        )}
+                      </td>
+                    </tr>
+                  )}
+              </tbody>
+            </table>
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

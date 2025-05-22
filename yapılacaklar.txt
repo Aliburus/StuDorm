@@ -1,4 +1,4 @@
-
 güvenlik düzenleme
-update((admindeki il ilçe kısmı ))
-premium gelir tablosu mantığı
+
+
+kullanıcı log

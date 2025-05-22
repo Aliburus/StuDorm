@@ -90,11 +90,11 @@ const User = {
     }
   },
 
-  upgradeToPremium: async (userId) => {
+  upgradeToPremium: async (userId, premiumPrice) => {
     try {
       const [result] = await db.query(
-        `UPDATE users SET user_type = 'premium' WHERE id = ?`,
-        [userId] // Kullanıcıyı premium yapıyoruz
+        `UPDATE users SET user_type = 'premium', premium_price = ? WHERE id = ?`,
+        [premiumPrice, userId]
       );
 
       if (result.affectedRows === 0) {

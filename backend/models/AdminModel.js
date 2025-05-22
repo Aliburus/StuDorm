@@ -1,7 +1,7 @@
 const db = require("../config/db");
 const AdminModel = {
   getAllUsers: async () => {
-    const query = `SELECT id, name, surname, email, user_type, created_at FROM users`;
+    const query = `SELECT id, name, surname, email, user_type, premium_price, created_at FROM users`;
     const [rows] = await db.query(query);
     return rows;
   },
@@ -109,15 +109,13 @@ const AdminModel = {
       FROM forum_posts
     `);
 
-    // Premium gelir hesaplama
+    // Premium gelir hesaplama (yeni)
     const [[premiumStats]] = await db.query(`
       SELECT 
-        pb.price,
-        COUNT(*) as premium_count,
-        (pb.price * COUNT(*)) as total_revenue
-      FROM premium_benefits pb
-      JOIN users u ON u.user_type = 'premium'
-      GROUP BY pb.price
+        SUM(u.premium_price) as total_revenue,
+        MAX(u.premium_price) as premiumPrice
+      FROM users u
+      WHERE u.user_type = 'premium'
     `);
 
     return {
@@ -126,7 +124,7 @@ const AdminModel = {
       ...forumStats,
       roommateListings: 0,
       premiumRevenue: premiumStats?.total_revenue || 0,
-      premiumPrice: premiumStats?.price || 0,
+      premiumPrice: premiumStats?.premiumPrice || 0,
     };
   },
 
@@ -247,9 +245,8 @@ const AdminModel = {
     const [rows] = await db.query(`
       SELECT 
         DATE_FORMAT(u.updated_at, '%Y-%m') as month,
-        COUNT(*) * pb.price as total_revenue
+        SUM(u.premium_price) as total_revenue
       FROM users u
-      JOIN premium_benefits pb ON pb.id = 1
       WHERE u.user_type = 'premium'
       GROUP BY month
       ORDER BY month ASC
@@ -261,7 +258,7 @@ const AdminModel = {
     const [rows] = await db.query(`
       SELECT 
         COALESCE(province, 'Belirtilmemiş') as city,
-        COUNT(*) * pb.price as total_revenue
+        SUM(u.premium_price) as total_revenue
       FROM (
         SELECT province, user_id FROM yurtads
         UNION ALL
@@ -270,7 +267,6 @@ const AdminModel = {
         SELECT province, user_id FROM interns
       ) as all_listings
       JOIN users u ON u.id = all_listings.user_id
-      JOIN premium_benefits pb ON pb.id = 1
       WHERE u.user_type = 'premium'
       GROUP BY province
       ORDER BY total_revenue DESC

@@ -40,17 +40,39 @@ function UserLogDetails() {
 
   const user = logs[0];
 
-  function renderDetails(details) {
-    if (!details || typeof details !== "object") return String(details);
-    return (
-      <ul className="list-disc pl-4 text-sm text-gray-700">
-        {Object.entries(details).map(([key, value]) => (
-          <li key={key}>
-            <span className="font-semibold">{key}:</span> {String(value)}
-          </li>
-        ))}
-      </ul>
-    );
+  function renderLogSummary(log) {
+    if (log.action === "USER DELETED") {
+      return `Kullanıcı ID: ${
+        log.details?.deletedUserId || "-"
+      }  Kullanıcı Adı: ${log.details?.deletedUserName || "-"}  E-posta: ${
+        log.details?.deletedUserEmail || "-"
+      }`;
+    }
+    if (log.action === "LOGIN") {
+      return `E-posta: ${log.details?.email || "-"}`;
+    }
+    if (log.action === "PREMIUM_BENEFIT_UPDATE") {
+      return `ID: ${log.details?.id || "-"}`;
+    }
+    if (log.action === "PROFILE_UPDATE") {
+      return `Ad: ${log.details?.newName || "-"} Soyad: ${
+        log.details?.newSurname || "-"
+      } E-posta: ${log.details?.newEmail || "-"}`;
+    }
+    if (log.details && typeof log.details === "object") {
+      const keys = Object.keys(log.details);
+      if (keys.length === 0) return "-";
+      return keys
+        .slice(0, 2)
+        .map(
+          (k) =>
+            `${k}: ${
+              typeof log.details[k] === "object" ? "..." : log.details[k]
+            }`
+        )
+        .join("  ");
+    }
+    return String(log.details || "-");
   }
 
   return (
@@ -62,32 +84,30 @@ function UserLogDetails() {
         {user.name} {user.surname}
       </h2>
       <div className="mb-4 text-gray-600">{user.email}</div>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              İşlem
-            </th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Detaylar
-            </th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Tarih
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {logs.map((log) => (
-            <tr key={log.id}>
-              <td className="px-4 py-2">{log.action}</td>
-              <td className="px-4 py-2">{renderDetails(log.details)}</td>
-              <td className="px-4 py-2">
-                {new Date(log.created_at).toLocaleString("tr-TR")}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <table className="hidden"></table>
+      <div className="space-y-4">
+        {logs.map((log) => (
+          <div
+            key={log.id}
+            className="flex flex-col md:flex-row md:items-center justify-between bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm"
+          >
+            <div className="flex items-center min-w-[180px] mb-2 md:mb-0 md:mr-4">
+              <span className="font-bold text-indigo-700 text-base mr-2">
+                {log.action.replace(/_/g, " ").toUpperCase()}
+              </span>
+              <span className="text-gray-800 text-sm">
+                {renderLogSummary(log)}
+              </span>
+            </div>
+            <div className="text-xs text-gray-400 mt-2 md:mt-0 md:ml-4 text-right min-w-[120px]">
+              {new Date(log.created_at).toLocaleString("tr-TR", {
+                dateStyle: "short",
+                timeStyle: "short",
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
