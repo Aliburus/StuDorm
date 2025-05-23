@@ -46,48 +46,21 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error state
-    setSuccess(""); // Reset success state
-
-    // E-posta validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!email) {
-      setError("E-posta adresi boş bırakılamaz");
-      return;
-    }
-    if (!emailRegex.test(email)) {
-      setError("Geçerli bir e-posta adresi giriniz");
-      return;
-    }
-
-    // Şifre validation
-    if (!password) {
-      setError("Şifre boş bırakılamaz");
-      return;
-    }
-    if (password.length < 6) {
-      setError("Şifre en az 6 karakter olmalıdır");
-      return;
-    }
+    setError("");
+    setSuccess("");
 
     try {
       const response = await login(email, password);
       localStorage.setItem("token", response.token);
-      setSuccess("Giriş başarılı! Yönlendiriliyorsunuz...");
 
-      // Token'ı decode et ve admin kontrolü yap
-      const decoded = JSON.parse(atob(response.token.split(".")[1]));
-
-      setTimeout(() => {
-        if (decoded.user_type === "admin") {
-          setIsAdmin(true);
-          setIsAuthenticated(true);
-          navigate("/admin");
-        } else {
-          setIsAuthenticated(true);
-          navigate("/");
-        }
-      }, 1500); // Yönlendirme öncesi kullanıcıya başarı mesajını görme şansı ver
+      if (response.user_type === "admin") {
+        setIsAdmin(true);
+        setIsAuthenticated(true);
+        window.location.href = "/admin";
+      } else {
+        setIsAuthenticated(true);
+        navigate("/");
+      }
     } catch (error) {
       setError(
         error.response?.data?.error ||

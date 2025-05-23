@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_secret_key";
-const JWT_EXPIRES_IN = "1h";
+const JWT_EXPIRES_IN = "24h";
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -54,7 +54,11 @@ const loginUser = async (req, res) => {
     // Giriş logu
     await User.logUserAction(user.id, "LOGIN", { email: user.email });
 
-    res.status(200).json({ message: "Giriş başarılı!", token });
+    res.status(200).json({
+      message: "Giriş başarılı!",
+      token,
+      user_type: user.user_type,
+    });
   } catch (error) {
     console.error("Giriş hatası:", error);
     res.status(500).json({ error: "Giriş işlemi sırasında bir hata oluştu!" });

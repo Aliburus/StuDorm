@@ -31,6 +31,7 @@ function App() {
         const decoded = JSON.parse(atob(token.split(".")[1]));
         return decoded.user_type === "admin";
       } catch (error) {
+        localStorage.removeItem("token");
         return false;
       }
     }
@@ -48,8 +49,13 @@ function App() {
     if (token) {
       try {
         const decoded = JSON.parse(atob(token.split(".")[1]));
-        setIsAdmin(decoded.user_type === "admin");
-        setIsAuthenticated(true);
+        if (decoded.user_type === "admin") {
+          setIsAdmin(true);
+          setIsAuthenticated(true);
+        } else {
+          setIsAdmin(false);
+          setIsAuthenticated(true);
+        }
       } catch (error) {
         setIsAdmin(false);
         setIsAuthenticated(false);

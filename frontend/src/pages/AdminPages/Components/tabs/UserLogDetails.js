@@ -84,26 +84,21 @@ function UserLogDetails() {
         {user.name} {user.surname}
       </h2>
       <div className="mb-4 text-gray-600">{user.email}</div>
-      <table className="hidden"></table>
       <div className="space-y-4">
         {logs.map((log) => (
           <div
             key={log.id}
-            className="flex flex-col md:flex-row md:items-center justify-between bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm"
+            className="flex items-center justify-between bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm"
           >
-            <div className="flex items-center min-w-[180px] mb-2 md:mb-0 md:mr-4">
-              <span className="font-bold text-indigo-700 text-base mr-2">
-                {log.action.replace(/_/g, " ").toUpperCase()}
-              </span>
-              <span className="text-gray-800 text-sm">
-                {renderLogSummary(log)}
-              </span>
-            </div>
-            <div className="text-xs text-gray-400 mt-2 md:mt-0 md:ml-4 text-right min-w-[120px]">
+            <div className="text-gray-800">
               {new Date(log.created_at).toLocaleString("tr-TR", {
-                dateStyle: "short",
-                timeStyle: "short",
-              })}
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              - {log.action}
             </div>
           </div>
         ))}
