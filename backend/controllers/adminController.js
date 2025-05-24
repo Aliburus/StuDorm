@@ -4,7 +4,8 @@ const User = require("../models/User"); // Kullanıcı modelini içe aktar
 const bcrypt = require("bcrypt"); // Bcrypt'i içe aktar
 module.exports.getUsers = async (req, res) => {
   try {
-    const users = await AdminModel.getAllUsers(); // AdminModel'den kullanıcıları al
+    const users = await AdminModel.getAllUsers();
+    await User.logUserAction(req.user.id, "GET_USERS", { count: users.length });
     res.status(200).json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -14,6 +15,9 @@ module.exports.getUsers = async (req, res) => {
 module.exports.getAllListings = async (req, res) => {
   try {
     const listings = await AdminModel.getAllListings();
+    await User.logUserAction(req.user.id, "GET_ALL_LISTINGS", {
+      count: listings.length,
+    });
     res.status(200).json(listings);
   } catch (err) {
     console.error("Error fetching listings:", err);
@@ -23,6 +27,7 @@ module.exports.getAllListings = async (req, res) => {
 module.exports.getOverviewStats = async (req, res) => {
   try {
     const stats = await AdminModel.getOverviewStats();
+    await User.logUserAction(req.user.id, "GET_OVERVIEW_STATS", { stats });
     res.status(200).json(stats);
   } catch (error) {
     console.error("Error fetching overview stats:", error);
@@ -33,6 +38,7 @@ module.exports.deleteListing = async (req, res) => {
   try {
     const { source, id } = req.params;
     await AdminModel.deleteListing(source, id);
+    await User.logUserAction(req.user.id, "DELETE_LISTING", { source, id });
     res.status(200).json({ message: "Listing deleted successfully" });
   } catch (err) {
     console.error("Delete error:", err);
@@ -43,8 +49,12 @@ module.exports.deleteListing = async (req, res) => {
 module.exports.updateListingDetails = async (req, res) => {
   try {
     const { source, id } = req.params;
-    // body'de tüm güncellenmiş alanlar geliyor
     await AdminModel.updateListingDetails(source, id, req.body);
+    await User.logUserAction(req.user.id, "UPDATE_LISTING_DETAILS", {
+      source,
+      id,
+      details: req.body,
+    });
     res.status(200).json({ message: "Listing details updated" });
   } catch (err) {
     console.error("UpdateDetails error:", err);
@@ -54,8 +64,11 @@ module.exports.updateListingDetails = async (req, res) => {
 
 module.exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await AdminModel.getAllPosts(); // Modelden verileri al
-    res.status(200).json(posts); // JSON olarak döndür
+    const posts = await AdminModel.getAllPosts();
+    await User.logUserAction(req.user.id, "GET_ALL_POSTS", {
+      count: posts.length,
+    });
+    res.status(200).json(posts);
   } catch (error) {
     console.error("Error fetching posts:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -87,28 +100,22 @@ module.exports.deleteUser = async (req, res) => {
 };
 module.exports.changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
-  const userId = req.user.id; // Admin ID'sini JWT'den alıyoruz
+  const userId = req.user.id;
 
   try {
-    // MySQL ile kullanıcıyı ID ile bul
     const user = await User.getUserById(userId);
-
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Mevcut şifreyi kontrol et
     const match = await bcrypt.compare(currentPassword, user.password);
     if (!match) {
       return res.status(401).json({ error: "Current password is incorrect" });
     }
 
-    // Yeni şifreyi hashle
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Yeni şifreyi kaydetmek için SQL sorgusu kullan
     await User.updateProfile(userId, { password: hashedPassword });
-
+    await User.logUserAction(userId, "ADMIN_PASSWORD_CHANGE", { userId });
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
     console.error("Error changing password:", error);
@@ -148,6 +155,9 @@ module.exports.updateUserType = async (req, res) => {
       newUserType: user_type,
     });
 
+    // Premium bitiş kontrolü
+    await User.checkAndDowngradeExpiredPremiums();
+
     res.status(200).json({
       message: "Kullanıcı tipi başarıyla güncellendi",
       updatedUser,
@@ -162,6 +172,7 @@ module.exports.deleteForumPost = async (req, res) => {
   try {
     const { id } = req.params;
     await AdminModel.deleteForumPost(id);
+    await User.logUserAction(req.user.id, "DELETE_FORUM_POST", { postId: id });
     res.status(200).json({ message: "Post başarıyla silindi" });
   } catch (error) {
     console.error("Post silinirken hata:", error);
@@ -172,6 +183,9 @@ module.exports.deleteForumPost = async (req, res) => {
 module.exports.getPremiumRevenueByMonth = async (req, res) => {
   try {
     const data = await AdminModel.getPremiumRevenueByMonth();
+    await User.logUserAction(req.user.id, "GET_PREMIUM_REVENUE_BY_MONTH", {
+      data,
+    });
     res.status(200).json(data);
   } catch (error) {
     console.error("Error fetching premium revenue by month:", error);
@@ -182,6 +196,9 @@ module.exports.getPremiumRevenueByMonth = async (req, res) => {
 module.exports.getPremiumRevenueByCity = async (req, res) => {
   try {
     const data = await AdminModel.getPremiumRevenueByCity();
+    await User.logUserAction(req.user.id, "GET_PREMIUM_REVENUE_BY_CITY", {
+      data,
+    });
     res.status(200).json(data);
   } catch (error) {
     console.error("Error fetching premium revenue by city:", error);
@@ -192,6 +209,9 @@ module.exports.getPremiumRevenueByCity = async (req, res) => {
 module.exports.getListingStatsByCity = async (req, res) => {
   try {
     const stats = await AdminModel.getListingStatsByCity();
+    await User.logUserAction(req.user.id, "GET_LISTING_STATS_BY_CITY", {
+      stats,
+    });
     res.json(stats);
   } catch (error) {
     console.error("Şehir bazlı ilan istatistikleri alınamadı:", error);
@@ -204,6 +224,11 @@ module.exports.getListingStatsByCity = async (req, res) => {
 module.exports.getUserAndListingTrendsByMonth = async (req, res) => {
   try {
     const data = await AdminModel.getUserAndListingTrendsByMonth();
+    await User.logUserAction(
+      req.user.id,
+      "GET_USER_AND_LISTING_TRENDS_BY_MONTH",
+      { data }
+    );
     res.status(200).json(data);
   } catch (error) {
     console.error("Trend verileri alınamadı:", error);
@@ -215,6 +240,7 @@ module.exports.getUserLogs = async (req, res) => {
   try {
     const { userId } = req.query;
     const logs = await User.getUserLogs(userId);
+    await User.logUserAction(req.user.id, "GET_USER_LOGS", { userId });
     res.status(200).json(logs);
   } catch (error) {
     console.error("Error fetching user logs:", error);

@@ -121,12 +121,14 @@ const getUserLogs = async (userId) => {
 };
 
 export const deleteForumComment = async (postId, commentId) => {
+  const token = localStorage.getItem("token");
   const res = await fetch(
     `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
     {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     }
   );

@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { updateListing, getListingById } from "../services/updateService";
-import { X, Plus, FileText, DollarSign, MapPin } from "lucide-react";
+import {
+  X,
+  Plus,
+  FileText,
+  DollarSign,
+  MapPin,
+  Clock,
+  Tag,
+  FileSpreadsheet,
+} from "lucide-react";
 import LocationSelector from "../components/LocationSelector";
 
 const BASE_UPLOAD_URL = "http://localhost:5000";
@@ -14,6 +23,7 @@ const UpdateForm = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -29,14 +39,49 @@ const UpdateForm = () => {
     images: [],
   });
 
+  // Form section titles based on type
+  const formTitles = {
+    yurt: "Yurt İlanı Güncelle",
+    intern: "Staj İlanı Güncelle",
+    parttime: "Part Time İlanı Güncelle",
+  };
+
+  // Category options for intern and parttime
+  const categoryOptions = [
+    { value: "software", label: "Yazılım Geliştirme" },
+    { value: "marketing", label: "Pazarlama" },
+    { value: "finance", label: "Finans" },
+    { value: "design", label: "Tasarım" },
+    { value: "sales", label: "Satış" },
+    { value: "customer_support", label: "Müşteri Destek" },
+    { value: "hr", label: "İnsan Kaynakları" },
+  ];
+
+  // Room type options for yurt
+  const roomTypeOptions = [
+    { value: "single", label: "Tek Kişilik" },
+    { value: "double", label: "Çift Kişilik" },
+    { value: "triple", label: "Üç Kişilik" },
+    { value: "quad", label: "Dört Kişilik" },
+    { value: "six", label: "Altı Kişilik" },
+    { value: "shared", label: "Paylaşımlı" },
+  ];
+
+  // Gender options for yurt
+  const genderOptions = [
+    { value: "erkek", label: "Erkek" },
+    { value: "kiz", label: "Kız" },
+    { value: "herkes", label: "Herkes" },
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getListingById(type, id);
-        console.log("Gelen data:", data);
         const formattedImages = (data.images || []).map((image) =>
           image.startsWith("http") ? image : `${BASE_UPLOAD_URL}${image}`
         );
+
         if (type === "yurt") {
           const [province, district] = (data.location || "").split(", ");
           setFormData({
@@ -61,6 +106,10 @@ const UpdateForm = () => {
             category: data.category || "",
             duration: data.duration || "",
             requirements: data.requirements || "",
+            price: "",
+            gender_required: "herkes",
+            room_type: "single",
+            images: [],
           });
         } else if (type === "parttime") {
           setFormData({
@@ -69,14 +118,15 @@ const UpdateForm = () => {
             price: data.price || "",
             province: data.province || "",
             district: data.district || "",
-            images: [],
-            gender_required: "herkes",
-            room_type: "single",
             category: data.category || "",
             duration: data.duration || "",
             requirements: data.requirements || "",
+            gender_required: "herkes",
+            room_type: "single",
+            images: [],
           });
         }
+
         setPreviewUrls(formattedImages);
         setLoading(false);
       } catch (err) {
@@ -84,6 +134,7 @@ const UpdateForm = () => {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [type, id]);
 
@@ -141,8 +192,15 @@ const UpdateForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
+      // Scroll to the first error
+      const firstError = document.querySelector(".text-red-500");
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       if (type === "intern" || type === "parttime") {
@@ -162,6 +220,7 @@ const UpdateForm = () => {
         navigate("/account");
         return;
       }
+
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title);
       formDataToSend.append("description", formData.description);
@@ -170,18 +229,22 @@ const UpdateForm = () => {
       formDataToSend.append("district", formData.district);
       formDataToSend.append("gender_required", formData.gender_required);
       formDataToSend.append("room_type", formData.room_type);
+
       formData.images.forEach((image) => {
         formDataToSend.append("images", image);
       });
+
       selectedFiles.forEach((file) => {
         formDataToSend.append("photos", file);
       });
+
       await updateListing(type, id, formDataToSend);
       navigate("/account");
     } catch (err) {
       setError(
         err.response?.data?.message || "Güncelleme sırasında bir hata oluştu"
       );
+      setIsSubmitting(false);
     }
   };
 
@@ -190,6 +253,14 @@ const UpdateForm = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+
+    // Clear error for this field when user starts typing
+    if (errors[e.target.name]) {
+      setErrors({
+        ...errors,
+        [e.target.name]: null,
+      });
+    }
   };
 
   const handleFileSelect = (e) => {
@@ -197,23 +268,31 @@ const UpdateForm = () => {
     const totalPhotos = previewUrls.length + files.length;
 
     if (totalPhotos < 5) {
-      setError("En az 5 fotoğraf olmalıdır");
+      setErrors({ ...errors, photos: "En az 5 fotoğraf olmalıdır" });
       return;
     }
     if (totalPhotos > 15) {
-      setError("En fazla 15 fotoğraf ekleyebilirsiniz");
+      setErrors({ ...errors, photos: "En fazla 15 fotoğraf ekleyebilirsiniz" });
       return;
     }
 
     const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
     setPreviewUrls([...previewUrls, ...newPreviewUrls]);
     setSelectedFiles([...selectedFiles, ...files]);
+
+    // Clear photo error if it exists
+    if (errors.photos) {
+      setErrors({
+        ...errors,
+        photos: null,
+      });
+    }
   };
 
   const removeImage = (index) => {
     const totalPhotos = previewUrls.length - 1;
     if (totalPhotos < 5) {
-      setError("En az 5 fotoğraf olmalıdır");
+      setErrors({ ...errors, photos: "En az 5 fotoğraf olmalıdır" });
       return;
     }
 
@@ -232,268 +311,326 @@ const UpdateForm = () => {
     }
   };
 
-  if (loading) return <div className="text-center p-4">Yükleniyor...</div>;
-  if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
+  // Render form field with label and error
+  const renderField = (
+    name,
+    label,
+    type = "text",
+    icon = null,
+    placeholder = "",
+    options = null
+  ) => {
+    return (
+      <div className="space-y-2 transition-all duration-200">
+        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+          {icon &&
+            React.cloneElement(icon, {
+              className: "w-4 h-4 inline-block mr-2 text-yellow-500",
+            })}
+          {label}
+        </label>
+
+        {type === "textarea" ? (
+          <textarea
+            name={name}
+            value={formData[name]}
+            onChange={handleChange}
+            className={`w-full p-3 border rounded-lg transition-all duration-200 focus:ring-2 focus:ring-yellow-300 focus:border-yellow-500 outline-none ${
+              errors[name] ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+            rows="4"
+            placeholder={placeholder}
+          />
+        ) : type === "select" ? (
+          <select
+            name={name}
+            value={formData[name]}
+            onChange={handleChange}
+            className={`w-full p-3 border rounded-lg transition-all duration-200 focus:ring-2 focus:ring-yellow-300 focus:border-yellow-500 outline-none appearance-none bg-white ${
+              errors[name] ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+            style={{
+              backgroundImage:
+                'url(\'data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3e%3cpolyline points="6 9 12 15 18 9"%3e%3c/polyline%3e%3c/svg%3e\')',
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 0.75rem center",
+              backgroundSize: "1em",
+            }}
+          >
+            {!options[0].label.includes("Seçin") && (
+              <option value="">Seçin</option>
+            )}
+            }
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={type}
+            name={name}
+            value={formData[name]}
+            onChange={handleChange}
+            className={`w-full p-3 border rounded-lg transition-all duration-200 focus:ring-2 focus:ring-yellow-300 focus:border-yellow-500 outline-none ${
+              errors[name] ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+            placeholder={placeholder}
+          />
+        )}
+
+        {errors[name] && (
+          <p className="text-sm text-red-500 mt-1 animate-fadeIn">
+            {errors[name]}
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-yellow-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Bilgiler yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">
-        {type === "yurt"
-          ? "Yurt İlanı Güncelle"
-          : type === "intern"
-          ? "Staj İlanı Güncelle"
-          : "Part Time İlanı Güncelle"}
-      </h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            <FileText className="w-4 h-4 inline-block mr-2 text-yellow-500" />
-            İlan Başlığı
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-          {errors.title && (
-            <p className="text-sm text-red-500 mt-1">{errors.title}</p>
-          )}
+    <div className="container mx-auto p-4 max-w-4xl animate-fadeIn">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 p-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-white">
+            {formTitles[type]}
+          </h1>
+          <p className="text-yellow-100 mt-2">
+            İlanınızı güncelleyin ve daha fazla kişiye ulaşın
+          </p>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Açıklama
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            rows="4"
-            required
-          />
-          {errors.description && (
-            <p className="text-sm text-red-500 mt-1">{errors.description}</p>
-          )}
-        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Basic Info Section */}
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4 transform transition-all duration-300 hover:shadow-md">
+            <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4 pb-2 border-b">
+              <FileText className="w-5 h-5 text-yellow-500" />
+              Temel Bilgiler
+            </h3>
 
-        <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4">
-            <MapPin className="w-5 h-5 text-yellow-500" />
-            Konum Bilgileri
-          </h3>
-          <LocationSelector formData={formData} handleChange={handleChange} />
-          {(errors.province || errors.district) && (
-            <p className="text-sm text-red-500 mt-2">
-              {errors.province || errors.district}
-            </p>
-          )}
-        </div>
-
-        {(type === "intern" || type === "parttime") && (
-          <>
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
-                Kategori
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Kategori Seçin</option>
-                <option value="software">Yazılım Geliştirme</option>
-                <option value="marketing">Pazarlama</option>
-                <option value="finance">Finans</option>
-                <option value="design">Tasarım</option>
-                <option value="sales">Satış</option>
-                <option value="customer_support">Müşteri Destek</option>
-                <option value="hr">İnsan Kaynakları</option>
-              </select>
-              {errors.category && (
-                <p className="text-sm text-red-500 mt-1">{errors.category}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
-                Süre
-              </label>
-              <input
-                type="text"
-                name="duration"
-                value={formData.duration}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-                placeholder={
-                  type === "intern" ? "Örn: 3 ay" : "Örn: Hafta içi 09:00-18:00"
-                }
-                required
-              />
-              {errors.duration && (
-                <p className="text-sm text-red-500 mt-1">{errors.duration}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
-                Gereksinimler
-              </label>
-              <textarea
-                name="requirements"
-                value={formData.requirements}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-                rows="4"
-                placeholder={
-                  type === "intern"
-                    ? "Staj için gerekli olan beceriler ve gereksinimler"
-                    : "İş için gerekli olan beceriler ve gereksinimler"
-                }
-                required
-              />
-              {errors.requirements && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.requirements}
-                </p>
-              )}
-            </div>
-          </>
-        )}
-
-        {type === "parttime" && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              <DollarSign className="w-4 h-4 inline-block mr-2 text-yellow-500" />
-              Ücret
-            </label>
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-            {errors.price && (
-              <p className="text-sm text-red-500 mt-1">{errors.price}</p>
+            {renderField("title", "İlan Başlığı", "text", <FileText />)}
+            {renderField(
+              "description",
+              "Açıklama",
+              "textarea",
+              null,
+              "İlanınızı detaylı bir şekilde anlatın..."
             )}
           </div>
-        )}
 
-        {type === "yurt" && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700">
-                  Cinsiyet Tercihi
-                </label>
-                <select
-                  name="gender_required"
-                  value={formData.gender_required}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="erkek">Erkek</option>
-                  <option value="kiz">Kız</option>
-                  <option value="herkes">Herkes</option>
-                </select>
-                {errors.gender_required && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.gender_required}
-                  </p>
-                )}
-              </div>
+          {/* Location Section */}
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm transform transition-all duration-300 hover:shadow-md">
+            <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4 pb-2 border-b">
+              <MapPin className="w-5 h-5 text-yellow-500" />
+              Konum Bilgileri
+            </h3>
 
-              <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700">
-                  Oda Türü
-                </label>
-                <select
-                  name="room_type"
-                  value={formData.room_type}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="single">Tek Kişilik</option>
-                  <option value="double">Çift Kişilik</option>
-                  <option value="triple">Üç Kişilik</option>
-                  <option value="quad">Dört Kişilik</option>
-                  <option value="six">Altı Kişilik</option>
-                  <option value="shared">Paylaşımlı</option>
-                </select>
-                {errors.room_type && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.room_type}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fotoğraflar (En az 5, en fazla 15)
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
-                {previewUrls.map((url, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={url}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src =
-                          "https://via.placeholder.com/400x300?text=No+Image";
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {previewUrls.length < 15 && (
-                  <label className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-colors">
-                    <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                    <span className="text-sm text-gray-500">Fotoğraf Ekle</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-              </div>
-              {errors.photos && (
-                <p className="text-sm text-red-500 mt-1">{errors.photos}</p>
-              )}
-            </div>
-          </>
-        )}
+            <LocationSelector formData={formData} handleChange={handleChange} />
 
-        {error && (
-          <div className="text-red-500 text-center p-4 bg-red-50 rounded-lg">
-            {error}
+            {(errors.province || errors.district) && (
+              <p className="text-sm text-red-500 mt-2 animate-fadeIn">
+                {errors.province || errors.district}
+              </p>
+            )}
           </div>
-        )}
 
-        <button
-          type="submit"
-          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 w-full"
-        >
-          Güncelle
-        </button>
-      </form>
+          {/* Specific Fields Based on Type */}
+          {(type === "intern" || type === "parttime") && (
+            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4 transform transition-all duration-300 hover:shadow-md">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4 pb-2 border-b">
+                <FileSpreadsheet className="w-5 h-5 text-yellow-500" />
+                İş Detayları
+              </h3>
+
+              {renderField(
+                "category",
+                "Kategori",
+                "select",
+                <Tag />,
+                "",
+                categoryOptions
+              )}
+              {renderField(
+                "duration",
+                "Süre",
+                "text",
+                <Clock />,
+                type === "intern" ? "Örn: 3 ay" : "Örn: Hafta içi 09:00-18:00"
+              )}
+              {renderField(
+                "requirements",
+                "Gereksinimler",
+                "textarea",
+                null,
+                type === "intern"
+                  ? "Staj için gerekli olan beceriler ve gereksinimler"
+                  : "İş için gerekli olan beceriler ve gereksinimler"
+              )}
+
+              {type === "parttime" &&
+                renderField("price", "Ücret (₺)", "number", <DollarSign />)}
+            </div>
+          )}
+
+          {/* Yurt Specific Fields */}
+          {type === "yurt" && (
+            <>
+              <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4 transform transition-all duration-300 hover:shadow-md">
+                <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4 pb-2 border-b">
+                  <FileSpreadsheet className="w-5 h-5 text-yellow-500" />
+                  Yurt Detayları
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderField(
+                    "gender_required",
+                    "Cinsiyet Tercihi",
+                    "select",
+                    null,
+                    "",
+                    genderOptions
+                  )}
+                  {renderField(
+                    "room_type",
+                    "Oda Türü",
+                    "select",
+                    null,
+                    "",
+                    roomTypeOptions
+                  )}
+                </div>
+
+                {renderField(
+                  "price",
+                  "Aylık Ücret (₺)",
+                  "number",
+                  <DollarSign />
+                )}
+              </div>
+
+              {/* Photos Section */}
+              <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm transform transition-all duration-300 hover:shadow-md">
+                <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4 pb-2 border-b">
+                  <FileText className="w-5 h-5 text-yellow-500" />
+                  Fotoğraflar{" "}
+                  <span className="text-sm text-gray-500 font-normal">
+                    (En az 5, en fazla 15)
+                  </span>
+                </h3>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+                  {previewUrls.map((url, index) => (
+                    <div
+                      key={index}
+                      className="relative group rounded-lg overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-md"
+                    >
+                      <img
+                        src={url}
+                        alt={`Fotoğraf ${index + 1}`}
+                        className="w-full h-32 object-cover transition-transform duration-500 transform group-hover:scale-110"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://via.placeholder.com/400x300?text=Resim+Yok";
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110"
+                        aria-label="Fotoğrafı kaldır"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                  ))}
+
+                  {previewUrls.length < 15 && (
+                    <label className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-yellow-500 hover:bg-yellow-50 transition-all duration-300 h-32">
+                      <Plus className="w-8 h-8 text-gray-400 mb-2 group-hover:text-yellow-500 transition-colors duration-300" />
+                      <span className="text-sm text-gray-500 group-hover:text-yellow-600 transition-colors duration-300">
+                        Fotoğraf Ekle
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+
+                {errors.photos && (
+                  <p className="text-sm text-red-500 mt-1 animate-fadeIn">
+                    {errors.photos}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="text-red-500 text-center p-4 bg-red-50 rounded-lg border border-red-100 animate-fadeIn">
+              {error}
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all duration-300 transform ${
+              isSubmitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-600 hover:to-yellow-500 hover:shadow-lg active:scale-98"
+            }`}
+          >
+            {isSubmitting ? (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Güncelleniyor...
+              </span>
+            ) : (
+              "Güncelle"
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

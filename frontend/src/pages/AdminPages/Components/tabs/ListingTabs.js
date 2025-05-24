@@ -79,21 +79,21 @@ function ListingsTab({
   };
 
   const openEditModal = (listing) => {
-    console.log("Gelen listing verisi:", listing);
+    // console.log("Gelen listing verisi:", listing);
 
     let photoArr = [];
     if (listing.photos) {
       photoArr = listing.photos.split(",").filter((p) => p);
     }
-    console.log("Photo array:", photoArr);
+    // console.log("Photo array:", photoArr);
 
     const photos = photoArr.map((p) => {
       const url = p.startsWith("http") ? p : `${BASE_UPLOAD_URL}${p}`;
-      console.log("Formatted URL:", url);
+      // console.log("Formatted URL:", url);
       return url;
     });
 
-    console.log("Final photos array:", photos);
+    // console.log("Final photos array:", photos);
 
     setEditingListing({
       ...listing,
@@ -388,7 +388,6 @@ function ListingsTab({
                               alt={`Preview ${index + 1}`}
                               className="w-full h-32 object-cover rounded-lg"
                               onError={(e) => {
-                                console.log("Image error:", e.target.src);
                                 e.target.onerror = null;
                                 e.target.src = "/images/no-image.png";
                               }}

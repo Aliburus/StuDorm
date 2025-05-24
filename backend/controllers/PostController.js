@@ -84,8 +84,6 @@ const getPostByUserId = async (req, res) => {
       .json({ message: "Unauthorized - User ID not found" });
   }
 
-  console.log("User ID:", user_id); // Kullanıcı ID'sini logluyoruz
-
   try {
     // Kullanıcıya ait tüm postları alıyoruz
     const posts = await ForumPost.getPostByUserId(user_id);
@@ -237,14 +235,12 @@ const deleteComment = async (req, res) => {
     }
     // Sadece admin veya yorum sahibi silebilsin
     if (!isAdmin && String(comment.user_id) !== String(userId)) {
-      return res
-        .status(403)
-        .json({
-          message: "Bu yorumu silmeye yetkiniz yok!",
-          userId,
-          commentUserId: comment.user_id,
-          isAdmin,
-        });
+      return res.status(403).json({
+        message: "Bu yorumu silmeye yetkiniz yok!",
+        userId,
+        commentUserId: comment.user_id,
+        isAdmin,
+      });
     }
     await ForumPost.deleteComment(commentId, isAdmin ? userId : null);
     res.status(200).json({ message: "Yorum silindi" });

@@ -10,7 +10,7 @@ const authenticateToken = (req, res, next) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      console.error("Token doğrulama hatası:", err); // Token doğrulama hatasını logla
+      console.error("Token doğrulama hatası:", err);
       return res.status(403).json({ message: "Geçersiz token" });
     }
     req.user = user; // Kullanıcı bilgilerini ekle

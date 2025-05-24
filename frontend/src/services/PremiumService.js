@@ -7,7 +7,6 @@ const getPremiumListings = async (limit = 10) => {
     const res = await axios.get(`${API_URL}/premium-listings`, {
       params: { limit },
     });
-    console.log("Premium Listings:", res.data); // Gelen veriyi konsola yazdırın
     return res.data.data;
   } catch (error) {
     console.error("Error fetching premium listings:", error);

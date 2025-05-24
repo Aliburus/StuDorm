@@ -8,6 +8,7 @@ import {
   Star,
   MoreVertical,
   Trash2,
+  Share2,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -40,6 +41,7 @@ function ForumPages() {
   const [commentLoading, setCommentLoading] = useState({});
   const [commentMenuOpen, setCommentMenuOpen] = useState(null);
   const commentMenuRefs = useRef({});
+  const [popularCount, setPopularCount] = useState(3);
 
   useEffect(() => {
     fetchPosts();
@@ -72,6 +74,8 @@ function ForumPages() {
   };
 
   const handlePostSubmit = async () => {
+    if (!newPostContent.trim()) return;
+
     try {
       const newPost = await createPost(newPostContent);
       setPosts((prevPosts) => [
@@ -85,7 +89,6 @@ function ForumPages() {
       setNewPostContent("");
     } catch (error) {
       console.error("Post eklenemedi:", error.message);
-      alert("Post eklenemedi: " + error.message);
     }
   };
 
@@ -145,6 +148,8 @@ function ForumPages() {
   };
 
   const handleCommentSubmit = async (postId) => {
+    if (!newComment[postId]?.trim()) return;
+
     try {
       await addComment(postId, newComment[postId]);
       setNewComment((prev) => ({ ...prev, [postId]: "" }));
@@ -171,8 +176,6 @@ function ForumPages() {
   };
 
   const handleDeleteComment = async (postId, commentId) => {
-    alert(`Yorum silinecek: postId=${postId}, commentId=${commentId}`);
-    console.log("handleDeleteComment tetiklendi:", { postId, commentId });
     if (window.confirm("Bu yorumu silmek istediğinize emin misiniz?")) {
       try {
         await deleteForumComment(postId, commentId);
@@ -188,346 +191,360 @@ function ForumPages() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-[#fafafa]">
       <Navbar />
+
       {copyMessage && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-yellow-500 text-white px-6 py-2 rounded-lg shadow-lg z-50 text-base font-semibold animate-fade-in">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full shadow-xl z-50 text-sm font-medium animate-fadeIn">
           {copyMessage}
         </div>
       )}
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="lg:w-2/3">
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-8 backdrop-blur-lg backdrop-filter">
-              <h2 className="text-2xl font-bold text-yellow-600 mb-6 flex items-center gap-3">
-                <MessageSquare className="w-6 h-6" />
-                Gönderi Paylaş
-              </h2>
+
+      <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Create Post */}
+            <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                  <MessageSquare className="w-4 h-4 text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Yeni Gönderi
+                </h2>
+              </div>
               <div className="relative">
                 <textarea
-                  className="w-full p-6 border-2 border-gray-100 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent resize-none transition-all duration-300 text-gray-700 placeholder-gray-400"
-                  rows={4}
+                  className="w-full px-4 py-2 bg-gray-50 rounded-lg border focus:border-yellow-500 focus:ring-0 transition-colors duration-200 resize-none text-gray-700 placeholder-gray-400 text-sm"
+                  rows={2}
                   value={newPostContent}
                   onChange={(e) => setNewPostContent(e.target.value)}
-                  placeholder="Düşüncelerinizi buraya yazın..."
+                  placeholder="Düşüncelerinizi paylaşın..."
+                  style={{ fontSize: "14px" }}
                 />
                 <button
                   onClick={handlePostSubmit}
-                  className="absolute bottom-4 right-4 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-xl"
+                  disabled={!newPostContent.trim()}
+                  className={`absolute bottom-2 right-2 rounded-lg px-4 py-1.5 font-medium flex items-center gap-2 text-xs
+                    ${
+                      newPostContent.trim()
+                        ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    }`}
+                  style={{ fontSize: "13px" }}
                 >
-                  <Send className="w-5 h-5" />
-                  Gönder
+                  <Send className="w-4 h-4" />
+                  Paylaş
                 </button>
               </div>
             </div>
 
+            {/* Posts */}
             <div className="space-y-6">
-              {posts.length > 0 ? (
-                posts.map((post, index) => (
-                  <div
-                    key={post.id || `temp-${index}`}
-                    className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 text-white flex items-center justify-center font-bold text-lg shadow-md">
-                          {post.name ? post.name[0] : "U"}
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-800 flex items-center">
-                            {post.name} {post.surname}
-                            {(post.isPremium ||
-                              post.user_type === "premium") && (
-                              <Star
-                                className="w-4 h-4 ml-1 text-yellow-400"
-                                fill="#facc15"
-                                stroke="#facc15"
-                                title="Premium Üye"
-                              />
-                            )}
-                          </h3>
-                          <span className="text-sm text-gray-500 flex items-center gap-2">
-                            {dayjs(post.created_at).fromNow()}
-                          </span>
-                        </div>
+              {posts.map((post) => (
+                <article
+                  key={post.id}
+                  id={`forum-post-${post.id}`}
+                  className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-sm"
+                >
+                  {/* Post Header */}
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center text-white font-bold text-base shadow-inner">
+                        {post.name?.[0] || "U"}
                       </div>
-
-                      <div className="relative" ref={menuRef}>
-                        <button
-                          className="p-1 rounded-full hover:bg-gray-100"
-                          onClick={() =>
-                            setMenuOpen(menuOpen === post.id ? null : post.id)
-                          }
-                        >
-                          <MoreVertical className="w-5 h-5 text-gray-400" />
-                        </button>
-                        {menuOpen === post.id && (
-                          <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                            <button
-                              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                              onClick={() => {
-                                handleShare(post.id);
-                                setMenuOpen(null);
-                              }}
-                            >
-                              Bağlantıyı Kopyala
-                            </button>
-                            {(() => {
-                              console.log(
-                                "POST",
-                                post.user_id,
-                                localStorage.getItem("userId")
-                              );
-                              return true;
-                            })() &&
-                              String(post.user_id) ===
-                                String(localStorage.getItem("userId")) && (
-                                <button
-                                  className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50"
-                                  onClick={() => {
-                                    handleDeletePost(post.id);
-                                    setMenuOpen(null);
-                                  }}
-                                >
-                                  Gönderiyi Sil
-                                </button>
-                              )}
-                          </div>
-                        )}
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <h3 className="font-semibold text-gray-900 text-sm">
+                            {post.name} {post.surname}
+                          </h3>
+                          {(post.isPremium || post.user_type === "premium") && (
+                            <Star
+                              className="w-3 h-3 text-yellow-500"
+                              fill="currentColor"
+                            />
+                          )}
+                        </div>
+                        <time className="text-xs text-gray-500">
+                          {dayjs(post.created_at).fromNow()}
+                        </time>
                       </div>
                     </div>
 
+                    <div className="relative" ref={menuRef}>
+                      <button
+                        onClick={() =>
+                          setMenuOpen(menuOpen === post.id ? null : post.id)
+                        }
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      >
+                        <MoreVertical className="w-5 h-5 text-gray-400" />
+                      </button>
+
+                      {menuOpen === post.id && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-10">
+                          <button
+                            onClick={() => {
+                              handleShare(post.id);
+                              setMenuOpen(null);
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            Paylaş
+                          </button>
+
+                          {String(post.user_id) ===
+                            String(localStorage.getItem("userId")) && (
+                            <button
+                              onClick={() => {
+                                handleDeletePost(post.id);
+                                setMenuOpen(null);
+                              }}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Sil
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Post Content */}
+                  <div className="mb-3">
                     <p
-                      className="text-gray-700 text-lg mb-6 leading-relaxed border-l-4 border-yellow-400 pl-6 py-3 bg-yellow-50 rounded-r-lg"
-                      style={{ wordBreak: "break-word" }}
+                      className="text-gray-700 leading-relaxed break-words overflow-hidden text-sm"
+                      style={{ maxHeight: "60px" }}
                     >
                       {expandedPosts.includes(post.id)
                         ? post.content
-                        : post.content.slice(0, 50) +
-                          (post.content.length > 50 ? "..." : "")}
+                        : post.content.slice(0, 120) +
+                          (post.content.length > 120 ? "..." : "")}
                     </p>
-                    {post.content.length > 50 && (
+                    {post.content.length > 120 && (
                       <button
-                        className="text-yellow-600 underline text-sm mb-2"
                         onClick={() => toggleExpand(post.id)}
+                        className="text-yellow-500 hover:text-yellow-600 text-xs font-medium mt-1"
                       >
                         {expandedPosts.includes(post.id)
                           ? "Küçült"
-                          : "Devamını Göster"}
+                          : "Devamını Oku"}
                       </button>
-                    )}
-
-                    <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
-                      <button
-                        onClick={() => handleLike(post.id)}
-                        className={`flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 ${
-                          likedPosts.includes(post.id)
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "text-gray-600 hover:bg-yellow-50 hover:text-yellow-600"
-                        }`}
-                      >
-                        <ThumbsUp className="w-5 h-5" />
-                        <span className="font-medium">{post.likes}</span>
-                      </button>
-                      <button
-                        onClick={() => handleDislike(post.id)}
-                        className={`flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 ${
-                          dislikedPosts.includes(post.id)
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "text-gray-600 hover:bg-yellow-50 hover:text-yellow-600"
-                        }`}
-                      >
-                        <ThumbsDown className="w-5 h-5" />
-                        <span className="font-medium">{post.dislikes}</span>
-                      </button>
-                      <button
-                        onClick={() => toggleComments(post.id)}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
-                          showComments[post.id]
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "text-gray-600 hover:bg-yellow-50 hover:text-yellow-600"
-                        }`}
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                        <span className="text-sm font-medium">
-                          Yorumlar (
-                          {post.comment_count || comments[post.id]?.length || 0}
-                          )
-                        </span>
-                      </button>
-                    </div>
-
-                    {showComments[post.id] && (
-                      <div className="mt-4 space-y-4">
-                        {commentLoading[post.id] ? (
-                          <div className="text-sm text-gray-500">
-                            Yorumlar yükleniyor...
-                          </div>
-                        ) : (
-                          <>
-                            <div className="space-y-3">
-                              {comments[post.id]?.map((comment) => (
-                                <div
-                                  key={comment.id}
-                                  className="flex items-start gap-3"
-                                >
-                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 text-white flex items-center justify-center text-sm font-bold">
-                                    {comment.name[0]}
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-1">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-medium text-sm text-gray-800">
-                                          {comment.name} {comment.surname}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                          {dayjs(comment.created_at).fromNow()}
-                                        </span>
-                                      </div>
-                                      <div
-                                        className="relative"
-                                        ref={(el) =>
-                                          (commentMenuRefs.current[comment.id] =
-                                            el)
-                                        }
-                                      >
-                                        <button
-                                          className="p-1 rounded-full hover:bg-gray-100"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setCommentMenuOpen(
-                                              commentMenuOpen === comment.id
-                                                ? null
-                                                : comment.id
-                                            );
-                                          }}
-                                        >
-                                          <MoreVertical className="w-4 h-4 text-gray-400" />
-                                        </button>
-                                        {commentMenuOpen === comment.id && (
-                                          <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 text-sm">
-                                            <button
-                                              className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleShare(comment.id);
-                                                setCommentMenuOpen(null);
-                                              }}
-                                            >
-                                              Bağlantıyı Kopyala
-                                            </button>
-                                            {String(comment.user_id) ===
-                                              String(
-                                                localStorage.getItem("userId")
-                                              ) && (
-                                              <button
-                                                className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  handleDeleteComment(
-                                                    post.id,
-                                                    comment.id
-                                                  );
-                                                  setCommentMenuOpen(null);
-                                                }}
-                                              >
-                                                Yorumu Sil
-                                              </button>
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <p className="text-sm text-gray-600">
-                                      {comment.comment}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={newComment[post.id] || ""}
-                                onChange={(e) =>
-                                  setNewComment((prev) => ({
-                                    ...prev,
-                                    [post.id]: e.target.value,
-                                  }))
-                                }
-                                placeholder="Yorum yazın..."
-                                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-transparent"
-                              />
-                              <button
-                                onClick={() => handleCommentSubmit(post.id)}
-                                className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors"
-                              >
-                                Gönder
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </div>
                     )}
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-16 bg-white rounded-2xl shadow-lg">
-                  <MessageSquare className="w-16 h-16 mx-auto text-yellow-400 mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                    Henüz bir gönderi yapılmamış
-                  </h3>
-                  <p className="text-gray-500 text-lg">
-                    İlk gönderiyi siz yapabilirsiniz!
-                  </p>
-                </div>
-              )}
+
+                  {/* Post Actions */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                    <button
+                      onClick={() => handleLike(post.id)}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full transition-colors text-xs
+                        ${
+                          likedPosts.includes(post.id)
+                            ? "bg-yellow-500 text-white"
+                            : "hover:bg-gray-100 text-gray-700"
+                        }`}
+                    >
+                      <ThumbsUp className="w-4 h-4" />
+                      <span className="font-medium">{post.likes}</span>
+                    </button>
+                    <button
+                      onClick={() => handleDislike(post.id)}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full transition-colors text-xs
+                        ${
+                          dislikedPosts.includes(post.id)
+                            ? "bg-yellow-500 text-white"
+                            : "hover:bg-gray-100 text-gray-700"
+                        }`}
+                    >
+                      <ThumbsDown className="w-4 h-4" />
+                      <span className="font-medium">{post.dislikes}</span>
+                    </button>
+                    <button
+                      onClick={() => toggleComments(post.id)}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full transition-colors text-xs
+                        ${
+                          showComments[post.id]
+                            ? "bg-yellow-500 text-white"
+                            : "hover:bg-gray-100 text-gray-700"
+                        }`}
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span className="font-medium">
+                        {post.comment_count || comments[post.id]?.length || 0}
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Comments Section */}
+                  {showComments[post.id] && (
+                    <div className="mt-6 space-y-4">
+                      {commentLoading[post.id] ? (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="w-6 h-6 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="space-y-4">
+                            {comments[post.id]?.map((comment) => (
+                              <div
+                                key={comment.id}
+                                className="flex items-start gap-3 bg-white p-4 rounded-xl"
+                              >
+                                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-medium text-sm">
+                                  {comment.name[0]}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <div>
+                                      <span className="font-medium text-gray-900">
+                                        {comment.name} {comment.surname}
+                                      </span>
+                                      <span className="mx-2 text-gray-300">
+                                        •
+                                      </span>
+                                      <time className="text-sm text-gray-500">
+                                        {dayjs(comment.created_at).fromNow()}
+                                      </time>
+                                    </div>
+
+                                    {String(comment.user_id) ===
+                                      String(
+                                        localStorage.getItem("userId")
+                                      ) && (
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteComment(
+                                            post.id,
+                                            comment.id
+                                          )
+                                        }
+                                        className="text-gray-400 hover:text-red-500 transition-colors"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                  </div>
+                                  <p className="text-gray-700 break-words">
+                                    {comment.comment}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="flex gap-2 mt-4">
+                            <input
+                              type="text"
+                              value={newComment[post.id] || ""}
+                              onChange={(e) =>
+                                setNewComment((prev) => ({
+                                  ...prev,
+                                  [post.id]: e.target.value,
+                                }))
+                              }
+                              placeholder="Yorum yaz..."
+                              className="flex-1 px-4 py-2 bg-gray-50 rounded-xl border-2 border-transparent focus:border-yellow-500 focus:ring-0 transition-colors"
+                            />
+                            <button
+                              onClick={() => handleCommentSubmit(post.id)}
+                              disabled={!newComment[post.id]?.trim()}
+                              className={`px-6 py-2 rounded-xl font-medium transition-colors ${
+                                newComment[post.id]?.trim()
+                                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              }`}
+                            >
+                              Gönder
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </article>
+              ))}
             </div>
           </div>
 
-          <div className="lg:w-1/3">
-            <div className="bg-white p-8 rounded-2xl shadow-lg sticky top-8">
+          {/* Trending Posts Sidebar */}
+          <div className="lg:col-span-4">
+            <div
+              className="bg-white p-8 rounded-2xl shadow-lg sticky top-8"
+              style={{ maxHeight: "480px", overflowY: "auto" }}
+            >
               <h2 className="text-2xl font-bold text-yellow-600 mb-6 flex items-center gap-3">
                 <TrendingUp className="w-6 h-6" />
                 Popüler Gönderiler
               </h2>
               <div className="space-y-6">
-                {sortedPosts.slice(0, 3).map((post) => (
+                {sortedPosts.slice(0, 10).map((post) => (
                   <div
                     key={post.id}
-                    className="p-6 rounded-xl bg-gradient-to-br from-yellow-50 to-white border-2 border-yellow-100 hover:border-yellow-300 transition-all duration-300 transform hover:-translate-y-1 shadow-sm hover:shadow-md"
+                    className="p-4 rounded-xl bg-white border border-yellow-100 hover:border-yellow-300 transition-all duration-300 transform hover:-translate-y-1 shadow-sm hover:shadow-md text-xs cursor-pointer"
+                    onClick={() => {
+                      const el = document.getElementById(
+                        `forum-post-${post.id}`
+                      );
+                      if (el) {
+                        el.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        });
+                        el.classList.add("ring-2", "ring-yellow-400");
+                        setTimeout(
+                          () =>
+                            el.classList.remove("ring-2", "ring-yellow-400"),
+                          1200
+                        );
+                      }
+                    }}
                   >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 text-white flex items-center justify-center font-bold shadow-md">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 text-white flex items-center justify-center font-bold shadow-md">
                         {post.name ? post.name.charAt(0) : "U"}
                       </div>
                       <div>
-                        <span className="font-bold text-gray-800 flex items-center">
+                        <span className="font-bold text-gray-800 flex items-center text-xs">
                           {post.name} {post.surname}
                           {(post.isPremium || post.user_type === "premium") && (
                             <Star
-                              className="w-4 h-4 ml-1 text-yellow-400"
+                              className="w-3 h-3 ml-1 text-yellow-400"
                               fill="#facc15"
                               stroke="#facc15"
                               title="Premium Üye"
                             />
                           )}
                         </span>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-gray-500">
                           {dayjs(post.created_at).fromNow()}
                         </p>
                       </div>
                     </div>
-                    <p className="text-gray-700 mb-4 line-clamp-2 leading-relaxed">
-                      {post.content}
+                    <p
+                      className="text-gray-700 mb-2 line-clamp-2 leading-relaxed break-words overflow-hidden"
+                      style={{ maxHeight: "40px" }}
+                    >
+                      {post.content.length > 60
+                        ? post.content.slice(0, 60) + "..."
+                        : post.content}
                     </p>
-                    <div className="flex justify-between text-sm font-medium pt-3 border-t border-yellow-100">
-                      <span className="flex items-center gap-2 text-yellow-600">
-                        <ThumbsUp className="w-4 h-4" /> {post.likes}
-                      </span>
-                      <span className="flex items-center gap-2 text-yellow-600">
-                        <ThumbsDown className="w-4 h-4" /> {post.dislikes}
-                      </span>
+                    <div className="flex justify-between text-xs font-medium pt-2 border-t border-yellow-100">
+                      <button
+                        onClick={() => handleLike(post.id)}
+                        className="flex items-center gap-1 text-yellow-600 hover:bg-yellow-100 px-1 py-0.5 rounded-lg"
+                      >
+                        <ThumbsUp className="w-3 h-3" /> {post.likes}
+                      </button>
+                      <button
+                        onClick={() => handleDislike(post.id)}
+                        className="flex items-center gap-1 text-yellow-600 hover:bg-yellow-100 px-1 py-0.5 rounded-lg"
+                      >
+                        <ThumbsDown className="w-3 h-3" /> {post.dislikes}
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -535,7 +552,8 @@ function ForumPages() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
       <Footer />
     </div>
   );

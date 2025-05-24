@@ -16,9 +16,11 @@ const ForumPost = {
   // ID ile post getirme
   getById: async (id) => {
     const query = `
-      SELECT id, user_id, content, likes, dislikes, created_at, updated_at
-      FROM forum_posts
-      WHERE id = ?
+      SELECT p.id, p.user_id, p.content, p.likes, p.dislikes, p.created_at, p.updated_at,
+             u.name, u.surname
+      FROM forum_posts p
+      JOIN users u ON p.user_id = u.id
+      WHERE p.id = ?
     `;
     const [rows] = await db.query(query, [id]);
     return rows[0];
@@ -144,8 +146,10 @@ const ForumPost = {
   // Kullanıcının postlarını getirme
   getPostByUserId: async (user_id) => {
     const query = `
-      SELECT p.id, p.user_id, p.content, p.likes, p.dislikes, p.created_at, p.updated_at
+      SELECT p.id, p.user_id, p.content, p.likes, p.dislikes, p.created_at, p.updated_at,
+             u.name, u.surname
       FROM forum_posts p
+      JOIN users u ON p.user_id = u.id
       WHERE p.user_id = ?
       ORDER BY p.created_at DESC
     `;
@@ -160,11 +164,6 @@ const ForumPost = {
     // Sonra postu sil
     const query = `DELETE FROM forum_posts WHERE id = ?`;
     const [result] = await db.query(query, [id]);
-    if (adminId) {
-      console.log(
-        `[ADMIN LOG] ${new Date().toISOString()} | AdminID: ${adminId} | Gönderi Silindi | PostID: ${id}`
-      );
-    }
     return result;
   },
 
@@ -204,11 +203,6 @@ const getCommentsByPostId = async (post_id) => {
 const deleteComment = async (commentId, adminId = null) => {
   const query = "DELETE FROM forum_comments WHERE id = ?";
   const [result] = await db.query(query, [commentId]);
-  if (adminId) {
-    console.log(
-      `[ADMIN LOG] ${new Date().toISOString()} | AdminID: ${adminId} | Yorum Silindi | CommentID: ${commentId}`
-    );
-  }
   return result;
 };
 

@@ -92,16 +92,18 @@ const User = {
 
   upgradeToPremium: async (userId, premiumPrice) => {
     try {
+      const now = new Date();
+      const end = new Date();
+      end.setFullYear(now.getFullYear() + 1);
+      const premiumStart = now.toISOString().slice(0, 19).replace("T", " ");
+      const premiumEnd = end.toISOString().slice(0, 19).replace("T", " ");
       const [result] = await db.query(
-        `UPDATE users SET user_type = 'premium', premium_price = ? WHERE id = ?`,
-        [premiumPrice, userId]
+        `UPDATE users SET user_type = 'premium', premium_price = ?, premium_start = ?, premium_end = ? WHERE id = ?`,
+        [premiumPrice, premiumStart, premiumEnd, userId]
       );
-
       if (result.affectedRows === 0) {
         throw new Error("Kullanıcı bulunamadı.");
       }
-
-      // Güncellenmiş kullanıcıyı tekrar çek
       const updatedUser = await User.getUserById(userId);
       return updatedUser;
     } catch (error) {
@@ -110,23 +112,41 @@ const User = {
     }
   },
 
-  updateUserType: async (userId, newUserType) => {
-    try {
-      const [result] = await db.query(
-        `UPDATE users SET user_type = ? WHERE id = ?`,
-        [newUserType, userId]
+  updateUserType: async (userId, user_type) => {
+    if (user_type === "premium") {
+      // O anki premium fiyatını çek
+      const [[benefit]] = await db.query(
+        "SELECT price FROM premium_benefits ORDER BY id DESC LIMIT 1"
       );
+      const premiumPrice = benefit?.price || 0;
+      const now = new Date();
+      const end = new Date();
+      end.setFullYear(now.getFullYear() + 1);
+      const premiumStart = now.toISOString().slice(0, 19).replace("T", " ");
+      const premiumEnd = end.toISOString().slice(0, 19).replace("T", " ");
+      await db.query(
+        `UPDATE users SET user_type = 'premium', premium_price = ?, premium_start = ?, premium_end = ? WHERE id = ?`,
+        [premiumPrice, premiumStart, premiumEnd, userId]
+      );
+    } else {
+      // Normale çekiliyorsa premium alanlarını sıfırla
+      await db.query(
+        `UPDATE users SET user_type = ?, premium_price = NULL, premium_start = NULL, premium_end = NULL WHERE id = ?`,
+        [user_type, userId]
+      );
+    }
+    return await User.getUserById(userId);
+  },
 
-      if (result.affectedRows === 0) {
-        throw new Error("User not found");
-      }
-
-      // Güncellenmiş kullanıcıyı tekrar çek
-      const updatedUser = await User.getUserById(userId);
-      return updatedUser;
+  checkAndDowngradeExpiredPremiums: async () => {
+    try {
+      const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+      await db.query(
+        `UPDATE users SET user_type = 'normal', premium_start = NULL, premium_end = NULL WHERE user_type = 'premium' AND premium_end < ?`,
+        [now]
+      );
     } catch (error) {
-      console.error("Error updating user type:", error);
-      throw new Error("Error updating user type");
+      console.error("Premium bitiş kontrol hatası:", error);
     }
   },
 

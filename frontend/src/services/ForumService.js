@@ -14,9 +14,7 @@ export const getUserForumPosts = async () => {
   if (response.status === 404) {
     return [];
   }
-  console.log("Response status:", response.status); // Status kodunu logla
   const responseBody = await response.text(); // Raw body'yi al
-  console.log("Response body:", responseBody); // Raw response'ı logla
 
   if (!response.ok) {
     const errorData = JSON.parse(responseBody); // Hata mesajını al

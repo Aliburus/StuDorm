@@ -14,14 +14,11 @@ const createContactMessage = async (req, res) => {
   }
 
   try {
-    console.log("Veriler alındı:", { email, message });
     const result = await contactModel.create({ email, message });
-    console.log("Mesaj kaydedildi:", result);
     return res
       .status(201)
       .json({ message: "Mesaj başarıyla gönderildi.", result });
   } catch (err) {
-    console.error("Veritabanı hatası:", err);
     return res.status(500).json({ message: "Veritabanı hatası." });
   }
 };
@@ -41,7 +38,6 @@ const getUserMessages = async (req, res) => {
     const messages = await contactModel.getByEmail(userEmail);
     return res.status(200).json(messages);
   } catch (err) {
-    console.error("Kullanıcı mesajları alınamadı:", err);
     return res.status(500).json({ message: "Veritabanı hatası." });
   }
 };

@@ -24,7 +24,7 @@ import {
   getInternById,
   getPartTimeJobById,
 } from "../services/ListingService";
-import { getUserById } from "../services/UserServices";
+
 const BASE_UPLOAD_URL = "http://localhost:5000";
 export default function ListingDetails() {
   const [owner, setOwner] = useState(null);
@@ -54,13 +54,6 @@ export default function ListingDetails() {
     }
     fetchData();
   }, [type, id]);
-
-  // Log owner only after it's set
-  useEffect(() => {
-    if (owner !== null) {
-      console.log(owner);
-    }
-  }, [owner]); // This ensures it logs after the state change
 
   if (!data) {
     return (

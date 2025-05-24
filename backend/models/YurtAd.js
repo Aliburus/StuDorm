@@ -116,6 +116,11 @@ const YurtAd = {
 
     return result;
   },
+
+  delete: async (id) => {
+    const [result] = await db.query("DELETE FROM YurtAds WHERE id = ?", [id]);
+    return result;
+  },
 };
 
 module.exports = YurtAd;

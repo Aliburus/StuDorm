@@ -53,7 +53,8 @@ const PaymentPage = () => {
 
       const response = await axios.post("http://localhost:5000/api/payments", {
         cardNumber,
-        amount: premiumPrice,
+        bank,
+        cardType,
       });
 
       if (response.data.success) {
@@ -132,9 +133,17 @@ const PaymentPage = () => {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition appearance-none bg-white"
                 >
                   <option value="">Kart Tipi Seçin</option>
-                  <option value="visa">Visa</option>
-                  <option value="mastercard">Mastercard</option>
-                  <option value="amex">American Express</option>
+                  <option value="Visa (Debit)">Visa (Debit)</option>
+                  <option value="Visa (Credit)">Visa (Credit)</option>
+                  <option value="Master Card (Debit)">
+                    Master Card (Debit)
+                  </option>
+                  <option value="Master Card (Credit)">
+                    Master Card (Credit)
+                  </option>
+                  <option value="American Express">American Express</option>
+                  <option value="Troy (Debit)">Troy (Debit)</option>
+                  <option value="Troy (Credit)">Troy (Credit)</option>
                 </select>
               </div>
 

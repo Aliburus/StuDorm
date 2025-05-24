@@ -50,7 +50,6 @@ const AccountPage = () => {
         const isTokenExpired = decoded.exp * 1000 < Date.now();
 
         if (isTokenExpired) {
-          console.log("Token süresi dolmuş!");
           localStorage.removeItem("token");
           navigate("/login");
           return;
@@ -61,7 +60,6 @@ const AccountPage = () => {
         setUser(userData);
         setFormData(userData);
       } catch (err) {
-        console.error("Hata:", err);
         localStorage.removeItem("token");
         navigate("/login");
       }

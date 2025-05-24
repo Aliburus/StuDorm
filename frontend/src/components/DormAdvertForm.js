@@ -109,10 +109,12 @@ const DormAdvertForm = () => {
 
   const checkEligibility = async () => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/users/check-ad-eligibility",
+        "http://localhost:5000/api/user/check-ad-eligibility",
         {
           params: { adType },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       return response.data.eligible;

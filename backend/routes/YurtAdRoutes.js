@@ -8,6 +8,7 @@ const {
   getYurtAdsByUserId,
   getYurtAdById,
   updateYurtAd,
+  deleteYurtAd,
 } = require("../controllers/YurtAdController");
 
 const storage = multer.diskStorage({
@@ -37,5 +38,6 @@ router.put(
   upload.array("photos", 15),
   updateYurtAd
 );
+router.delete("/yurt-ilanlar/:id", verifyToken, deleteYurtAd);
 
 module.exports = router;

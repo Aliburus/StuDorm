@@ -58,7 +58,6 @@ function ContactMessagesTab() {
         email: replyModal.email,
         message: replyMessage,
       };
-      console.log("Gönderilen cevap payload:", payload);
       await axios.post(
         "http://localhost:5000/api/contact-messages/reply",
         payload,

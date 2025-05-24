@@ -1,6 +1,7 @@
 // controllers/userController.js
 const userModel = require("../models/User"); // userModel'i import et
 const bcrypt = require("bcrypt"); // bcrypt'i import et
+const db = require("../config/db");
 const getUserProfile = async (req, res) => {
   const userId = req.user.id;
 
@@ -10,6 +11,7 @@ const getUserProfile = async (req, res) => {
       return res.status(404).json({ error: "Kullanıcı bulunamadı" });
     }
 
+    await userModel.logUserAction(userId, "GET_USER_PROFILE", { userId });
     res.json({
       id: user.id,
       name: user.name,
@@ -43,6 +45,7 @@ const accessPremiumContent = async (req, res) => {
     }
 
     // Eğer premium ise, premium içeriği döndür
+    await userModel.logUserAction(userId, "ACCESS_PREMIUM_CONTENT", { userId });
     res.json({ message: "Premium içeriğe erişim sağlandı" });
   } catch (err) {
     console.error("Hata:", err.message);
@@ -110,8 +113,8 @@ const updateUserProfile = async (req, res) => {
 };
 
 const upgradeToPremium = async (req, res) => {
-  const userId = req.user.id; // Token'den alınan kullanıcı ID'si
-  const paymentStatus = req.body.paymentStatus; // Ödeme durumu (başarılı/başarısız)
+  const userId = req.user.id;
+  const paymentStatus = req.body.paymentStatus;
 
   if (paymentStatus !== "successful") {
     return res.status(400).json({ error: "Ödeme başarısız" });
@@ -123,11 +126,16 @@ const upgradeToPremium = async (req, res) => {
       "SELECT price FROM premium_benefits ORDER BY id DESC LIMIT 1"
     );
     const premiumPrice = benefit?.price || 0;
-    // Kullanıcıyı premium yaparken fiyatı da kaydet
+
+    // Kullanıcıyı premium yap
     const updatedUser = await userModel.upgradeToPremium(userId, premiumPrice);
+    await userModel.logUserAction(userId, "UPGRADE_TO_PREMIUM", {
+      userId,
+      premiumPrice,
+    });
     res.json({ message: "Hesabınız premium olmuştur", user: updatedUser });
   } catch (err) {
-    console.error("Hata:", err.message);
+    console.error("Premium yapma hatası:", err);
     return res.status(500).json({ error: "Veritabanı hatası" });
   }
 };
@@ -138,9 +146,82 @@ const getUserById = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "Kullanıcı bulunamadı" });
     }
+    await userModel.logUserAction(req.user.id, "GET_USER_BY_ID", {
+      userId: req.params.id,
+    });
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: "Veritabanı hatası" });
+  }
+};
+
+const checkAdEligibility = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { adType } = req.query;
+    let table;
+    if (adType === "parttime" || adType === "parttimeads")
+      table = "parttimeads";
+    else if (adType === "yurt" || adType === "dorm" || adType === "yurtads")
+      table = "yurtads";
+    else if (adType === "intern" || adType === "interns") table = "interns";
+    else {
+      return res
+        .status(400)
+        .json({ eligible: false, message: "Geçersiz ilan tipi!" });
+    }
+
+    // Kullanıcıyı çek
+    const [userRows] = await db.query(
+      "SELECT id, user_type, premium_start, premium_end FROM users WHERE id = ?",
+      [userId]
+    );
+    const user = userRows[0];
+    if (!user) {
+      return res
+        .status(404)
+        .json({ eligible: false, message: "Kullanıcı bulunamadı!" });
+    }
+    const now = new Date();
+    let isPremium = false;
+    if (user.premium_start && user.premium_end) {
+      const start = new Date(user.premium_start);
+      const end = new Date(user.premium_end);
+      isPremium = now >= start && now <= end;
+    }
+
+    // Son 6 ayda eklenen ilan sayısı
+    const [countRows] = await db.query(
+      `SELECT COUNT(*) as count FROM ${table} WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH)`,
+      [userId]
+    );
+    const adCount = countRows[0].count;
+
+    let isEligible = false;
+    let message = "";
+    if (isPremium) {
+      isEligible = adCount < 6;
+      if (!isEligible) message = "Premium ilan ekleme limitinize ulaştınız.";
+    } else {
+      isEligible = adCount < 1;
+      if (!isEligible && adCount >= 1)
+        message = "Normal üyeler sadece 1 ilan ekleyebilir. Premium olun!";
+      else if (!isPremium) message = "Premium üye değilsiniz.";
+    }
+
+    await userModel.logUserAction(userId, "CHECK_AD_ELIGIBILITY", {
+      adType,
+      isEligible,
+      isPremium,
+      adCount,
+    });
+    return res.status(200).json({
+      eligible: isEligible,
+      message,
+      isPremium,
+    });
+  } catch (error) {
+    res.status(500).json({ eligible: false, message: "Sunucu hatası!" });
   }
 };
 
@@ -150,4 +231,5 @@ module.exports = {
   upgradeToPremium,
   accessPremiumContent,
   getUserById,
+  checkAdEligibility,
 };

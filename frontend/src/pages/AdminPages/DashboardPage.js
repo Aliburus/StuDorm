@@ -49,7 +49,6 @@ function DashboardPage() {
       setLoading(true);
       AdminService.getAllPosts()
         .then((data) => {
-          console.log("✅ Posts data:", data);
           setAllPosts(data);
         })
         .catch((err) => {

@@ -87,7 +87,7 @@ function OverviewTab({ stats }) {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="p-6">
             <div className="flex items-center justify-between">
@@ -218,49 +218,7 @@ function OverviewTab({ stats }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Aylık Premium Gelir</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={monthlyRevenue}
-                margin={{ left: 40, right: 20, top: 20, bottom: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis
-                  tickFormatter={(value) =>
-                    value.toLocaleString("tr-TR", {
-                      style: "currency",
-                      currency: "TRY",
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
-                  }
-                />
-                <Tooltip
-                  formatter={(value) =>
-                    value.toLocaleString("tr-TR", {
-                      style: "currency",
-                      currency: "TRY",
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
-                  }
-                />
-                <Bar
-                  dataKey="total_revenue"
-                  name="Gelir"
-                  fill="#8884d8"
-                  radius={[6, 6, 0, 0]}
-                  barSize={32}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4">
             Şehir Bazlı İlan Dağılımı
@@ -292,75 +250,77 @@ function OverviewTab({ stats }) {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
 
-      {/* Kullanıcı ve ilan trendi grafiği */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 mt-8">
-        <h3 className="text-xl font-bold mb-6 text-gray-800">
-          Aylara Göre Kullanıcı ve İlan Artışı
-        </h3>
-        <div className="h-[500px] w-full xl:w-[1100px] mx-auto">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={trendData}
-              margin={{ top: 30, right: 40, left: 0, bottom: 10 }}
-            >
-              <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
-              <XAxis dataKey="month" tick={{ fontSize: 14, fill: "#6b7280" }} />
-              <YAxis
-                tick={{ fontSize: 14, fill: "#6b7280" }}
-                allowDecimals={false}
-                tickFormatter={(value) => d3format("~s")(value)}
-                domain={[
-                  0,
-                  (dataMax) => {
-                    if (dataMax < 10) return 10;
-                    if (dataMax < 100) return Math.ceil(dataMax / 10) * 10;
-                    if (dataMax < 1000) return Math.ceil(dataMax / 100) * 100;
-                    if (dataMax < 10000)
-                      return Math.ceil(dataMax / 1000) * 1000;
-                    return Math.ceil(dataMax / 10000) * 10000;
-                  },
-                ]}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "#fff",
-                  borderRadius: 12,
-                  border: "1px solid #e5e7eb",
-                  fontSize: 15,
-                }}
-                labelStyle={{ color: "#6366f1", fontWeight: "bold" }}
-                itemStyle={{ fontWeight: "bold" }}
-                formatter={(value, name) => [
-                  d3format("~s")(value),
-                  name === "new_users"
-                    ? "Yeni Kullanıcı"
-                    : name === "total_listings"
-                    ? "Toplam İlan"
-                    : name,
-                ]}
-              />
-              <Legend
-                iconType="circle"
-                wrapperStyle={{ fontSize: 15, marginBottom: 10 }}
-              />
-              <Bar
-                dataKey="new_users"
-                name="Yeni Kullanıcı"
-                fill="#6366f1"
-                radius={[6, 6, 0, 0]}
-                barSize={32}
-              />
-              <Bar
-                dataKey="total_listings"
-                name="Toplam İlan"
-                fill="#10b981"
-                radius={[6, 6, 0, 0]}
-                barSize={32}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">
+            Kullanıcı ve İlan Trendi
+          </h3>
+          <div className="h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={trendData}
+                margin={{ top: 30, right: 40, left: 0, bottom: 10 }}
+              >
+                <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 14, fill: "#6b7280" }}
+                />
+                <YAxis
+                  tick={{ fontSize: 14, fill: "#6b7280" }}
+                  allowDecimals={false}
+                  tickFormatter={(value) => d3format("~s")(value)}
+                  domain={[
+                    0,
+                    (dataMax) => {
+                      if (dataMax < 10) return 10;
+                      if (dataMax < 100) return Math.ceil(dataMax / 10) * 10;
+                      if (dataMax < 1000) return Math.ceil(dataMax / 100) * 100;
+                      if (dataMax < 10000)
+                        return Math.ceil(dataMax / 1000) * 1000;
+                      return Math.ceil(dataMax / 10000) * 10000;
+                    },
+                  ]}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "#fff",
+                    borderRadius: 12,
+                    border: "1px solid #e5e7eb",
+                    fontSize: 15,
+                  }}
+                  labelStyle={{ color: "#6366f1", fontWeight: "bold" }}
+                  itemStyle={{ fontWeight: "bold" }}
+                  formatter={(value, name) => [
+                    d3format("~s")(value),
+                    name === "new_users"
+                      ? "Yeni Kullanıcı"
+                      : name === "total_listings"
+                      ? "Toplam İlan"
+                      : name,
+                  ]}
+                />
+                <Legend
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 15, marginBottom: 10 }}
+                />
+                <Bar
+                  dataKey="new_users"
+                  name="Yeni Kullanıcı"
+                  fill="#6366f1"
+                  radius={[6, 6, 0, 0]}
+                  barSize={32}
+                />
+                <Bar
+                  dataKey="total_listings"
+                  name="Toplam İlan"
+                  fill="#10b981"
+                  radius={[6, 6, 0, 0]}
+                  barSize={32}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 

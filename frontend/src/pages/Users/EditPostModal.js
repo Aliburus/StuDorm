@@ -4,7 +4,6 @@ import { updateUserForumPost } from "../../services/ForumService";
 const EditPostModal = ({ postId, currentContent, onClose, onSave }) => {
   const [content, setContent] = useState(currentContent);
 
-  // Eğer parent’tan gelen currentContent değişirse güncelle
   useEffect(() => {
     setContent(currentContent);
   }, [currentContent]);

@@ -42,7 +42,6 @@ const AccountListingsPage = ({ user }) => {
         ]);
 
         const formattedYurtAds = yurtData.map((ad) => {
-          console.log("ad:", ad);
           let photoArr = [];
           if (Array.isArray(ad.images)) {
             photoArr = ad.images;
