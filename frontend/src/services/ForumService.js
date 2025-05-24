@@ -10,7 +10,7 @@ export const getUserForumPosts = async () => {
       "Content-Type": "application/json",
     },
   });
-  // Eğer 404 dönerse “no posts” yerine boş dizi döndür
+  // Eğer 404 dönerse "no posts" yerine boş dizi döndür
   if (response.status === 404) {
     return [];
   }
@@ -143,4 +143,68 @@ export const toggleDislike = async (postId, isDisliked) => {
     throw new Error(err.message || "Dislike işlemi başarısız");
   }
   return res.json();
+};
+
+// Bir postun yorumlarını getir
+export const getComments = async (postId) => {
+  const res = await fetch(`http://localhost:5000/api/posts/${postId}/comments`);
+  if (!res.ok) throw new Error("Yorumlar alınamadı");
+  return await res.json();
+};
+
+// Bir posta yorum ekle
+export const addComment = async (postId, comment) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(
+    `http://localhost:5000/api/posts/${postId}/comments`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ post_id: postId, comment }),
+    }
+  );
+  if (!res.ok) throw new Error("Yorum eklenemedi");
+  return await res.json();
+};
+
+export const getUserComments = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No authentication token found");
+
+  const response = await fetch(
+    "http://localhost:5000/api/posts/user/comments",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch user comments");
+  }
+
+  return response.json();
+};
+
+export const deleteForumComment = async (postId, commentId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(
+    `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Yorum silinemedi");
+  return await res.json();
 };

@@ -15,4 +15,16 @@ router.put("/:id/dislike", authenticateToken, forumController.toggleDislike);
 // **Yeni eklenen**: Top N postu dönen endpoint
 router.get("/top", forumController.getTopPosts);
 
+// Yorum ekle
+router.post("/:postId/comments", authenticateToken, forumController.addComment);
+// Posta ait yorumları getir
+router.get("/:postId/comments", forumController.getCommentsByPostId);
+
+// Yorum silme (admin)
+router.delete(
+  "/:postId/comments/:commentId",
+  authenticateToken,
+  forumController.deleteComment
+);
+
 module.exports = router;

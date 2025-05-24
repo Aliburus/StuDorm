@@ -89,22 +89,30 @@ const Navbar = () => {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               />
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg">
+                <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 animate-fade-in">
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+                    <FaUserCircle className="text-yellow-500 text-3xl" />
+                    <div>
+                      <div className="font-semibold text-gray-800 text-base">
+                        {localStorage.getItem("userName") || ""}
+                      </div>
+                    </div>
+                  </div>
                   <button
                     onClick={() => navigate("/account")}
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 transition rounded-none"
                   >
-                    Hesabım
+                    Profilim
                   </button>
                   <button
                     onClick={() => navigate("/dormAdForm")}
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-yellow-50 transition rounded-none"
                   >
                     İlan Ver
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
+                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition rounded-none"
                   >
                     Çıkış Yap
                   </button>
@@ -144,73 +152,88 @@ const Navbar = () => {
 
       {/* Mobil Menü Açıldığında */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white text-yellow-400 p-4 space-y-4 z-50">
-          <div
-            className="block text-lg font-semibold hover:text-yellow-500"
+        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-8 animate-fade-in">
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="absolute top-6 right-6 text-gray-400 hover:text-yellow-500 text-3xl"
+          >
+            &times;
+          </button>
+          <Link
+            to="/"
+            className="text-2xl font-bold text-yellow-500 hover:text-yellow-600"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Link to="/">Ana Sayfa</Link>
-          </div>
-          <div
-            className="block text-lg font-semibold hover:text-yellow-500"
+            Ana Sayfa
+          </Link>
+          <Link
+            to="/find"
+            className="text-2xl font-bold text-yellow-500 hover:text-yellow-600"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Link to="/find">İlanlar</Link>
-          </div>
-          <div
-            className="block text-lg font-semibold hover:text-yellow-500"
+            İlanlar
+          </Link>
+          <Link
+            to="/forumpage"
+            className="text-2xl font-bold text-yellow-500 hover:text-yellow-600"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Link to="/about">Hakkımızda</Link>
-          </div>
-          <div
-            className="block text-lg font-semibold hover:text-yellow-500"
+            Forum
+          </Link>
+          <Link
+            to="/about"
+            className="text-2xl font-bold text-yellow-500 hover:text-yellow-600"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Link to="/contact">İletişim</Link>
-          </div>
-
-          {/* Mobilde Giriş Durumu */}
+            Hakkımızda
+          </Link>
+          <Link
+            to="/contact"
+            className="text-2xl font-bold text-yellow-500 hover:text-yellow-600"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            İletişim
+          </Link>
           {isLoggedIn ? (
             <>
-              <div
-                className="block text-lg font-semibold hover:text-yellow-500"
+              <button
                 onClick={() => {
                   setIsMenuOpen(false);
                   navigate("/account");
                 }}
+                className="text-2xl font-bold text-yellow-500 hover:text-yellow-600"
               >
-                Hesabım
-              </div>
-              <div
-                className="block text-lg font-semibold hover:text-yellow-500"
+                Profilim
+              </button>
+              <button
                 onClick={() => {
                   setIsMenuOpen(false);
                   navigate("/dormAdForm");
                 }}
+                className="text-2xl font-bold text-yellow-500 hover:text-yellow-600"
               >
                 İlan Ver
-              </div>
-              <div
-                className="block text-lg font-semibold hover:text-yellow-500"
+              </button>
+              <button
                 onClick={() => {
                   setIsMenuOpen(false);
                   handleLogout();
                 }}
+                className="text-2xl font-bold text-red-500 hover:text-red-600"
               >
                 Çıkış Yap
-              </div>
+              </button>
             </>
           ) : (
-            <div
-              className="block text-lg font-semibold hover:text-yellow-500"
+            <button
               onClick={() => {
                 setIsMenuOpen(false);
                 navigate("/login");
               }}
+              className="text-2xl font-bold text-yellow-500 hover:text-yellow-600"
             >
               Giriş Yap
-            </div>
+            </button>
           )}
         </div>
       )}

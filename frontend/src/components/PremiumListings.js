@@ -52,7 +52,9 @@ const PremiumListings = () => {
   }, []);
 
   const handleListingClick = (listing) => {
-    const type = listing.type === "dorm" ? "room" : listing.type;
+    let type = listing.type;
+    if (type === "dorm") type = "room";
+    if (type === "internship") type = "intern";
     navigate(`/listing-details/${type}/${listing.id}`);
   };
 

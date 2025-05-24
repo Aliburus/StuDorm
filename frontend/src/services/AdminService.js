@@ -120,6 +120,20 @@ const getUserLogs = async (userId) => {
   }
 };
 
+export const deleteForumComment = async (postId, commentId) => {
+  const res = await fetch(
+    `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Yorum silinemedi");
+  return await res.json();
+};
+
 export const AdminService = {
   getUsers,
   getAllListings,
@@ -133,4 +147,5 @@ export const AdminService = {
   updateUserType,
   deleteForumPost,
   getUserLogs,
+  deleteForumComment,
 };

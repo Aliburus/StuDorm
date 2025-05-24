@@ -154,9 +154,17 @@ const ForumPost = {
   },
 
   // Post silme
-  delete: async (id) => {
+  delete: async (id, adminId = null) => {
+    // Önce yorumları sil
+    await db.query("DELETE FROM forum_comments WHERE post_id = ?", [id]);
+    // Sonra postu sil
     const query = `DELETE FROM forum_posts WHERE id = ?`;
     const [result] = await db.query(query, [id]);
+    if (adminId) {
+      console.log(
+        `[ADMIN LOG] ${new Date().toISOString()} | AdminID: ${adminId} | Gönderi Silindi | PostID: ${id}`
+      );
+    }
     return result;
   },
 
@@ -172,4 +180,41 @@ const ForumPost = {
   },
 };
 
-module.exports = ForumPost;
+// Yorum ekle
+const addComment = async ({ post_id, user_id, comment }) => {
+  const query = `INSERT INTO forum_comments (post_id, user_id, comment) VALUES (?, ?, ?)`;
+  const [result] = await db.query(query, [post_id, user_id, comment]);
+  return result.insertId;
+};
+
+// Posta ait yorumları getir
+const getCommentsByPostId = async (post_id) => {
+  const query = `
+    SELECT fc.*, u.name, u.surname
+    FROM forum_comments fc
+    JOIN users u ON fc.user_id = u.id
+    WHERE fc.post_id = ?
+    ORDER BY fc.created_at ASC
+  `;
+  const [rows] = await db.query(query, [post_id]);
+  return rows;
+};
+
+// Belirli bir yorumu sil
+const deleteComment = async (commentId, adminId = null) => {
+  const query = "DELETE FROM forum_comments WHERE id = ?";
+  const [result] = await db.query(query, [commentId]);
+  if (adminId) {
+    console.log(
+      `[ADMIN LOG] ${new Date().toISOString()} | AdminID: ${adminId} | Yorum Silindi | CommentID: ${commentId}`
+    );
+  }
+  return result;
+};
+
+module.exports = {
+  ...ForumPost,
+  addComment,
+  getCommentsByPostId,
+  deleteComment,
+};

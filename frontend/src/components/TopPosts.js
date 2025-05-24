@@ -1,11 +1,13 @@
 import React from "react";
 import { getTopForumPosts } from "../services/ForumService";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Heart, ThumbsDown, Star } from "lucide-react";
 
 const TopPosts = () => {
   const [topPosts, setTopPosts] = useState([]);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchTopPosts = async () => {
       const data = await getTopForumPosts();
@@ -98,8 +100,11 @@ const TopPosts = () => {
 
       {/* CTA Button */}
       <div className="text-center mt-12">
-        <Link
-          to="/forumpage"
+        <button
+          onClick={() => {
+            navigate("/forumpage");
+            window.scrollTo(0, 0);
+          }}
           className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-full font-semibold hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
         >
           Forumu Görüntüle
@@ -116,7 +121,7 @@ const TopPosts = () => {
               d="M13 7l5 5m0 0l-5 5m5-5H6"
             />
           </svg>
-        </Link>
+        </button>
       </div>
     </div>
   );

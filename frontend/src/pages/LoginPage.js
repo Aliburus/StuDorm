@@ -52,6 +52,19 @@ function LoginPage() {
     try {
       const response = await login(email, password);
       localStorage.setItem("token", response.token);
+      let userId = response.id || response.user_id || response.user?.id;
+      if (!userId && response.token) {
+        try {
+          const decoded = JSON.parse(atob(response.token.split(".")[1]));
+          userId =
+            decoded.id || decoded.user_id || decoded.userId || decoded.user?.id;
+        } catch (e) {
+          userId = undefined;
+        }
+      }
+      if (userId) {
+        localStorage.setItem("userId", String(userId));
+      }
 
       if (response.user_type === "admin") {
         setIsAdmin(true);

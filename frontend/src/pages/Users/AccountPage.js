@@ -103,11 +103,10 @@ const AccountPage = () => {
   if (!user) return <div className="text-gray-500">Yükleniyor...</div>;
 
   const menuItems = [
-    { id: "profile", label: "Profile", icon: User },
-
-    { id: "messages", label: "Messages", icon: Bell },
-    { id: "listings", label: "Listing", icon: Megaphone }, // ← listings eklendi
-    { id: "forumPosts", label: "Forum Posts", icon: MessageCircle },
+    { id: "profile", label: "Profil", icon: User },
+    { id: "messages", label: "Mesajlar", icon: Bell },
+    { id: "listings", label: "İlanlarım", icon: Megaphone },
+    { id: "forumPosts", label: "Forum Paylaşımlarım", icon: MessageCircle },
     { id: "premium", label: "Premium", icon: CreditCard },
   ];
   const handlePayment = () => {
@@ -135,9 +134,9 @@ const AccountPage = () => {
     if (user?.isPremium) {
       return (
         <div className="flex flex-col items-center justify-center py-8">
-          <h2 className="text-2xl font-bold mb-4">Premium Member 🚀</h2>
+          <h2 className="text-2xl font-bold mb-4">Premium Üye 🚀</h2>
           <p className="text-gray-600 mb-6 text-center">
-            You have 12 months left in your premium membership!
+            Premium üyeliğinizin bitmesine 12 ay kaldı!
           </p>
         </div>
       );
@@ -185,7 +184,7 @@ const AccountPage = () => {
         >
           <div className="flex flex-col h-full">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800">Account</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Hesabım</h2>
             </div>
             <nav className="flex-1 p-4 space-y-1">
               {menuItems.map((item) => {
@@ -211,7 +210,7 @@ const AccountPage = () => {
                 onClick={handleLogout}
                 className="flex items-center w-full px-4 py-3 text-sm text-red-600 rounded-lg hover:bg-red-50"
               >
-                <LogOut className="w-5 h-5 mr-3" /> Logout
+                <LogOut className="w-5 h-5 mr-3" /> Çıkış Yap
               </button>
             </div>
           </div>

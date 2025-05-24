@@ -100,27 +100,23 @@ const getPostByUserId = async (req, res) => {
 // Post silme
 const deletePost = async (req, res) => {
   const postId = req.params.id;
-  const userId = req.user.id; // JWT'den alınan user ID
-
+  const userId = req.user.id;
   try {
-    // Postu veritabanından silmeden önce, postun sahibi olup olmadığını kontrol edelim
     const post = await ForumPost.getById(postId);
     if (!post) {
       return res.status(404).json({ message: "Post bulunamadı!" });
     }
-
-    if (post.user_id !== userId) {
+    const isAdmin = req.user?.user_type === "admin";
+    // Sadece admin veya post sahibi silebilsin
+    if (!isAdmin && String(post.user_id) !== String(userId)) {
       return res
         .status(403)
         .json({ message: "Bu postu silmeye yetkiniz yok!" });
     }
-
-    // Postu silme işlemi
-    const result = await ForumPost.delete(postId);
+    const result = await ForumPost.delete(postId, isAdmin ? userId : null);
     if (result.affectedRows === 0) {
       return res.status(500).json({ message: "Post silinemedi." });
     }
-
     return res.status(200).json({ message: "Post başarıyla silindi." });
   } catch (err) {
     console.error("Post silinirken hata:", err);
@@ -179,6 +175,84 @@ const getTopPosts = async (req, res) => {
     return res.status(500).json({ message: "Could not fetch top posts." });
   }
 };
+
+// Yorum ekle
+const addComment = async (req, res) => {
+  const { post_id, comment } = req.body;
+  const user_id = req.user.id;
+  if (!comment || !post_id) {
+    return res.status(400).json({ message: "Yorum ve post_id zorunlu!" });
+  }
+  try {
+    const commentId = await ForumPost.addComment({ post_id, user_id, comment });
+    return res.status(201).json({ message: "Yorum eklendi", commentId });
+  } catch (error) {
+    console.error("Yorum eklenirken hata:", error);
+    return res.status(500).json({ message: "Yorum eklenemedi." });
+  }
+};
+
+// Posta ait yorumları getir
+const getCommentsByPostId = async (req, res) => {
+  const post_id = req.params.postId;
+  try {
+    const comments = await ForumPost.getCommentsByPostId(post_id);
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.error("Yorumlar alınırken hata:", error);
+    return res.status(500).json({ message: "Yorumlar alınamadı." });
+  }
+};
+
+const getUserComments = async (req, res) => {
+  const user_id = req.user.id;
+  try {
+    const comments = await ForumPost.getUserComments(user_id);
+    return res.status(200).json(comments);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// Admin yorum silme
+const deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user?.id;
+    const isAdmin = req.user?.user_type === "admin";
+    // Yorumu bul
+    const [rows] = await require("../config/db").query(
+      "SELECT * FROM forum_comments WHERE id = ?",
+      [commentId]
+    );
+    const comment = rows[0];
+    console.log("DEBUG deleteComment:", {
+      userId,
+      commentUserId: comment?.user_id,
+      isAdmin,
+      comment,
+    });
+    if (!comment) {
+      return res.status(404).json({ message: "Yorum bulunamadı!" });
+    }
+    // Sadece admin veya yorum sahibi silebilsin
+    if (!isAdmin && String(comment.user_id) !== String(userId)) {
+      return res
+        .status(403)
+        .json({
+          message: "Bu yorumu silmeye yetkiniz yok!",
+          userId,
+          commentUserId: comment.user_id,
+          isAdmin,
+        });
+    }
+    await ForumPost.deleteComment(commentId, isAdmin ? userId : null);
+    res.status(200).json({ message: "Yorum silindi" });
+  } catch (err) {
+    res.status(500).json({ message: "Yorum silinemedi", error: err.message });
+  }
+};
+
 module.exports = {
   createPost,
   toggleLike,
@@ -188,4 +262,8 @@ module.exports = {
   deletePost,
   updatePost,
   getTopPosts,
+  addComment,
+  getCommentsByPostId,
+  getUserComments,
+  deleteComment,
 };

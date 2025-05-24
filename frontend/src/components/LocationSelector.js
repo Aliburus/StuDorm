@@ -54,14 +54,16 @@ const LocationSelector = ({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6">
+    <div className="grid grid-cols-2 gap-4">
       <div>
-        <label className="block text-gray-600 mb-2">İl</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1 flex items-center">
+          İl
+        </label>
         <select
           name="province"
           value={formData.province}
           onChange={handleProvinceChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all hover:border-yellow-400"
         >
           <option value="">İl Seçin</option>
           {provinces.map((prov) => (
@@ -71,25 +73,25 @@ const LocationSelector = ({
           ))}
         </select>
       </div>
-
-      {formData.province && (
-        <div>
-          <label className="block text-gray-600 mb-2">İlçe</label>
-          <select
-            name="district"
-            value={formData.district}
-            onChange={handleDistrictChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">İlçe Seçin</option>
-            {districts.map((dist) => (
-              <option key={dist} value={dist}>
-                {dist}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1 flex items-center">
+          İlçe
+        </label>
+        <select
+          name="district"
+          value={formData.district}
+          onChange={handleDistrictChange}
+          className="w-full border border-gray-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all hover:border-yellow-400"
+          disabled={!formData.province}
+        >
+          <option value="">İlçe Seçin</option>
+          {districts.map((dist) => (
+            <option key={dist} value={dist}>
+              {dist}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 };

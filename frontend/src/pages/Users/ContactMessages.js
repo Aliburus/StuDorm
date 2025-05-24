@@ -65,15 +65,23 @@ const ContactMessages = () => {
           {messages.map((m) => (
             <li
               key={m.id}
-              className="bg-white shadow rounded-lg p-5 border border-gray-100"
+              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col gap-2 hover:shadow-xl transition-shadow duration-300"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-500 font-medium">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white font-bold text-lg shadow">
+                    <span>M</span>
+                  </div>
+                  <span className="font-semibold text-yellow-700 text-base">
+                    Mesaj
+                  </span>
+                </div>
+                <span className="text-xs text-gray-400 font-medium">
                   {formatDate(m.created_at)}
                 </span>
               </div>
               <div
-                className="text-gray-800 text-base mb-2 border-l-4 border-yellow-400 pl-4 py-2 bg-yellow-50 rounded-r-lg shadow-sm"
+                className="text-gray-800 text-base border-l-4 border-yellow-400 pl-4 py-2 bg-yellow-50 rounded-r-lg shadow-sm"
                 style={{ wordBreak: "break-word" }}
               >
                 {expandedMessages.includes(m.id)
@@ -83,7 +91,7 @@ const ContactMessages = () => {
               </div>
               {m.message.length > 100 && (
                 <button
-                  className="text-yellow-600 underline text-sm mb-2"
+                  className="text-yellow-600 underline text-sm mb-2 self-end"
                   onClick={() => toggleExpand(m.id)}
                 >
                   {expandedMessages.includes(m.id)
@@ -92,8 +100,8 @@ const ContactMessages = () => {
                 </button>
               )}
               {/* Admin cevabı varsa göster */}
-              {answers[m.id] ? (
-                <div className="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded shadow-sm">
+              {answers[m.id] && (
+                <div className="mt-2 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-xl shadow-sm animate-fade-in">
                   <div className="flex items-center mb-1">
                     <span className="text-xs text-indigo-700 font-semibold mr-2">
                       Admin cevabı
@@ -106,7 +114,7 @@ const ContactMessages = () => {
                     {answers[m.id].answer}
                   </div>
                 </div>
-              ) : null}
+              )}
             </li>
           ))}
         </ul>

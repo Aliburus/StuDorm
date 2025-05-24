@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   getUserForumPosts,
   deleteUserForumPost,
+  getComments,
+  getUserComments,
 } from "../../services/ForumService";
 import EditPostModal from "./EditPostModal";
 import {
@@ -22,6 +24,13 @@ const AccountForumPosts = () => {
   const [editPostId, setEditPostId] = useState(null);
   const [currentContent, setCurrentContent] = useState("");
   const [expandedPosts, setExpandedPosts] = useState([]);
+  const [comments, setComments] = useState({});
+  const [showComments, setShowComments] = useState({});
+  const [visibleComments, setVisibleComments] = useState({});
+  const [commentLoading, setCommentLoading] = useState({});
+  const [userComments, setUserComments] = useState([]);
+  const [userCommentPosts, setUserCommentPosts] = useState({});
+  const [showUserCommentPosts, setShowUserCommentPosts] = useState({});
   const navigate = useNavigate();
 
   // Gönderileri sunucudan çeker
@@ -39,6 +48,26 @@ const AccountForumPosts = () => {
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  const fetchUserComments = async () => {
+    try {
+      const comments = await getUserComments();
+      setUserComments(comments);
+      // Her yorumun ait olduğu gönderiyi çek
+      comments.forEach(async (comment) => {
+        try {
+          const post = await fetch(
+            `http://localhost:5000/api/posts/${comment.post_id}`
+          ).then((res) => res.json());
+          setUserCommentPosts((prev) => ({ ...prev, [comment.post_id]: post }));
+        } catch (e) {
+          console.error("Gönderi alınamadı:", e);
+        }
+      });
+    } catch (err) {
+      console.error("Yorumlar alınamadı:", err);
+    }
+  };
 
   // Gönderi silme işlemi
   const handleDelete = async (postId) => {
@@ -69,6 +98,29 @@ const AccountForumPosts = () => {
         ? prev.filter((id) => id !== postId)
         : [...prev, postId]
     );
+  };
+
+  const fetchComments = async (postId) => {
+    setCommentLoading((prev) => ({ ...prev, [postId]: true }));
+    try {
+      const data = await getComments(postId);
+      setComments((prev) => ({ ...prev, [postId]: data }));
+      setVisibleComments((prev) => ({ ...prev, [postId]: 3 }));
+    } catch (e) {
+      setComments((prev) => ({ ...prev, [postId]: [] }));
+      setVisibleComments((prev) => ({ ...prev, [postId]: 3 }));
+    } finally {
+      setCommentLoading((prev) => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const toggleComments = (postId) => {
+    setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    if (!showComments[postId]) fetchComments(postId);
+  };
+
+  const toggleUserCommentPost = (postId) => {
+    setShowUserCommentPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   if (error)
@@ -168,6 +220,95 @@ const AccountForumPosts = () => {
             >
               {expandedPosts.includes(post.id) ? "Küçült" : "Devamını Göster"}
             </button>
+          )}
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              onClick={() => toggleComments(post.id)}
+              className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium transition-all duration-300 ${
+                showComments[post.id]
+                  ? "bg-yellow-500 text-white"
+                  : "text-yellow-600 hover:bg-yellow-100 hover:text-yellow-700"
+              }`}
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Yorumlar ({comments[post.id]?.length || 0})</span>
+            </button>
+          </div>
+          {showComments[post.id] && (
+            <div className="mt-4 bg-white border border-gray-100 rounded-2xl shadow p-4">
+              {commentLoading[post.id] && (
+                <div className="text-yellow-700 font-medium">
+                  Yorumlar yükleniyor...
+                </div>
+              )}
+              {comments[post.id] && (
+                <div className="space-y-4 mt-2">
+                  {comments[post.id].length === 0 && (
+                    <div className="text-gray-500 italic">Henüz yorum yok.</div>
+                  )}
+                  {comments[post.id]
+                    .slice(0, visibleComments[post.id] || 3)
+                    .sort(
+                      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                    )
+                    .map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex items-start gap-3 bg-white border border-yellow-100 rounded-xl p-4 shadow-sm transition-all duration-200 hover:shadow-md"
+                        style={{ minHeight: 56 }}
+                      >
+                        <div className="flex-shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center">
+                            <span className="text-white font-bold">
+                              {c.name[0]}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-semibold text-yellow-700 text-base">
+                              {c.name} {c.surname}
+                            </span>
+                            <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                              {new Date(c.created_at).toLocaleString("tr-TR")}
+                            </span>
+                          </div>
+                          <div className="text-gray-800 text-sm leading-relaxed">
+                            {c.comment}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  {comments[post.id].length >
+                    (visibleComments[post.id] || 3) && (
+                    <button
+                      className="text-yellow-600 underline text-xs mt-2"
+                      onClick={() =>
+                        setVisibleComments((prev) => ({
+                          ...prev,
+                          [post.id]: (prev[post.id] || 3) + 3,
+                        }))
+                      }
+                    >
+                      Daha fazla gör
+                    </button>
+                  )}
+                  {(visibleComments[post.id] || 3) > 3 && (
+                    <button
+                      className="text-yellow-600 underline text-xs mt-2 ml-2"
+                      onClick={() =>
+                        setVisibleComments((prev) => ({
+                          ...prev,
+                          [post.id]: 3,
+                        }))
+                      }
+                    >
+                      Daha az gör
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
       ))}

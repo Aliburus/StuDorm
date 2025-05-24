@@ -8,18 +8,43 @@ import {
   AlertCircle,
   Trash2,
 } from "lucide-react";
+import { getComments } from "../../../../services/ForumService";
 
 const ForumPosts = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [comments, setComments] = useState({});
+  const [showComments, setShowComments] = useState({});
+  const [commentLoading, setCommentLoading] = useState({});
+  const [commentCounts, setCommentCounts] = useState({});
+  const [expandedPosts, setExpandedPosts] = useState([]);
+
+  const fetchAllCommentCounts = async (posts) => {
+    const counts = {};
+    await Promise.all(
+      posts.map(async (post) => {
+        try {
+          const data = await getComments(post.id);
+          counts[post.id] = data.length;
+        } catch {
+          counts[post.id] = 0;
+        }
+      })
+    );
+    setCommentCounts(counts);
+  };
 
   const fetchPosts = async () => {
     setLoading(true);
     setError("");
     try {
-      const posts = await AdminService.getAllPosts();
+      let posts = await AdminService.getAllPosts();
+      posts = posts.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
       setPosts(posts);
+      await fetchAllCommentCounts(posts);
     } catch (error) {
       console.error("Postlar alınamadı:", error);
       setError("Forum postları yüklenirken bir hata oluştu.");
@@ -35,6 +60,44 @@ const ForumPosts = () => {
     } catch (error) {
       console.error("Post silinemedi:", error);
       setError("Post silinirken bir hata oluştu.");
+    }
+  };
+
+  const fetchComments = async (postId) => {
+    setCommentLoading((prev) => ({ ...prev, [postId]: true }));
+    try {
+      const data = await getComments(postId);
+      setComments((prev) => ({ ...prev, [postId]: data }));
+    } catch (e) {
+      setComments((prev) => ({ ...prev, [postId]: [] }));
+    } finally {
+      setCommentLoading((prev) => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const toggleComments = (postId) => {
+    setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    if (!showComments[postId]) fetchComments(postId);
+  };
+
+  const toggleExpand = (postId) => {
+    setExpandedPosts((prev) =>
+      prev.includes(postId)
+        ? prev.filter((id) => id !== postId)
+        : [...prev, postId]
+    );
+  };
+
+  const handleDeleteComment = async (commentId, postId) => {
+    try {
+      await AdminService.deleteForumComment(postId, commentId);
+      await fetchComments(postId);
+      setCommentCounts((prev) => ({
+        ...prev,
+        [postId]: (prev[postId] || 1) - 1,
+      }));
+    } catch (e) {
+      alert("Yorum silinirken hata oluştu");
     }
   };
 
@@ -110,9 +173,25 @@ const ForumPosts = () => {
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  {post.content}
+                <p
+                  className="text-gray-600 leading-relaxed mb-4"
+                  style={{ wordBreak: "break-word" }}
+                >
+                  {expandedPosts.includes(post.id)
+                    ? post.content
+                    : post.content.slice(0, 100) +
+                      (post.content.length > 100 ? "..." : "")}
                 </p>
+                {post.content.length > 100 && (
+                  <button
+                    className="text-indigo-600 underline text-sm mb-2"
+                    onClick={() => toggleExpand(post.id)}
+                  >
+                    {expandedPosts.includes(post.id)
+                      ? "Küçült"
+                      : "Devamını Gör"}
+                  </button>
+                )}
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center space-x-2">
@@ -146,6 +225,82 @@ const ForumPosts = () => {
                     </div>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-2 mt-4">
+                  <button
+                    onClick={() => toggleComments(post.id)}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium transition-all duration-300 ${
+                      showComments[post.id]
+                        ? "bg-indigo-500 text-white"
+                        : "text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700"
+                    }`}
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Yorumlar ({commentCounts[post.id] ?? 0})</span>
+                  </button>
+                </div>
+                {showComments[post.id] && (
+                  <div className="mt-4 bg-gray-50 border border-gray-100 rounded-2xl shadow p-4">
+                    {commentLoading[post.id] && (
+                      <div className="text-indigo-700 font-medium">
+                        Yorumlar yükleniyor...
+                      </div>
+                    )}
+                    {comments[post.id] && (
+                      <div className="space-y-4 mt-2">
+                        {comments[post.id].length === 0 && (
+                          <div className="text-gray-500 italic">
+                            Henüz yorum yok.
+                          </div>
+                        )}
+                        {comments[post.id]
+                          .sort(
+                            (a, b) =>
+                              new Date(b.created_at) - new Date(a.created_at)
+                          )
+                          .map((c) => (
+                            <div
+                              key={c.id}
+                              className="flex items-start gap-3 bg-white border border-indigo-100 rounded-xl p-4 shadow-sm transition-all duration-200 hover:shadow-md"
+                              style={{ minHeight: 56 }}
+                            >
+                              <div className="flex-shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-500 flex items-center justify-center">
+                                  <span className="text-white font-bold">
+                                    {c.name[0]}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="font-semibold text-indigo-700 text-base">
+                                    {c.name} {c.surname}
+                                  </span>
+                                  <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                                    {new Date(c.created_at).toLocaleString(
+                                      "tr-TR"
+                                    )}
+                                  </span>
+                                </div>
+                                <div className="text-gray-800 text-sm leading-relaxed">
+                                  {c.comment}
+                                </div>
+                              </div>
+                              <button
+                                className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Yorumu Sil"
+                                onClick={() =>
+                                  handleDeleteComment(c.id, post.id)
+                                }
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </article>
           ))}

@@ -118,7 +118,7 @@ const AccountListingsPage = ({ user }) => {
   }
 
   return (
-    <div className="p-8 min-h-screen bg-gray-50 flex flex-col items-center">
+    <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-gray-50 flex flex-col items-center">
       <h1 className="text-3xl font-bold mb-10 text-gray-900 tracking-tight self-start">
         İlanlarım
       </h1>
@@ -131,11 +131,11 @@ const AccountListingsPage = ({ user }) => {
               Yurt İlanları
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {yurtAds.map((ad) => (
               <div
                 key={`yurt-${ad.id}`}
-                className="bg-white rounded-2xl shadow hover:shadow-lg border border-gray-100 transition-all duration-200 group flex flex-col w-80 hover:scale-105"
+                className="bg-white rounded-2xl shadow hover:shadow-lg border border-gray-100 transition-all duration-200 group flex flex-col w-full sm:w-full md:w-80 hover:scale-105"
               >
                 <div className="relative h-44 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-2xl">
                   {ad.images && ad.images.length > 0 ? (
@@ -210,11 +210,11 @@ const AccountListingsPage = ({ user }) => {
               Staj İlanları
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {interns.map((intern) => (
               <div
                 key={`intern-${intern.id}`}
-                className="bg-white rounded-2xl shadow hover:shadow-lg border border-gray-100 transition-all duration-200 group flex flex-col w-80 hover:scale-105"
+                className="bg-white rounded-2xl shadow hover:shadow-lg border border-gray-100 transition-all duration-200 group flex flex-col w-full sm:w-full md:w-80 hover:scale-105"
               >
                 <div className="flex items-center gap-2 mt-5 px-5">
                   <Briefcase className="w-5 h-5 text-blue-500" />
@@ -270,11 +270,11 @@ const AccountListingsPage = ({ user }) => {
               Part-Time İlanlar
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {partTimeAds.map((ad) => (
               <div
                 key={`pt-${ad.id}`}
-                className="bg-white rounded-2xl shadow hover:shadow-lg border border-gray-100 transition-all duration-200 group flex flex-col w-80 hover:scale-105"
+                className="bg-white rounded-2xl shadow hover:shadow-lg border border-gray-100 transition-all duration-200 group flex flex-col w-full sm:w-full md:w-80 hover:scale-105"
               >
                 <div className="flex items-center gap-2 mt-5 px-5">
                   <Clock className="w-5 h-5 text-green-500" />

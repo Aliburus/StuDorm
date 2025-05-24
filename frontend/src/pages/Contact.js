@@ -2,6 +2,16 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { sendContactMessage } from "../services/ContactService";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+} from "lucide-react";
 
 const Contact = () => {
   const [email, setEmail] = useState("");
@@ -52,7 +62,7 @@ const Contact = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
                   placeholder="E-posta adresinizi girin"
                   required
                 />
@@ -68,7 +78,7 @@ const Contact = () => {
                   id="message"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
                   placeholder="Mesajınızı buraya yazın"
                   rows="5"
                   required
@@ -82,13 +92,12 @@ const Contact = () => {
               )}
               <button
                 type="submit"
-                className="w-full bg-gray-900 text-white p-3 rounded-lg text-lg font-semibold hover:bg-gray-700 transition"
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-3 rounded-lg text-lg font-semibold hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 transform hover:-translate-y-1"
               >
                 Gönder
               </button>
             </form>
           </section>
-
           <section className="flex-1">
             <div className="w-full h-[80vh] rounded-lg overflow-hidden shadow-lg">
               <iframe
