@@ -18,7 +18,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-const BASE_UPLOAD_URL = "http://localhost:5000";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
 
 const AccountListingsPage = ({ user }) => {
   const [yurtAds, setYurtAds] = useState([]);
@@ -49,7 +49,7 @@ const AccountListingsPage = ({ user }) => {
             photoArr = ad.photos;
           }
           const photos = photoArr.map((p) =>
-            p.startsWith("http") ? p : `${BASE_UPLOAD_URL}${p}`
+            p.startsWith("http") ? p : `${BASE_URL}${p}`
           );
           return {
             ...ad,
@@ -142,14 +142,13 @@ const AccountListingsPage = ({ user }) => {
                       src={
                         ad.images[0].startsWith("http")
                           ? ad.images[0]
-                          : `${BASE_UPLOAD_URL}${ad.images[0]}`
+                          : `${BASE_URL}${ad.images[0]}`
                       }
                       alt={ad.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src =
-                          "https://via.placeholder.com/400x300?text=No+Image";
+                        e.target.src = "/images/no-image.png";
                       }}
                     />
                   ) : (

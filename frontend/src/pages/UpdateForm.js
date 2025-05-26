@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import LocationSelector from "../components/LocationSelector";
 
-const BASE_UPLOAD_URL = "http://localhost:5000";
+const BASE_UPLOAD_URL = process.env.REACT_APP_BASE_URL;
 
 const UpdateForm = () => {
   const { id, type } = useParams();
@@ -360,7 +360,6 @@ const UpdateForm = () => {
             {!options[0].label.includes("Seçin") && (
               <option value="">Seçin</option>
             )}
-            }
             {options.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}

@@ -14,6 +14,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import ErrorMessage from "../components/ErrorMessage";
 dayjs.extend(relativeTime);
 import {
   toggleLike,
@@ -42,6 +43,8 @@ function ForumPages() {
   const [commentMenuOpen, setCommentMenuOpen] = useState(null);
   const commentMenuRefs = useRef({});
   const [popularCount, setPopularCount] = useState(3);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     fetchPosts();
@@ -74,7 +77,10 @@ function ForumPages() {
   };
 
   const handlePostSubmit = async () => {
-    if (!newPostContent.trim()) return;
+    if (!newPostContent.trim()) {
+      setError("forum/validation/content");
+      return;
+    }
 
     try {
       const newPost = await createPost(newPostContent);
@@ -87,8 +93,9 @@ function ForumPages() {
         ...prevPosts,
       ]);
       setNewPostContent("");
+      setSuccess("forum/post/create/success");
     } catch (error) {
-      console.error("Post eklenemedi:", error.message);
+      setError("forum/post/create/failed");
     }
   };
 
@@ -102,7 +109,7 @@ function ForumPages() {
       );
       setDislikedPosts((prev) => prev.filter((id) => id !== postId));
     } catch (e) {
-      console.error("Like hatası:", e.message);
+      setError("forum/post/update/failed");
     }
   };
 
@@ -116,7 +123,7 @@ function ForumPages() {
       );
       setLikedPosts((prev) => prev.filter((id) => id !== postId));
     } catch (e) {
-      console.error("Dislike hatası:", e.message);
+      setError("forum/post/update/failed");
     }
   };
 
@@ -148,14 +155,18 @@ function ForumPages() {
   };
 
   const handleCommentSubmit = async (postId) => {
-    if (!newComment[postId]?.trim()) return;
+    if (!newComment[postId]?.trim()) {
+      setError("forum/validation/comment");
+      return;
+    }
 
     try {
       await addComment(postId, newComment[postId]);
       setNewComment((prev) => ({ ...prev, [postId]: "" }));
       await fetchComments(postId);
+      setSuccess("forum/comment/create/success");
     } catch (e) {
-      console.error("Yorum eklenemedi:", e);
+      setError("forum/comment/create/failed");
     }
   };
 
@@ -169,8 +180,9 @@ function ForumPages() {
       try {
         await deleteUserForumPost(postId);
         await fetchPosts();
+        setSuccess("forum/post/delete/success");
       } catch (e) {
-        console.error("Gönderi silinemedi:", e);
+        setError("forum/post/delete/failed");
       }
     }
   };
@@ -180,8 +192,9 @@ function ForumPages() {
       try {
         await deleteForumComment(postId, commentId);
         await fetchComments(postId);
+        setSuccess("forum/comment/delete/success");
       } catch (e) {
-        console.error("Yorum silinemedi:", e);
+        setError("forum/comment/delete/failed");
       }
     }
   };
@@ -193,6 +206,9 @@ function ForumPages() {
   return (
     <div className="min-h-screen bg-[#fafafa]">
       <Navbar />
+
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} severity="success" />}
 
       {copyMessage && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full shadow-xl z-50 text-sm font-medium animate-fadeIn">

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { getUserMessages } from "../../services/ContactService";
 import axios from "axios";
 
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -29,7 +31,7 @@ const ContactMessages = () => {
         data.forEach(async (msg) => {
           try {
             const res = await axios.get(
-              `http://localhost:5000/api/contact-messages/answer/${msg.id}`
+              `${BASE_URL}/api/contact/answer/${msg.id}`
             );
             if (res.data && res.data.length > 0) {
               setAnswers((prev) => ({ ...prev, [msg.id]: res.data[0] }));

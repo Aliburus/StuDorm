@@ -1,52 +1,60 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Mail, Send, Loader, AlertCircle } from "lucide-react";
+import { Mail, Send, Loader } from "lucide-react";
+import ErrorMessage from "../../../../components/ErrorMessage";
+
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
 
 function ContactMessagesTab() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState("");
   const [replyModal, setReplyModal] = useState(null);
   const [replyMessage, setReplyMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          `${BASE_URL}/api/contact-messages/all`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setMessages(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Mesajlar alınamadı:", error);
+        setError("Mesajlar yüklenirken bir hata oluştu");
+        setLoading(false);
+      }
+    };
+
     fetchMessages();
     fetchUsers();
   }, []);
 
-  const fetchMessages = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        "http://localhost:5000/api/contact-messages/all",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setMessages(res.data);
-    } catch (err) {
-      setError("Mesajlar alınamadı");
-    }
-    setLoading(false);
-  };
-
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/users", {
+      const res = await axios.get(`${BASE_URL}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
     } catch (err) {
-      setError("Kullanıcılar alınamadı");
+      setError("admin/user/fetch/failed");
     }
   };
 
   const handleSendReply = async () => {
     if (!replyMessage.trim()) {
-      alert("Lütfen bir mesaj girin");
+      setError("contact/validation/message");
       return;
     }
 
@@ -58,18 +66,14 @@ function ContactMessagesTab() {
         email: replyModal.email,
         message: replyMessage,
       };
-      await axios.post(
-        "http://localhost:5000/api/contact-messages/reply",
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      alert("Mesaj başarıyla gönderildi");
+      await axios.post(`${BASE_URL}/api/contact-messages/reply`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSuccess("contact/reply/success");
       setReplyModal(null);
       setReplyMessage("");
     } catch (err) {
-      alert("Mesaj gönderilirken bir hata oluştu");
+      setError("contact/reply/failed");
     }
     setSending(false);
   };
@@ -84,14 +88,13 @@ function ContactMessagesTab() {
       <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
         İletişim Mesajları
       </h2>
+
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} severity="success" />}
+
       {loading ? (
         <div className="flex items-center justify-center p-8">
           <Loader className="w-8 h-8 text-indigo-500 animate-spin" />
-        </div>
-      ) : error ? (
-        <div className="flex items-center justify-center p-8 text-red-500">
-          <AlertCircle className="w-8 h-8 mr-2" />
-          {error}
         </div>
       ) : (
         <div className="overflow-x-auto">

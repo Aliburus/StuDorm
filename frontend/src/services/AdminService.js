@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Backend API URL'sini belirtin
-const API_URL = "http://localhost:5000/api/admin";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+const API_URL = `${BASE_URL}/api/admin`;
 
 // Axios instance'ı oluşturuyoruz
 const apiClient = axios.create({
@@ -121,19 +121,18 @@ const getUserLogs = async (userId) => {
 };
 
 export const deleteForumComment = async (postId, commentId) => {
-  const token = localStorage.getItem("token");
-  const res = await fetch(
-    `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+  try {
+    const response = await apiClient.delete(
+      `/forum/posts/${postId}/comments/${commentId}`
+    );
+    if (!response.data) {
+      throw new Error("Yorum silinemedi");
     }
-  );
-  if (!res.ok) throw new Error("Yorum silinemedi");
-  return await res.json();
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting forum comment:", error);
+    throw new Error("Yorum silinemedi");
+  }
 };
 
 export const AdminService = {

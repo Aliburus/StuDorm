@@ -1,10 +1,10 @@
 // services/UserServices.js
 import axios from "axios";
 
-// Yetkilendirme ve kullanıcı API uç noktaları
-const AUTH_URL = "http://localhost:5000/api/auth/";
-const PROFILE_URL = "http://localhost:5000/api/user"; // /api/user/profile
-const USER_URL = "http://localhost:5000/api/user"; // /api/user/:id
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+const AUTH_URL = `${BASE_URL}/api/auth/`;
+const PROFILE_URL = `${BASE_URL}/api/user`; // /api/user/profile
+const USER_URL = `${BASE_URL}/api/user`; // /api/user/:id
 
 // İlan sahibinin bilgilerini çekme
 export const getUserById = async (userId) => {

@@ -18,7 +18,7 @@ const PaymentPage = () => {
     const fetchPremiumPrice = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/premium-benefits"
+          `${process.env.REACT_APP_BASE_URL}/api/premium-benefits`
         );
         if (response.data && response.data.length > 0) {
           setPremiumPrice(response.data[0].price);
@@ -51,17 +51,20 @@ const PaymentPage = () => {
         return;
       }
 
-      const response = await axios.post("http://localhost:5000/api/payments", {
-        cardNumber,
-        bank,
-        cardType,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}/api/payments`,
+        {
+          cardNumber,
+          bank,
+          cardType,
+        }
+      );
 
       if (response.data.success) {
         const userToken = localStorage.getItem("token");
         if (userToken) {
           await axios.post(
-            "http://localhost:5000/api/user/upgrade-to-premium",
+            `${process.env.REACT_APP_BASE_URL}/api/user/upgrade-to-premium`,
             { paymentStatus: "successful" },
             { headers: { Authorization: `Bearer ${userToken}` } }
           );

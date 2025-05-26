@@ -1,4 +1,5 @@
 güvenlik düzenleme
 
 paylaşma
-
+şifre güncelleme tasarım
+payment dene 

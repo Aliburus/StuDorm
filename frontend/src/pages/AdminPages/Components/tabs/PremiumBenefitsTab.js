@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+
 function PremiumBenefitsTab() {
   const [benefits, setBenefits] = useState([]);
   const [form, setForm] = useState({
@@ -13,24 +15,30 @@ function PremiumBenefitsTab() {
   });
   const [editId, setEditId] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
+    const fetchBenefits = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${BASE_URL}/api/premium-benefits`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setBenefits(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Premium benefits alınamadı:", error);
+        setError("Premium benefits yüklenirken bir hata oluştu");
+        setLoading(false);
+      }
+    };
+
     fetchBenefits();
   }, []);
-
-  const fetchBenefits = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get("http://localhost:5000/api/premium-benefits");
-      setBenefits(res.data);
-    } catch (err) {
-      setError("Veriler alınamadı");
-    }
-    setLoading(false);
-  };
 
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -58,11 +66,9 @@ function PremiumBenefitsTab() {
     setSuccess("");
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
-        `http://localhost:5000/api/premium-benefits/${editId}`,
-        form,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.put(`${BASE_URL}/api/premium-benefits/${editId}`, form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setSuccess("Başarıyla güncellendi");
       setEditId(null);
       setShowEdit(false);

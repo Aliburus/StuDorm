@@ -3,7 +3,7 @@ import { AdminService } from "../../../../services/AdminService";
 import { X } from "lucide-react";
 import LocationSelector from "../../../../components/LocationSelector";
 
-const BASE_UPLOAD_URL = "http://localhost:5000";
+const BASE_UPLOAD_URL = process.env.REACT_APP_BASE_URL;
 
 function ListingsTab({
   listings,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { sendContactMessage } from "../services/ContactService";
@@ -12,27 +12,42 @@ import {
   Instagram,
   Linkedin,
 } from "lucide-react";
+import ErrorMessage from "../components/ErrorMessage";
 
 const Contact = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
+    setError("");
+    setSuccess("");
+
+    if (!email.trim()) {
+      setError("contact/validation/email");
+      return;
+    }
+
+    if (!message.trim()) {
+      setError("contact/validation/message");
+      return;
+    }
+
+    if (message.length > 1000) {
+      setError("contact/validation/length");
+      return;
+    }
 
     const messageData = { email, message };
     try {
-      const result = await sendContactMessage(messageData);
-      setSuccess(true);
+      await sendContactMessage(messageData);
+      setSuccess("contact/send/success");
       setEmail("");
       setMessage("");
     } catch (err) {
-      console.error(err);
-      setError("Mesaj gönderme sırasında bir hata oluştu.");
+      setError("contact/send/failed");
     }
   };
 
@@ -84,12 +99,8 @@ const Contact = () => {
                   required
                 ></textarea>
               </div>
-              {error && <div className="text-red-500 text-sm">{error}</div>}
-              {success && (
-                <div className="text-green-500 text-sm">
-                  Mesajınız başarıyla gönderildi!
-                </div>
-              )}
+              {error && <ErrorMessage message={error} />}
+              {success && <ErrorMessage message={success} severity="success" />}
               <button
                 type="submit"
                 className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-3 rounded-lg text-lg font-semibold hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 transform hover:-translate-y-1"

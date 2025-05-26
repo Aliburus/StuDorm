@@ -25,12 +25,14 @@ import {
   getPartTimeJobById,
 } from "../services/ListingService";
 
-const BASE_UPLOAD_URL = "http://localhost:5000";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+
 export default function ListingDetails() {
   const [owner, setOwner] = useState(null);
   const { type, id } = useParams();
   const [data, setData] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   useEffect(() => {
     setData(null);
     async function fetchData() {
@@ -39,7 +41,9 @@ export default function ListingDetails() {
         if (type === "room") {
           result = await getYurtAdById(id);
           if (Array.isArray(result.images)) {
-            result.images = result.images.map((img) => BASE_UPLOAD_URL + img);
+            result.images = result.images.map((img) =>
+              img.startsWith("http") ? img : `${BASE_URL}${img}`
+            );
           }
         } else if (type === "intern") {
           result = await getInternById(id);
@@ -418,7 +422,7 @@ export default function ListingDetails() {
                 >
                   <div className="relative pb-[70%] overflow-hidden">
                     <img
-                      src={img}
+                      src={img.startsWith("http") ? img : `${BASE_URL}${img}`}
                       alt={`Thumb ${idx + 1}`}
                       className="absolute inset-0 w-full h-full object-cover"
                     />

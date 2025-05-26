@@ -19,7 +19,7 @@ import LocationSelector from "../components/LocationSelector";
 
 const internCategories = ["Software Development", "Marketing", "Finance"];
 const partTimeCategories = ["Eğitim", "Satış", "Destek", "Teknik"];
-const BASE_UPLOAD_URL = "http://localhost:5000";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
 
 function FindAll() {
   const [selectedType, setSelectedType] = useState("room");
@@ -57,7 +57,9 @@ function FindAll() {
         const result = await getYurtListings();
         data = result.map((item) => ({
           ...item,
-          photos: item.photos?.map((p) => BASE_UPLOAD_URL + p) || [],
+          images: (item.photos || []).map((img) =>
+            img.startsWith("http") ? img : `${BASE_URL}${img}`
+          ),
         }));
       } else if (selectedType === "intern") {
         data = await getInterns();
@@ -391,10 +393,10 @@ function FindAll() {
                     onClick={() => handleClick(item)}
                     className="cursor-pointer bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group flex flex-col"
                   >
-                    {item.photos?.[0] ? (
+                    {item.images?.[0] ? (
                       <div className="w-full h-40 overflow-hidden flex-shrink-0">
                         <img
-                          src={item.photos[0]}
+                          src={item.images[0]}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />

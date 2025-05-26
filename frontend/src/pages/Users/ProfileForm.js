@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Save } from "lucide-react";
 import { updateUserProfile } from "../../services/UserServices";
+import ErrorMessage from "../../components/ErrorMessage";
 
 const ProfileForm = ({
   user,
@@ -13,8 +14,8 @@ const ProfileForm = ({
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Email validation regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -25,24 +26,22 @@ const ProfileForm = ({
   // Handle password change
   const handlePasswordChange = () => {
     if (newPassword !== confirmPassword) {
-      setErrorMessage("Yeni şifreler eşleşmiyor.");
-      setSuccessMessage("");
+      setError("password/validation/match");
+      setSuccess("");
       return;
     }
 
     // Password validation
     if (!passwordRegex.test(newPassword)) {
-      setErrorMessage(
-        "Yeni şifre en az bir büyük harf, bir rakam ve 6 karakterden oluşmalıdır."
-      );
-      setSuccessMessage("");
+      setError("password/validation/format");
+      setSuccess("");
       return;
     }
 
     // Email validation
     if (!emailRegex.test(formData.email)) {
-      setErrorMessage("Geçerli bir e-posta adresi girin.");
-      setSuccessMessage("");
+      setError("validation/email");
+      setSuccess("");
       return;
     }
 
@@ -51,24 +50,24 @@ const ProfileForm = ({
       oldPassword,
       newPassword,
     });
-    setErrorMessage(""); // Clear any previous error message
-    setSuccessMessage("Şifre başarıyla güncellendi.");
+    setError("");
+    setSuccess("password/change/success");
   };
 
   const updateUserInfo = async () => {
     try {
-      const token = sessionStorage.getItem("token");
+      const token = localStorage.getItem("token");
       const formDataWithPassword = {
         ...formData,
-        oldPassword: oldPassword, // Eski şifre
-        newPassword: newPassword, // Yeni şifre
+        oldPassword: oldPassword,
+        newPassword: newPassword,
       };
-      const updatedUser = await updateUserProfile(formDataWithPassword, token); // API'ye yeni verileri gönderiyoruz
+      const updatedUser = await updateUserProfile(formDataWithPassword, token);
       setIsEditing(false);
-      setSuccessMessage("Profil başarıyla güncellendi!");
+      setSuccess("admin/user/update/success");
     } catch (error) {
-      setErrorMessage("Kullanıcı bilgileri güncellenirken bir hata oluştu.");
-      setSuccessMessage("");
+      setError("admin/user/update/failed");
+      setSuccess("");
     }
   };
 
@@ -76,8 +75,8 @@ const ProfileForm = ({
     <>
       <form
         onSubmit={(e) => {
-          e.preventDefault(); // Formun sayfa yenilenmesini engelliyoruz
-          handlePasswordChange(); // Şifre değişikliği kontrolü
+          e.preventDefault();
+          handlePasswordChange();
         }}
         className="space-y-6 bg-white rounded-xl shadow-sm p-8"
       >
@@ -85,50 +84,70 @@ const ProfileForm = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              First Name
+              Ad
             </label>
             <input
               type="text"
-              disabled
               value={formData.name}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-50 disabled:text-gray-500"
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              disabled={!isEditing}
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-100"
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Last Name
+              Soyad
             </label>
             <input
               type="text"
-              disabled
               value={formData.surname}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-50 disabled:text-gray-500"
+              onChange={(e) =>
+                setFormData({ ...formData, surname: e.target.value })
+              }
+              disabled={!isEditing}
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              E-posta
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              disabled={!isEditing}
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Telefon
+            </label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              disabled={!isEditing}
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-100"
             />
           </div>
         </div>
 
-        {/* Email */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            type="email"
-            disabled={!isEditing}
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 disabled:bg-gray-50 disabled:text-gray-500"
-          />
-        </div>
-
-        {/* Password Change Section */}
         {isEditing && (
           <>
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Old Password
+                Mevcut Şifre
               </label>
               <input
                 type="password"
@@ -140,7 +159,7 @@ const ProfileForm = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                New Password
+                Yeni Şifre
               </label>
               <input
                 type="password"
@@ -152,7 +171,7 @@ const ProfileForm = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Confirm New Password
+                Yeni Şifre Tekrar
               </label>
               <input
                 type="password"
@@ -164,14 +183,10 @@ const ProfileForm = ({
           </>
         )}
 
-        {/* Error and Success Messages */}
-        {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
-        {successMessage && (
-          <p className="text-green-500 text-sm">{successMessage}</p>
-        )}
+        {error && <ErrorMessage message={error} />}
+        {success && <ErrorMessage message={success} severity="success" />}
 
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-6">
+        <div className="flex justify-end space-x-4">
           {isEditing ? (
             <>
               <button
@@ -182,14 +197,14 @@ const ProfileForm = ({
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                Cancel
+                İptal
               </button>
               <button
                 type="button"
-                onClick={updateUserInfo} // Güncelleme işlemini başlat
+                onClick={updateUserInfo}
                 className="flex items-center px-4 py-2 bg-yellow-400 text-white rounded-lg text-sm font-medium hover:bg-yellow-600"
               >
-                <Save className="w-4 h-4 mr-2" /> Save Changes
+                <Save className="w-4 h-4 mr-2" /> Değişiklikleri Kaydet
               </button>
             </>
           ) : (
@@ -198,7 +213,7 @@ const ProfileForm = ({
               onClick={() => setIsEditing(true)}
               className="px-4 py-2 bg-yellow-400 text-white rounded-lg text-sm font-medium hover:bg-yellow-600"
             >
-              Edit Profile
+              Profili Düzenle
             </button>
           )}
         </div>

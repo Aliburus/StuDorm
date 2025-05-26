@@ -85,7 +85,7 @@ const PremiumListings = () => {
               ) {
                 imageToShow = firstPhoto.startsWith("http")
                   ? firstPhoto
-                  : `http://localhost:5000${firstPhoto}`;
+                  : `${process.env.REACT_APP_BASE_URL}${firstPhoto}`;
               }
             } else if (ad.photos && ad.photos.length > 0) {
               imageToShow = ad.photos.split(",")[0];

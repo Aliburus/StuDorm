@@ -14,6 +14,9 @@ import {
 import { register, login } from "../services/UserServices"; // Assuming these functions exist
 import { useNavigate } from "react-router-dom"; // For navigation
 import axios from "axios";
+import ErrorMessage from "../components/ErrorMessage";
+
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
 
 function LoginPage() {
   const [activeForm, setActiveForm] = useState("login");
@@ -75,10 +78,8 @@ function LoginPage() {
         navigate("/");
       }
     } catch (error) {
-      setError(
-        error.response?.data?.error ||
-          "Kullanıcı adı veya şifre hatalı. Lütfen tekrar deneyin."
-      );
+      const errorCode = error.response?.data?.error || "auth/wrong-password";
+      setError(errorCode);
     }
   };
 
@@ -87,17 +88,15 @@ function LoginPage() {
     setError("");
     setSuccess("");
 
-    // İsim ve soyisim kontrolü ve düzenleme
     if (name.length < 2) {
-      setError("İsim en az 2 karakter olmalıdır");
+      setError("validation/name");
       return;
     }
     if (surname.length < 2) {
-      setError("Soyisim en az 2 karakter olmalıdır");
+      setError("validation/surname");
       return;
     }
 
-    // İsim ve soyadı düzenleme
     const formattedName = name
       .trim()
       .split(" ")
@@ -110,67 +109,55 @@ function LoginPage() {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ");
 
-    // E-posta validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!email) {
-      setError("E-posta adresi boş bırakılamaz");
+      setError("validation/email");
       return;
     }
     if (!emailRegex.test(email)) {
-      setError("Geçerli bir e-posta adresi giriniz (örn: ornek@mail.com)");
+      setError("validation/email");
       return;
     }
 
-    // Telefon numarası validation
     if (!phone) {
-      setError("Telefon numarası boş bırakılamaz");
+      setError("validation/phone");
       return;
     }
 
-    // Türk numarası kontrolü
     const turkishPhoneRegex = /^(\+90|0)?[5][0-9][0-9][1-9]([0-9]){6}$/;
-    // Uluslararası numara kontrolü
     const internationalPhoneRegex = /^\+[1-9]\d{1,14}$/;
 
     if (
       !turkishPhoneRegex.test(phone) &&
       !internationalPhoneRegex.test(phone)
     ) {
-      setError(
-        "Geçerli bir telefon numarası giriniz:\nTürk numarası: +905551234567 veya 05551234567\nUluslararası numara: +1234567890"
-      );
+      setError("validation/phone");
       return;
     }
 
-    // Telefon numarasını WhatsApp formatına dönüştür
+    if (!password) {
+      setError("validation/password");
+      return;
+    }
+    if (
+      password.length < 6 ||
+      !/[A-Z]/.test(password) ||
+      !/[0-9]/.test(password)
+    ) {
+      setError("validation/password");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("validation/password-match");
+      return;
+    }
+
     let formattedPhone = phone;
     if (phone.startsWith("0")) {
       formattedPhone = "90" + phone.substring(1);
     } else if (phone.startsWith("+")) {
       formattedPhone = phone.substring(1);
-    }
-
-    // Şifre validation
-    if (!password) {
-      setError("Şifre boş bırakılamaz");
-      return;
-    }
-    if (password.length < 6) {
-      setError("Şifre en az 6 karakter olmalıdır");
-      return;
-    }
-    if (!/[A-Z]/.test(password)) {
-      setError("Şifre en az bir büyük harf içermelidir");
-      return;
-    }
-    if (!/[0-9]/.test(password)) {
-      setError("Şifre en az bir rakam içermelidir");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Şifreler eşleşmiyor!");
-      return;
     }
 
     try {
@@ -181,8 +168,7 @@ function LoginPage() {
         formattedPhone,
         password
       );
-      setSuccess("Kayıt işlemi başarılı! Giriş yapabilirsiniz.");
-
+      setSuccess("operation/success");
       setName("");
       setSurname("");
       setEmail("");
@@ -194,10 +180,7 @@ function LoginPage() {
         setActiveForm("login");
       }, 2000);
     } catch (error) {
-      setError(
-        error.response?.data?.error ||
-          "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin."
-      );
+      setError(error.response?.data?.error || "operation/failed");
     }
   };
 
@@ -207,33 +190,31 @@ function LoginPage() {
     setSuccess("");
 
     if (!modalEmail) {
-      setError("Lütfen e-posta adresinizi girin.");
+      setError("validation/email");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Şifreler eşleşmiyor!");
+      setError("password/validation/match");
       return;
     }
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/forgot-password",
+        `${BASE_URL}/api/auth/forgot-password`,
         {
           email: modalEmail,
           newPassword,
           confirmPassword,
         }
       );
-      setSuccess("Şifreniz başarıyla güncellendi.");
+      setSuccess("password/reset/success");
       setShowForgotPassword(false);
       setNewPassword("");
       setConfirmPassword("");
       setModalEmail("");
     } catch (error) {
-      setError(
-        error.response?.data?.error || "Bir hata oluştu. Lütfen tekrar deneyin."
-      );
+      setError("password/reset/failed");
     }
   };
 
@@ -256,31 +237,8 @@ function LoginPage() {
         </div>
 
         {/* Notification Area */}
-        {error && (
-          <div className="flex items-center p-4 mb-4 bg-red-50 border-l-4 border-red-500 rounded-md">
-            <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-            <div className="flex-1 text-red-700">{error}</div>
-            <button
-              onClick={() => setError("")}
-              className="text-red-500 hover:text-red-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {success && (
-          <div className="flex items-center p-4 mb-4 bg-green-50 border-l-4 border-green-500 rounded-md">
-            <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-            <div className="flex-1 text-green-700">{success}</div>
-            <button
-              onClick={() => setSuccess("")}
-              className="text-green-500 hover:text-green-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        {error && <ErrorMessage message={error} />}
+        {success && <ErrorMessage message={success} severity="success" />}
 
         <div className="flex gap-8 mt-8">
           {/* Login Form */}
@@ -537,6 +495,12 @@ function LoginPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                 </div>
+
+                {error && <ErrorMessage message={error} />}
+                {success && (
+                  <ErrorMessage message={success} severity="success" />
+                )}
+
                 <div className="flex justify-end space-x-2">
                   <button
                     type="button"

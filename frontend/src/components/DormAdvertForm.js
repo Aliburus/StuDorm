@@ -16,6 +16,7 @@ import {
   createPartTimeAdvert,
 } from "../services/ListingService"; // Adjust the import path as necessary
 import axios from "axios";
+import ErrorMessage from "./ErrorMessage";
 
 const DormAdvertForm = () => {
   const [adType, setAdType] = useState("dorm"); // NEW: ad type selection
@@ -40,7 +41,8 @@ const DormAdvertForm = () => {
   });
 
   const [previewImages, setPreviewImages] = useState([]);
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
@@ -49,8 +51,8 @@ const DormAdvertForm = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+    if (error) {
+      setError("");
     }
   };
 
@@ -59,10 +61,7 @@ const DormAdvertForm = () => {
     const totalFiles = formData.photos.length + files.length;
 
     if (totalFiles > 15) {
-      setErrors((prev) => ({
-        ...prev,
-        photos: "En fazla 15 fotoğraf yükleyebilirsiniz.",
-      }));
+      setError("listing/validation/images");
       return;
     }
 
@@ -87,31 +86,47 @@ const DormAdvertForm = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = "Başlık gereklidir";
-    if (!formData.description.trim())
-      newErrors.description = "Açıklama gereklidir";
-    if (!formData.province) newErrors.province = "İl seçimi gereklidir";
-    if (!formData.district) newErrors.district = "İlçe seçimi gereklidir";
+    if (!formData.title.trim()) {
+      setError("listing/validation/title");
+      return false;
+    }
+    if (!formData.description.trim()) {
+      setError("listing/validation/description");
+      return false;
+    }
+    if (!formData.province) {
+      setError("listing/validation/address");
+      return false;
+    }
+    if (!formData.district) {
+      setError("listing/validation/address");
+      return false;
+    }
 
     if (adType === "dorm") {
-      if (!formData.price) newErrors.price = "Fiyat gereklidir";
-      if (formData.photos.length < 5)
-        newErrors.photos = "En az 5 fotoğraf yüklemelisiniz";
+      if (!formData.price) {
+        setError("listing/validation/price");
+        return false;
+      }
+      if (formData.photos.length < 5) {
+        setError("listing/validation/images");
+        return false;
+      }
     }
 
     if (adType === "parttime" && !formData.price) {
-      newErrors.price = "Ücret gereklidir";
+      setError("listing/validation/price");
+      return false;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return true;
   };
 
   const checkEligibility = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:5000/api/user/check-ad-eligibility",
+        `${process.env.REACT_APP_BASE_URL}/api/user/check-ad-eligibility`,
         {
           params: { adType },
           headers: { Authorization: `Bearer ${token}` },
@@ -126,13 +141,14 @@ const DormAdvertForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+
     if (!validateForm()) return;
 
     const isEligible = await checkEligibility();
     if (!isEligible) {
-      setPremiumError(
-        "İlan ekleme limitinize ulaştınız veya premium üye değilsiniz."
-      );
+      setError("listing/premium/required");
       setShowPremiumModal(true);
       return;
     }
@@ -143,7 +159,6 @@ const DormAdvertForm = () => {
 
     try {
       if (adType === "dorm") {
-        // Use FormData to handle file uploads
         const data = new FormData();
         Object.entries(payload).forEach(([key, value]) => {
           if (key === "photos") {
@@ -155,13 +170,13 @@ const DormAdvertForm = () => {
           }
         });
         await createYurtIlan(data);
-        alert("Yurt ilanınız başarıyla kaydedildi.");
+        setSuccess("listing/create/success");
       } else if (adType === "interns") {
         await createIntern(payload);
-        alert("Staj ilanınız başarıyla kaydedildi.");
+        setSuccess("listing/create/success");
       } else if (adType === "parttime") {
         await createPartTimeAdvert(payload);
-        alert("Part-time ilanınız başarıyla kaydedildi.");
+        setSuccess("listing/create/success");
       }
 
       // Reset form
@@ -181,8 +196,7 @@ const DormAdvertForm = () => {
       });
       setPreviewImages([]);
     } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("İlan kaydedilirken bir hata oluştu: " + error.message);
+      setError(error.response?.data?.error || "listing/create/failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -240,13 +254,11 @@ const DormAdvertForm = () => {
                     value={formData.title}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.title ? "border-red-500" : "border-gray-300"
+                      error ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Başlık girin"
                   />
-                  {errors.title && (
-                    <p className="text-sm text-red-500">{errors.title}</p>
-                  )}
+                  {error && <ErrorMessage message={error} />}
                 </div>
 
                 {adType !== "dorm" && (
@@ -294,7 +306,7 @@ const DormAdvertForm = () => {
                     value={formData.description}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.description ? "border-red-500" : "border-gray-300"
+                      error ? "border-red-500" : "border-gray-300"
                     }`}
                     rows="4"
                   />
@@ -310,10 +322,8 @@ const DormAdvertForm = () => {
                     formData={formData}
                     handleChange={handleChange}
                   />
-                  {(errors.province || errors.district) && (
-                    <div className="mt-2 text-red-500 text-sm">
-                      {errors.province || errors.district}
-                    </div>
+                  {error && (
+                    <div className="mt-2 text-red-500 text-sm">{error}</div>
                   )}
                 </div>
 
@@ -330,13 +340,10 @@ const DormAdvertForm = () => {
                       value={formData.price}
                       onChange={handleChange}
                       className={`w-full px-4 py-3 rounded-lg border ${
-                        errors.price ? "border-red-500" : "border-gray-300"
+                        error ? "border-red-500" : "border-gray-300"
                       }`}
                       placeholder="₺"
                     />
-                    {errors.price && (
-                      <p className="text-sm text-red-500">{errors.price}</p>
-                    )}
                   </div>
                 )}
 
@@ -393,9 +400,7 @@ const DormAdvertForm = () => {
                       onChange={handleFileChange}
                       className="block"
                     />
-                    {errors.photos && (
-                      <p className="text-sm text-red-500">{errors.photos}</p>
-                    )}
+                    {error && <p className="text-sm text-red-500">{error}</p>}
                     {previewImages.length > 0 && (
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
                         {previewImages.map((img, idx) => (
@@ -475,6 +480,8 @@ const DormAdvertForm = () => {
           </div>
         </div>
       )}
+
+      {success && <ErrorMessage message={success} severity="success" />}
     </>
   );
 };

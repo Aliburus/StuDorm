@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AdminService } from "../../../../services/AdminService";
+import ErrorMessage from "../../../../components/ErrorMessage";
 import {
   MessageSquare,
   ThumbsUp,
@@ -14,6 +15,7 @@ const ForumPosts = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [comments, setComments] = useState({});
   const [showComments, setShowComments] = useState({});
   const [commentLoading, setCommentLoading] = useState({});
@@ -46,8 +48,7 @@ const ForumPosts = () => {
       setPosts(posts);
       await fetchAllCommentCounts(posts);
     } catch (error) {
-      console.error("Postlar alınamadı:", error);
-      setError("Forum postları yüklenirken bir hata oluştu.");
+      setError("forum/post/not-found");
     } finally {
       setLoading(false);
     }
@@ -57,9 +58,9 @@ const ForumPosts = () => {
     try {
       await AdminService.deleteForumPost(postId);
       await fetchPosts();
+      setSuccess("forum/post/delete/success");
     } catch (error) {
-      console.error("Post silinemedi:", error);
-      setError("Post silinirken bir hata oluştu.");
+      setError("forum/post/delete/failed");
     }
   };
 
@@ -96,8 +97,9 @@ const ForumPosts = () => {
         ...prev,
         [postId]: (prev[postId] || 1) - 1,
       }));
+      setSuccess("forum/comment/delete/success");
     } catch (e) {
-      alert("Yorum silinirken hata oluştu");
+      setError("forum/comment/delete/failed");
     }
   };
 
@@ -127,23 +129,11 @@ const ForumPosts = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow-lg p-8">
-        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-        <p className="text-red-600 font-medium mb-4">{error}</p>
-        <button
-          onClick={fetchPosts}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-        >
-          Tekrar Dene
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-gray-50 rounded-xl p-6 shadow-lg">
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} severity="success" />}
+
       <div className="flex items-center space-x-3 mb-8">
         <MessageSquare className="w-8 h-8 text-indigo-600" />
         <h2 className="text-2xl font-bold text-gray-900">Forum Postları</h2>

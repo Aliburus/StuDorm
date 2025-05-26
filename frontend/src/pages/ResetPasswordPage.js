@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Lock, AlertCircle, CheckCircle, X } from "lucide-react";
+import { Lock } from "lucide-react";
+import ErrorMessage from "../components/ErrorMessage";
 
 function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
@@ -20,23 +21,24 @@ function ResetPasswordPage() {
     setSuccess("");
 
     if (newPassword !== confirmPassword) {
-      setError("Şifreler eşleşmiyor!");
+      setError("password/validation/match");
       return;
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/reset-password", {
-        token,
-        newPassword,
-      });
-      setSuccess("Şifreniz başarıyla güncellendi. Yönlendiriliyorsunuz...");
+      await axios.post(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/reset-password`,
+        {
+          token,
+          newPassword,
+        }
+      );
+      setSuccess("password/reset/success");
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (error) {
-      setError(
-        error.response?.data?.error || "Bir hata oluştu. Lütfen tekrar deneyin."
-      );
+      setError("password/reset/failed");
     }
   };
 
@@ -49,31 +51,8 @@ function ResetPasswordPage() {
           </h2>
         </div>
 
-        {error && (
-          <div className="flex items-center p-4 mb-4 bg-red-50 border-l-4 border-red-500 rounded-md">
-            <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-            <div className="flex-1 text-red-700">{error}</div>
-            <button
-              onClick={() => setError("")}
-              className="text-red-500 hover:text-red-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {success && (
-          <div className="flex items-center p-4 mb-4 bg-green-50 border-l-4 border-green-500 rounded-md">
-            <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-            <div className="flex-1 text-green-700">{success}</div>
-            <button
-              onClick={() => setSuccess("")}
-              className="text-green-500 hover:text-green-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        {error && <ErrorMessage message={error} />}
+        {success && <ErrorMessage message={success} severity="success" />}
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">

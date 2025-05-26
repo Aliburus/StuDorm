@@ -5,8 +5,10 @@ import {
   deleteUserForumPost,
   getComments,
   getUserComments,
+  deleteForumComment,
 } from "../../services/ForumService";
 import EditPostModal from "./EditPostModal";
+import ErrorMessage from "../../components/ErrorMessage";
 import {
   MessageSquare,
   Edit,
@@ -22,7 +24,8 @@ import {
 
 const AccountForumPosts = () => {
   const [posts, setPosts] = useState([]);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editPostId, setEditPostId] = useState(null);
   const [currentContent, setCurrentContent] = useState("");
@@ -40,9 +43,9 @@ const AccountForumPosts = () => {
     try {
       const fetchedPosts = await getUserForumPosts();
       setPosts(fetchedPosts);
-      setError(null);
+      setError("");
     } catch (err) {
-      setError("Gönderiler alınırken bir hata oluştu.");
+      setError("forum/post/not-found");
     }
   };
 
@@ -57,7 +60,7 @@ const AccountForumPosts = () => {
       comments.forEach(async (comment) => {
         try {
           const post = await fetch(
-            `http://localhost:5000/api/posts/${comment.post_id}`
+            `${process.env.REACT_APP_BASE_URL}/api/posts/${comment.post_id}`
           ).then((res) => res.json());
           setUserCommentPosts((prev) => ({ ...prev, [comment.post_id]: post }));
         } catch (e) {
@@ -74,8 +77,9 @@ const AccountForumPosts = () => {
       try {
         await deleteUserForumPost(postId);
         await fetchPosts();
+        setSuccess("forum/post/delete/success");
       } catch (err) {
-        setError("Gönderi silinirken bir hata oluştu.");
+        setError("forum/post/delete/failed");
       }
     }
   };
@@ -89,6 +93,7 @@ const AccountForumPosts = () => {
   const handleSave = async () => {
     setIsModalOpen(false);
     await fetchPosts();
+    setSuccess("forum/post/update/success");
   };
 
   const toggleExpand = (postId) => {
@@ -122,15 +127,6 @@ const AccountForumPosts = () => {
     setShowUserCommentPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-100 rounded-xl p-6 flex items-center gap-3 animate-fadeIn">
-        <AlertCircle className="w-6 h-6 text-red-500" />
-        <p className="text-red-600 font-medium">{error}</p>
-      </div>
-    );
-  }
-
   if (!posts.length) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-12 text-center space-y-6 animate-fadeIn">
@@ -156,6 +152,9 @@ const AccountForumPosts = () => {
 
   return (
     <div className="space-y-4 animate-fadeIn">
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} severity="success" />}
+
       {posts.map((post) => (
         <div
           key={post.id}
@@ -304,11 +303,15 @@ const AccountForumPosts = () => {
                                 className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                 title="Yorumu Sil"
                                 onClick={async () => {
-                                  await require("../../services/AdminService").deleteForumComment(
-                                    post.id,
-                                    c.id
-                                  );
-                                  fetchComments(post.id);
+                                  try {
+                                    await deleteForumComment(post.id, c.id);
+                                    fetchComments(post.id);
+                                  } catch (error) {
+                                    console.error(
+                                      "Yorum silinirken hata oluştu:",
+                                      error
+                                    );
+                                  }
                                 }}
                               >
                                 <Trash2 className="w-4 h-4" />
