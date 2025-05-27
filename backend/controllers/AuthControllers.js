@@ -69,10 +69,10 @@ const registerUser = async (req, res) => {
   const { name, surname, email, phone, password } = req.body;
 
   // İsim ve soyisim kontrolü
-  if (!name || name.trim().length < 3) {
-    return res.status(400).json({ error: "İsim en az 3 karakter olmalıdır!" });
+  if (!name || typeof name !== "string" || name.trim().length < 2) {
+    return res.status(400).json({ error: "İsim en az 2 karakter olmalıdır!" });
   }
-  if (!surname || surname.trim().length < 2) {
+  if (!surname || typeof surname !== "string" || surname.trim().length < 2) {
     return res
       .status(400)
       .json({ error: "Soyisim en az 2 karakter olmalıdır!" });
@@ -81,14 +81,16 @@ const registerUser = async (req, res) => {
   // İsim ve soyadı düzenleme
   const formattedName = name
     .trim()
+    .toLowerCase()
     .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
   const formattedSurname = surname
     .trim()
+    .toLowerCase()
     .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
   // E-posta validation
@@ -165,7 +167,6 @@ const registerUser = async (req, res) => {
     // Hash the password for security
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert the new user into the database with default 'normal' user_type
     await User.create({
       name: formattedName,
       surname: formattedSurname,

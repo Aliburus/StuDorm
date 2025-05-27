@@ -45,24 +45,49 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = JSON.parse(atob(token.split(".")[1]));
-        if (decoded.user_type === "admin") {
-          setIsAdmin(true);
-          setIsAuthenticated(true);
-        } else {
+    const checkToken = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const decoded = JSON.parse(atob(token.split(".")[1]));
+          const isTokenExpired = decoded.exp * 1000 < Date.now();
+
+          if (isTokenExpired) {
+            localStorage.removeItem("token");
+            setIsAdmin(false);
+            setIsAuthenticated(false);
+            window.location.href = "/login";
+          } else {
+            if (decoded.user_type === "admin") {
+              setIsAdmin(true);
+              setIsAuthenticated(true);
+              if (window.location.pathname !== "/admin") {
+                window.location.href = "/admin";
+              }
+            } else {
+              setIsAdmin(false);
+              setIsAuthenticated(true);
+            }
+          }
+        } catch (error) {
+          localStorage.removeItem("token");
           setIsAdmin(false);
-          setIsAuthenticated(true);
+          setIsAuthenticated(false);
+          window.location.href = "/login";
         }
-      } catch (error) {
+      } else {
         setIsAdmin(false);
         setIsAuthenticated(false);
-        localStorage.removeItem("token");
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    checkToken();
+    window.addEventListener("focus", checkToken);
+
+    return () => {
+      window.removeEventListener("focus", checkToken);
+    };
   }, []);
 
   return (

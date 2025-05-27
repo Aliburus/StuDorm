@@ -18,15 +18,9 @@ export const getUserById = async (userId) => {
 };
 
 // Kayıt olma
-export const register = async (name, surname, email, phone, password) => {
+export const register = async (userData) => {
   try {
-    const { data } = await axios.post(`${AUTH_URL}register`, {
-      name,
-      surname,
-      email,
-      phone,
-      password,
-    });
+    const { data } = await axios.post(`${AUTH_URL}register`, userData);
     return data;
   } catch (err) {
     if (err.response && err.response.data) {

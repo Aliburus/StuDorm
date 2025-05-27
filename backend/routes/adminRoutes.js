@@ -59,4 +59,10 @@ router.delete(
   require("../controllers/adminController").deleteForumPost
 );
 
+router.delete(
+  "/forum/posts/:postId/comments/:commentId",
+  authenticateAdmin,
+  require("../controllers/adminController").deleteForumComment
+);
+
 module.exports = router;

@@ -32,7 +32,7 @@ function About() {
                   Biz Kimiz?
                 </h2>
                 <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                  StuDorm, 2023 yılında öğrencilerin konaklama sorunlarına çözüm
+                  StuDorm, 2025 yılında öğrencilerin konaklama sorunlarına çözüm
                   bulmak amacıyla kuruldu. Misyonumuz, öğrencilerin güvenilir ve
                   uygun fiyatlı konaklama seçeneklerine erişimini
                   kolaylaştırmak, ev/yurt sahiplerinin ise boş kapasitelerini

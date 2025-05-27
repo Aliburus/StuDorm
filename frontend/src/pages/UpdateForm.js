@@ -142,47 +142,62 @@ const UpdateForm = () => {
     const newErrors = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = "Bu alan zorunludur";
+      newErrors.title = "Lütfen ilan başlığını giriniz";
+    } else if (formData.title.trim().length < 5) {
+      newErrors.title = "İlan başlığı en az 5 karakter olmalıdır";
     }
+
     if (!formData.description.trim()) {
-      newErrors.description = "Bu alan zorunludur";
+      newErrors.description = "Lütfen ilan açıklamasını giriniz";
+    } else if (formData.description.trim().length < 20) {
+      newErrors.description = "İlan açıklaması en az 20 karakter olmalıdır";
     }
+
     if (!formData.province) {
-      newErrors.province = "Bu alan zorunludur";
+      newErrors.province = "Lütfen il seçiniz";
     }
     if (!formData.district) {
-      newErrors.district = "Bu alan zorunludur";
+      newErrors.district = "Lütfen ilçe seçiniz";
     }
 
     if (type === "yurt") {
       if (!formData.price) {
-        newErrors.price = "Bu alan zorunludur";
+        newErrors.price = "Lütfen fiyat bilgisini giriniz";
+      } else if (isNaN(formData.price) || formData.price <= 0) {
+        newErrors.price = "Lütfen geçerli bir fiyat giriniz";
       }
+
       if (!formData.gender_required) {
-        newErrors.gender_required = "Bu alan zorunludur";
+        newErrors.gender_required = "Lütfen cinsiyet seçiniz";
       }
       if (!formData.room_type) {
-        newErrors.room_type = "Bu alan zorunludur";
+        newErrors.room_type = "Lütfen oda tipini seçiniz";
       }
       if (previewUrls.length < 5) {
-        newErrors.photos = "En az 5 fotoğraf yüklemelisiniz";
+        newErrors.photos = "En az 5 fotoğraf yüklemeniz gerekmektedir";
       }
     }
 
     if (type === "intern" || type === "parttime") {
       if (!formData.category) {
-        newErrors.category = "Bu alan zorunludur";
+        newErrors.category = "Lütfen kategori seçiniz";
       }
       if (!formData.duration) {
-        newErrors.duration = "Bu alan zorunludur";
+        newErrors.duration = "Lütfen süre bilgisini giriniz";
       }
       if (!formData.requirements) {
-        newErrors.requirements = "Bu alan zorunludur";
+        newErrors.requirements = "Lütfen gereksinimleri giriniz";
+      } else if (formData.requirements.trim().length < 10) {
+        newErrors.requirements = "Gereksinimler en az 10 karakter olmalıdır";
       }
     }
 
-    if (type === "parttime" && !formData.price) {
-      newErrors.price = "Bu alan zorunludur";
+    if (type === "parttime") {
+      if (!formData.price) {
+        newErrors.price = "Lütfen fiyat bilgisini giriniz";
+      } else if (isNaN(formData.price) || formData.price <= 0) {
+        newErrors.price = "Lütfen geçerli bir fiyat giriniz";
+      }
     }
 
     setErrors(newErrors);
@@ -192,7 +207,7 @@ const UpdateForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      // Scroll to the first error
+      setError("Lütfen tüm alanları doğru şekilde doldurunuz");
       const firstError = document.querySelector(".text-red-500");
       if (firstError) {
         firstError.scrollIntoView({ behavior: "smooth", block: "center" });

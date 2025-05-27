@@ -30,13 +30,19 @@ const Contact = () => {
       return;
     }
 
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      setError("contact/validation/email-format");
+      return;
+    }
+
     if (!message.trim()) {
       setError("contact/validation/message");
       return;
     }
 
     if (message.length > 1000) {
-      setError("contact/validation/length");
+      setError("contact/validation/message-length");
       return;
     }
 
@@ -78,7 +84,7 @@ const Contact = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
-                  placeholder="E-posta adresinizi girin"
+                  placeholder="ornek@mail.com"
                   required
                 />
               </div>
@@ -94,7 +100,7 @@ const Contact = () => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
-                  placeholder="Mesajınızı buraya yazın"
+                  placeholder="Mesajınızı buraya yazın (maksimum 1000 karakter)"
                   rows="5"
                   required
                 ></textarea>

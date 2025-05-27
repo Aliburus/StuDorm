@@ -78,7 +78,12 @@ function ForumPages() {
 
   const handlePostSubmit = async () => {
     if (!newPostContent.trim()) {
-      setError("forum/validation/content");
+      setError("Lütfen bir gönderi içeriği giriniz");
+      return;
+    }
+
+    if (newPostContent.trim().length > 1000) {
+      setError("Gönderi içeriği çok uzun. Maksimum 1000 karakter olmalıdır");
       return;
     }
 
@@ -93,9 +98,9 @@ function ForumPages() {
         ...prevPosts,
       ]);
       setNewPostContent("");
-      setSuccess("forum/post/create/success");
+      setSuccess("Gönderiniz başarıyla paylaşıldı");
     } catch (error) {
-      setError("forum/post/create/failed");
+      setError("Gönderi paylaşılırken bir hata oluştu. Lütfen tekrar deneyin");
     }
   };
 
@@ -109,7 +114,7 @@ function ForumPages() {
       );
       setDislikedPosts((prev) => prev.filter((id) => id !== postId));
     } catch (e) {
-      setError("forum/post/update/failed");
+      setError("İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin");
     }
   };
 
@@ -123,14 +128,14 @@ function ForumPages() {
       );
       setLikedPosts((prev) => prev.filter((id) => id !== postId));
     } catch (e) {
-      setError("forum/post/update/failed");
+      setError("İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin");
     }
   };
 
   const handleShare = (postId) => {
     const url = `${window.location.origin}/forumpage#post-${postId}`;
     navigator.clipboard.writeText(url);
-    setCopyMessage("Bağlantı kopyalandı!");
+    setCopyMessage("Gönderi bağlantısı panoya kopyalandı!");
     setTimeout(() => setCopyMessage(""), 1500);
   };
 
@@ -156,7 +161,12 @@ function ForumPages() {
 
   const handleCommentSubmit = async (postId) => {
     if (!newComment[postId]?.trim()) {
-      setError("forum/validation/comment");
+      setError("Lütfen bir yorum giriniz");
+      return;
+    }
+
+    if (newComment[postId].trim().length > 500) {
+      setError("Yorum çok uzun. Maksimum 500 karakter olmalıdır");
       return;
     }
 
@@ -164,9 +174,9 @@ function ForumPages() {
       await addComment(postId, newComment[postId]);
       setNewComment((prev) => ({ ...prev, [postId]: "" }));
       await fetchComments(postId);
-      setSuccess("forum/comment/create/success");
+      setSuccess("Yorumunuz başarıyla eklendi");
     } catch (e) {
-      setError("forum/comment/create/failed");
+      setError("Yorum eklenirken bir hata oluştu. Lütfen tekrar deneyin");
     }
   };
 
@@ -176,25 +186,33 @@ function ForumPages() {
   };
 
   const handleDeletePost = async (postId) => {
-    if (window.confirm("Bu gönderiyi silmek istediğinize emin misiniz?")) {
+    if (
+      window.confirm(
+        "Bu gönderiyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+      )
+    ) {
       try {
         await deleteUserForumPost(postId);
         await fetchPosts();
-        setSuccess("forum/post/delete/success");
+        setSuccess("Gönderi başarıyla silindi");
       } catch (e) {
-        setError("forum/post/delete/failed");
+        setError("Gönderi silinirken bir hata oluştu. Lütfen tekrar deneyin");
       }
     }
   };
 
   const handleDeleteComment = async (postId, commentId) => {
-    if (window.confirm("Bu yorumu silmek istediğinize emin misiniz?")) {
+    if (
+      window.confirm(
+        "Bu yorumu silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+      )
+    ) {
       try {
         await deleteForumComment(postId, commentId);
         await fetchComments(postId);
-        setSuccess("forum/comment/delete/success");
+        setSuccess("Yorum başarıyla silindi");
       } catch (e) {
-        setError("forum/comment/delete/failed");
+        setError("Yorum silinirken bir hata oluştu. Lütfen tekrar deneyin");
       }
     }
   };

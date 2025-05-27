@@ -1,7 +1,14 @@
 const db = require("../config/db");
 
-const getRandomPremiumUserAds = async (limit = 10) => {
-  limit = parseInt(limit, 15) || 10; // güvenli tamsayıya çevir
+const getRandomPremiumUserAds = async (limit = 15) => {
+  limit = parseInt(limit, 15) || 15;
+
+  // Bugünün tarihini seed olarak kullan
+  const today = new Date();
+  const seed =
+    today.getFullYear() * 10000 +
+    (today.getMonth() + 1) * 100 +
+    today.getDate();
 
   const yurtadsQuery = `
   SELECT 
@@ -35,6 +42,7 @@ const getRandomPremiumUserAds = async (limit = 10) => {
   FROM parttimeads pa
   INNER JOIN users u ON pa.user_id = u.id
   WHERE u.user_type = 'premium'
+    AND pa.status = 'active'
 `;
 
   const internsQuery = `
@@ -50,6 +58,7 @@ const getRandomPremiumUserAds = async (limit = 10) => {
   FROM interns i
   INNER JOIN users u ON i.user_id = u.id
   WHERE u.user_type = 'premium'
+    AND i.status = 'active'
 `;
 
   const sql = `
@@ -61,7 +70,7 @@ const getRandomPremiumUserAds = async (limit = 10) => {
     UNION ALL
     ${internsQuery}
   ) AS combined
-  ORDER BY RAND()
+  ORDER BY RAND(${seed})
   LIMIT ${limit}
 `;
 
@@ -69,4 +78,6 @@ const getRandomPremiumUserAds = async (limit = 10) => {
   return rows;
 };
 
-module.exports = { getRandomPremiumUserAds };
+module.exports = {
+  getRandomPremiumUserAds,
+};

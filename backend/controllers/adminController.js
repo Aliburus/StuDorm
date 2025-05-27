@@ -247,3 +247,21 @@ module.exports.getUserLogs = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+module.exports.deleteForumComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+    const [rows] = await require("../config/db").query(
+      "SELECT * FROM forum_comments WHERE id = ?",
+      [commentId]
+    );
+    const comment = rows[0];
+    if (!comment) {
+      return res.status(404).json({ message: "Yorum bulunamadı!" });
+    }
+    await require("../models/ForumPosts").deleteComment(commentId);
+    res.status(200).json({ message: "Yorum başarıyla silindi" });
+  } catch (err) {
+    res.status(500).json({ message: "Yorum silinemedi", error: err.message });
+  }
+};

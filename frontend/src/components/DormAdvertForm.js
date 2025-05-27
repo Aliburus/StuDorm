@@ -85,7 +85,6 @@ const DormAdvertForm = () => {
   };
 
   const validateForm = () => {
-    const newErrors = {};
     if (!formData.title.trim()) {
       setError("listing/validation/title");
       return false;
@@ -95,30 +94,37 @@ const DormAdvertForm = () => {
       return false;
     }
     if (!formData.province) {
-      setError("listing/validation/address");
+      setError("listing/validation/province");
       return false;
     }
     if (!formData.district) {
-      setError("listing/validation/address");
+      setError("listing/validation/district");
       return false;
     }
-
-    if (adType === "dorm") {
-      if (!formData.price) {
-        setError("listing/validation/price");
-        return false;
-      }
-      if (formData.photos.length < 5) {
-        setError("listing/validation/images");
-        return false;
-      }
-    }
-
-    if (adType === "parttime" && !formData.price) {
+    if (!formData.price) {
       setError("listing/validation/price");
       return false;
     }
-
+    if (!formData.gender_required) {
+      setError("listing/validation/gender");
+      return false;
+    }
+    if (!formData.room_type) {
+      setError("listing/validation/room-type");
+      return false;
+    }
+    if (!formData.category) {
+      setError("listing/validation/category");
+      return false;
+    }
+    if (!formData.duration) {
+      setError("listing/validation/duration");
+      return false;
+    }
+    if (!formData.requirements) {
+      setError("listing/validation/requirements");
+      return false;
+    }
     return true;
   };
 
@@ -205,7 +211,7 @@ const DormAdvertForm = () => {
         setPremiumError(backendMsg);
         setShowPremiumModal(true);
       }
-      setError(backendMsg || "listing/create/failed");
+      setError("listing/create/failed");
     } finally {
       setIsSubmitting(false);
     }

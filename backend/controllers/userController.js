@@ -55,7 +55,7 @@ const accessPremiumContent = async (req, res) => {
 };
 const updateUserProfile = async (req, res) => {
   try {
-    const { name, surname, email, oldPassword, newPassword } = req.body;
+    const { name, surname, email, phone, oldPassword, newPassword } = req.body;
     const userId = req.user.id;
 
     const user = await userModel.getUserById(userId);
@@ -79,6 +79,31 @@ const updateUserProfile = async (req, res) => {
       });
     }
 
+    // Telefon numarası validasyonu
+    if (phone) {
+      const turkishPhoneRegex = /^(\+90|0)?[5][0-9][0-9][1-9]([0-9]){6}$/;
+      const internationalPhoneRegex = /^\+[1-9]\d{1,14}$/;
+
+      if (
+        !turkishPhoneRegex.test(phone) &&
+        !internationalPhoneRegex.test(phone)
+      ) {
+        return res.status(400).json({
+          error:
+            "Geçerli bir telefon numarası giriniz:\nTürk numarası: +905551234567 veya 05551234567\nUluslararası numara: +1234567890",
+        });
+      }
+
+      // Telefon numarasını WhatsApp formatına dönüştür
+      let formattedPhone = phone;
+      if (phone.startsWith("0")) {
+        formattedPhone = "90" + phone.substring(1);
+      } else if (phone.startsWith("+")) {
+        formattedPhone = phone.substring(1);
+      }
+      user.phone = formattedPhone;
+    }
+
     // Kullanıcı bilgilerini güncelle
     user.name = name || user.name;
     user.surname = surname || user.surname;
@@ -90,6 +115,7 @@ const updateUserProfile = async (req, res) => {
       name: user.name,
       surname: user.surname,
       email: user.email,
+      phone: user.phone,
       password: user.password,
     });
 
@@ -98,9 +124,11 @@ const updateUserProfile = async (req, res) => {
       oldName: user.name,
       oldSurname: user.surname,
       oldEmail: user.email,
+      oldPhone: user.phone,
       newName: name,
       newSurname: surname,
       newEmail: email,
+      newPhone: phone,
     });
 
     return res.status(200).json({ message: "User updated successfully" });

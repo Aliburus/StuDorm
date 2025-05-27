@@ -60,6 +60,16 @@ function LoginPage() {
     setError("");
     setSuccess("");
 
+    if (!email) {
+      setError("auth/validation/email");
+      return;
+    }
+
+    if (!password) {
+      setError("auth/validation/password");
+      return;
+    }
+
     try {
       const response = await login(email, password);
       localStorage.setItem("token", response.token);
@@ -80,14 +90,20 @@ function LoginPage() {
       if (response.user_type === "admin") {
         setIsAdmin(true);
         setIsAuthenticated(true);
-        window.location.href = "/admin";
+        setSuccess("auth/login/admin");
+        setTimeout(() => {
+          window.location.href = "/admin";
+        }, 1500);
       } else {
         setIsAuthenticated(true);
-        window.location.href = "/";
+        setSuccess("auth/login/success");
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1500);
       }
     } catch (error) {
-      const errorCode = error.response?.data?.error || "auth/wrong-password";
-      setError(errorCode);
+      const errorMessage = error.response?.data?.error || "auth/login/failed";
+      setError(errorMessage);
     }
   };
 
@@ -96,39 +112,31 @@ function LoginPage() {
     setError("");
     setSuccess("");
 
-    if (name.length < 2) {
-      setError("validation/name");
-      return;
-    }
-    if (surname.length < 2) {
-      setError("validation/surname");
+    if (!name || name.trim().length < 2) {
+      setError("Lütfen geçerli bir isim giriniz (en az 2 karakter)");
       return;
     }
 
-    const formattedName = name
-      .trim()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
+    if (!surname || surname.trim().length < 2) {
+      setError("Lütfen geçerli bir soyisim giriniz (en az 2 karakter)");
+      return;
+    }
 
-    const formattedSurname = surname
-      .trim()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
+    if (!email) {
+      setError("Lütfen e-posta adresinizi giriniz");
+      return;
+    }
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!email) {
-      setError("validation/email");
-      return;
-    }
     if (!emailRegex.test(email)) {
-      setError("validation/email");
+      setError(
+        "Lütfen geçerli bir e-posta adresi giriniz (örn: ornek@mail.com)"
+      );
       return;
     }
 
     if (!phone) {
-      setError("validation/phone");
+      setError("Lütfen telefon numaranızı giriniz");
       return;
     }
 
@@ -139,56 +147,66 @@ function LoginPage() {
       !turkishPhoneRegex.test(phone) &&
       !internationalPhoneRegex.test(phone)
     ) {
-      setError("validation/phone");
+      setError(
+        "Lütfen geçerli bir telefon numarası giriniz (örn: +905551234567 veya 05551234567)"
+      );
       return;
     }
 
     if (!password) {
-      setError("validation/password");
+      setError("Lütfen bir şifre belirleyiniz");
       return;
     }
-    if (
-      password.length < 6 ||
-      !/[A-Z]/.test(password) ||
-      !/[0-9]/.test(password)
-    ) {
-      setError("validation/password");
+
+    if (password.length < 6) {
+      setError("Şifreniz en az 6 karakter olmalıdır");
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setError("Şifreniz en az bir büyük harf içermelidir");
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setError("Şifreniz en az bir rakam içermelidir");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("validation/password-match");
+      setError("Girdiğiniz şifreler eşleşmiyor. Lütfen tekrar kontrol edin");
       return;
     }
 
-    let formattedPhone = phone;
-    if (phone.startsWith("0")) {
-      formattedPhone = "90" + phone.substring(1);
-    } else if (phone.startsWith("+")) {
-      formattedPhone = phone.substring(1);
-    }
-
     try {
-      await register(
-        formattedName,
-        formattedSurname,
+      const response = await register({
+        name,
+        surname,
         email,
-        formattedPhone,
-        password
-      );
-      setSuccess("operation/success");
-      setName("");
-      setSurname("");
-      setEmail("");
-      setPhone("");
-      setPassword("");
-      setConfirmPassword("");
-
+        password,
+        phone,
+        birthDate,
+      });
+      setSuccess("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...");
       setTimeout(() => {
         setActiveForm("login");
       }, 2000);
     } catch (error) {
-      setError(error.response?.data?.error || "operation/failed");
+      const errorMessage =
+        error.response?.data?.error || "Kayıt olurken bir hata oluştu";
+      let displayError = "";
+
+      switch (errorMessage) {
+        case "Bu e-posta adresi zaten kullanılıyor!":
+          displayError = "Bu e-posta adresiyle kayıtlı bir hesap zaten var";
+          break;
+        case "Bu telefon numarası zaten kullanılıyor!":
+          displayError = "Bu telefon numarasıyla kayıtlı bir hesap zaten var";
+          break;
+        default:
+          displayError = "Kayıt olurken bir hata oluştu. Lütfen tekrar deneyin";
+      }
+      setError(displayError);
     }
   };
 
@@ -275,7 +293,7 @@ function LoginPage() {
                           type="email"
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="E-posta adresinizi girin"
+                          placeholder="ornek@mail.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                         />
@@ -291,7 +309,7 @@ function LoginPage() {
                           type="password"
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="Şifrenizi girin"
+                          placeholder="En az 6 karakter, 1 büyük harf ve 1 rakam"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                         />
@@ -354,7 +372,7 @@ function LoginPage() {
                           type="text"
                           required
                           className="w-full px-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="Adınız"
+                          placeholder="Adınız (en az 2 karakter)"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                         />
@@ -367,7 +385,7 @@ function LoginPage() {
                           type="text"
                           required
                           className="w-full px-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="Soyadınız"
+                          placeholder="Soyadınız (en az 2 karakter)"
                           value={surname}
                           onChange={(e) => setSurname(e.target.value)}
                         />
@@ -383,7 +401,7 @@ function LoginPage() {
                           type="email"
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="E-posta adresiniz"
+                          placeholder="ornek@mail.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                         />
@@ -415,7 +433,7 @@ function LoginPage() {
                           type="password"
                           required
                           className="w-full pl-10 pr-3 py-2 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          placeholder="Şifrenizi girin"
+                          placeholder="En az 6 karakter, 1 büyük harf ve 1 rakam"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                         />

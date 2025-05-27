@@ -1,199 +1,249 @@
 import React from "react";
-import { Alert, AlertTitle, Box } from "@mui/material";
 import { AlertCircle, CheckCircle, Info, X } from "lucide-react";
 
 const ErrorMessage = ({ message, severity = "error", onClose }) => {
-  const errorMessages = {
-    // Kimlik doğrulama hataları
-    "auth/invalid-email":
-      "Geçersiz e-posta adresi. Lütfen doğru formatta bir e-posta adresi girin.",
-    "auth/user-not-found":
-      "Bu e-posta adresiyle kayıtlı bir kullanıcı bulunamadı.",
-    "auth/wrong-password":
-      "Hatalı şifre. Lütfen şifrenizi kontrol edip tekrar deneyin.",
-    "auth/email-already-in-use":
-      "Bu e-posta adresi zaten kullanımda. Lütfen başka bir e-posta adresi deneyin.",
-    "auth/weak-password":
-      "Şifre çok zayıf. En az 6 karakter, bir büyük harf ve bir rakam içermelidir.",
-    "auth/network-request-failed":
-      "İnternet bağlantınızı kontrol edin ve tekrar deneyin.",
+  const getMessage = (code) => {
+    switch (code) {
+      // Giriş/Kayıt Mesajları
+      case "auth/login/success":
+        return "✅ Başarıyla giriş yaptınız. Yönlendiriliyorsunuz...";
+      case "auth/login/failed":
+        return "❌ Giriş yapılamadı. E-posta veya şifre hatalı";
+      case "auth/login/admin":
+        return "✅ Admin paneline yönlendiriliyorsunuz...";
+      case "auth/validation/email":
+        return "❌ Lütfen e-posta adresinizi giriniz";
+      case "auth/validation/password":
+        return "❌ Lütfen şifrenizi giriniz";
+      case "auth/register/success":
+        return "✅ Kayıt işleminiz başarıyla tamamlandı. Giriş yapabilirsiniz";
+      case "auth/register/failed":
+        return "❌ Kayıt işlemi başarısız oldu. Lütfen bilgilerinizi kontrol edin";
+      case "auth/logout/success":
+        return "✅ Başarıyla çıkış yaptınız";
+      case "auth/session/expired":
+        return "⚠️ Oturumunuz sona erdi. Lütfen tekrar giriş yapın";
 
-    // Form doğrulama hataları
-    "validation/name": "İsim en az 2 karakter olmalıdır.",
-    "validation/surname": "Soyisim en az 2 karakter olmalıdır.",
-    "validation/phone":
-      "Geçerli bir telefon numarası giriniz (örn: +905551234567 veya 05551234567).",
-    "validation/password":
-      "Şifre en az 6 karakter, bir büyük harf ve bir rakam içermelidir.",
-    "validation/password-match":
-      "Şifreler eşleşmiyor. Lütfen tekrar kontrol edin.",
-    "validation/email":
-      "Geçerli bir e-posta adresi giriniz (örn: ornek@mail.com).",
+      // Şifre İşlemleri
+      case "password/validation/empty":
+        return "❌ Lütfen tüm alanları doldurunuz";
+      case "password/validation/match":
+        return "❌ Şifreler eşleşmiyor. Lütfen tekrar kontrol ediniz";
+      case "password/validation/current":
+        return "❌ Mevcut şifreniz yanlış. Lütfen tekrar deneyiniz";
+      case "password/change/success":
+        return "✅ Şifreniz başarıyla değiştirildi";
+      case "password/change/failed":
+        return "❌ Şifre değiştirme işlemi başarısız oldu";
+      case "password/reset/success":
+        return "✅ Şifreniz başarıyla sıfırlandı. Yeni şifrenizle giriş yapabilirsiniz";
+      case "password/reset/failed":
+        return "❌ Şifre sıfırlama işlemi başarısız oldu";
 
-    // Şifre değiştirme hataları
-    "password/validation/empty": "Lütfen tüm alanları doldurun.",
-    "password/validation/match": "Yeni şifre ve şifre tekrarı eşleşmiyor.",
-    "password/validation/current": "Mevcut şifre yanlış.",
-    "password/validation/format":
-      "Şifre en az bir büyük harf ve bir rakam içermelidir.",
-    "password/change/success": "Şifre başarıyla güncellendi!",
-    "password/change/failed":
-      "Şifre güncellenirken bir hata oluştu. Lütfen tekrar deneyin.",
-    "password/reset/success":
-      "Şifreniz başarıyla güncellendi. Yönlendiriliyorsunuz...",
-    "password/reset/failed":
-      "Şifre sıfırlama işlemi başarısız oldu. Lütfen tekrar deneyin.",
+      // İlan İşlemleri
+      case "listing/validation/title":
+        return "❌ Lütfen ilan başlığını giriniz";
+      case "listing/validation/description":
+        return "❌ Lütfen ilan açıklamasını giriniz";
+      case "listing/validation/province":
+        return "❌ Lütfen il seçiniz";
+      case "listing/validation/district":
+        return "❌ Lütfen ilçe seçiniz";
+      case "listing/validation/price":
+        return "❌ Lütfen fiyat bilgisini giriniz";
+      case "listing/validation/gender":
+        return "❌ Lütfen cinsiyet seçiniz";
+      case "listing/validation/room-type":
+        return "❌ Lütfen oda tipini seçiniz";
+      case "listing/validation/category":
+        return "❌ Lütfen kategori seçiniz";
+      case "listing/validation/duration":
+        return "❌ Lütfen süre bilgisini giriniz";
+      case "listing/validation/requirements":
+        return "❌ Lütfen gereksinimleri giriniz";
+      case "listing/create/success":
+        return "✅ İlanınız başarıyla oluşturuldu";
+      case "listing/create/failed":
+        return "❌ İlan oluşturulurken bir hata oluştu";
+      case "listing/update/success":
+        return "✅ İlanınız başarıyla güncellendi";
+      case "listing/update/failed":
+        return "❌ İlan güncellenirken bir hata oluştu";
+      case "listing/delete/success":
+        return "✅ İlanınız başarıyla silindi";
+      case "listing/delete/failed":
+        return "❌ İlan silinirken bir hata oluştu";
+      case "listing/premium/required":
+        return "⚠️ Bu işlem için premium üyelik gereklidir";
+      case "listing/not-found":
+        return "❌ İlan bulunamadı veya silinmiş olabilir";
 
-    // İşlem hataları
-    "operation/failed": "İşlem başarısız oldu. Lütfen tekrar deneyin.",
-    "operation/success": "İşlem başarıyla tamamlandı.",
-    "operation/loading": "İşlem devam ediyor, lütfen bekleyin...",
+      // Profil İşlemleri
+      case "profile/update/success":
+        return "✅ Profil bilgileriniz başarıyla güncellendi";
+      case "profile/update/failed":
+        return "❌ Profil güncellenirken bir hata oluştu";
+      case "profile/avatar/success":
+        return "✅ Profil fotoğrafınız başarıyla güncellendi";
+      case "profile/avatar/failed":
+        return "❌ Profil fotoğrafı güncellenirken bir hata oluştu";
 
-    // Sistem hataları
-    "system/error":
-      "Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
-    "system/maintenance": "Sistem bakımda. Lütfen daha sonra tekrar deneyin.",
+      // İletişim Mesajları
+      case "contact/validation/email":
+        return "❌ Lütfen e-posta adresinizi giriniz";
+      case "contact/validation/email-format":
+        return "❌ Lütfen geçerli bir e-posta adresi giriniz";
+      case "contact/validation/message":
+        return "❌ Lütfen mesajınızı giriniz";
+      case "contact/validation/message-length":
+        return "❌ Mesajınız çok uzun. Maksimum 1000 karakter olmalıdır";
+      case "contact/send/success":
+        return "✅ Mesajınız başarıyla gönderildi";
+      case "contact/send/failed":
+        return "❌ Mesaj gönderilirken bir hata oluştu";
+      case "contact/reply/success":
+        return "✅ Yanıtınız başarıyla gönderildi";
+      case "contact/reply/failed":
+        return "❌ Yanıt gönderilirken bir hata oluştu";
 
-    // İletişim hataları
-    "contact/send/success": "Mesajınız başarıyla gönderildi.",
-    "contact/send/failed": "Mesaj gönderilirken bir hata oluştu.",
-    "contact/validation/name": "Lütfen adınızı girin.",
-    "contact/validation/email": "Lütfen geçerli bir e-posta adresi girin.",
-    "contact/validation/subject": "Lütfen bir konu girin.",
-    "contact/validation/message": "Lütfen bir mesaj girin.",
-    "contact/validation/length":
-      "Mesaj çok uzun. Maksimum 1000 karakter olmalıdır.",
-    "contact/messages/fetch/failed": "Mesajlar alınamadı.",
-    "contact/reply/success": "Mesaj başarıyla gönderildi.",
-    "contact/reply/failed": "Mesaj gönderilirken bir hata oluştu.",
+      // Forum İşlemleri
+      case "forum/post/create/success":
+        return "✅ Gönderiniz başarıyla paylaşıldı";
+      case "forum/post/create/failed":
+        return "❌ Gönderi paylaşılırken bir hata oluştu";
+      case "forum/comment/create/success":
+        return "✅ Yorumunuz başarıyla eklendi";
+      case "forum/comment/create/failed":
+        return "❌ Yorum eklenirken bir hata oluştu";
+      case "forum/like/success":
+        return "✅ Beğeni işlemi başarılı";
+      case "forum/dislike/success":
+        return "✅ Beğenmeme işlemi başarılı";
+      case "forum/share/success":
+        return "✅ Gönderi bağlantısı panoya kopyalandı";
 
-    // Admin işlemleri hataları
-    "admin/user/fetch/failed": "Kullanıcılar alınamadı.",
-    "admin/user/update/success": "Kullanıcı bilgileri başarıyla güncellendi.",
-    "admin/user/update/failed":
-      "Kullanıcı bilgileri güncellenirken bir hata oluştu.",
-    "admin/user/delete/success": "Kullanıcı başarıyla silindi.",
-    "admin/user/delete/failed": "Kullanıcı silinirken bir hata oluştu.",
+      // Premium İşlemleri
+      case "premium/upgrade/success":
+        return "✅ Premium üyeliğiniz başarıyla aktifleştirildi";
+      case "premium/upgrade/failed":
+        return "❌ Premium üyelik işlemi başarısız oldu";
+      case "premium/expired":
+        return "⚠️ Premium üyeliğiniz sona erdi";
 
-    // İlan işlemleri hataları
-    "listing/create/success": "İlanınız başarıyla oluşturuldu.",
-    "listing/create/failed":
-      "İlan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
-    "listing/update/success": "İlanınız başarıyla güncellendi.",
-    "listing/update/failed":
-      "İlan güncellenirken bir hata oluştu. Lütfen tekrar deneyin.",
-    "listing/delete/success": "İlanınız başarıyla silindi.",
-    "listing/delete/failed":
-      "İlan silinirken bir hata oluştu. Lütfen tekrar deneyin.",
-    "listing/not-found": "İlan bulunamadı.",
-    "listing/unauthorized": "Bu işlem için yetkiniz bulunmuyor.",
+      // Admin Kullanıcı İşlemleri
+      case "admin/user/delete/success":
+        return "✅ Kullanıcı başarıyla sistemden silindi";
+      case "admin/user/delete/failed":
+        return "❌ Kullanıcı silinirken bir hata oluştu. Lütfen tekrar deneyin";
+      case "admin/user/update/success":
+        return "✅ Kullanıcı bilgileri başarıyla güncellendi";
+      case "admin/user/update/failed":
+        return "❌ Kullanıcı bilgileri güncellenirken bir hata oluştu";
+      case "admin/user/type/update/success":
+        return "✅ Kullanıcı tipi başarıyla değiştirildi";
+      case "admin/user/type/update/failed":
+        return "❌ Kullanıcı tipi değiştirilirken bir hata oluştu";
+      case "admin/user/fetch/failed":
+        return "❌ Kullanıcı bilgileri alınamadı. Lütfen sayfayı yenileyin";
 
-    // İlan doğrulama hataları
-    "listing/validation/title": "İlan başlığı en az 5 karakter olmalıdır.",
-    "listing/validation/description":
-      "İlan açıklaması en az 20 karakter olmalıdır.",
-    "listing/validation/price": "Geçerli bir fiyat giriniz.",
-    "listing/validation/address": "Lütfen geçerli bir adres giriniz.",
-    "listing/validation/images": "En az 1 fotoğraf yüklemelisiniz.",
-    "listing/validation/features": "En az 1 özellik seçmelisiniz.",
-    "listing/validation/contact": "İletişim bilgileri eksik veya hatalı.",
+      // Admin İlan İşlemleri
+      case "admin/listing/delete/success":
+        return "✅ İlan başarıyla sistemden silindi";
+      case "admin/listing/delete/failed":
+        return "❌ İlan silinirken bir hata oluştu. Lütfen tekrar deneyin";
+      case "admin/listing/update/success":
+        return "✅ İlan bilgileri başarıyla güncellendi";
+      case "admin/listing/update/failed":
+        return "❌ İlan bilgileri güncellenirken bir hata oluştu";
+      case "admin/listing/fetch/failed":
+        return "❌ İlan bilgileri alınamadı. Lütfen sayfayı yenileyin";
 
-    // Premium özellikler
-    "listing/premium/required":
-      "Bu özelliği kullanmak için premium üye olmalısınız.",
-    "listing/premium/expired": "Premium üyeliğiniz sona erdi.",
-    "listing/premium/limit": "Premium özellik kullanım limitinize ulaştınız.",
+      // Admin Forum İşlemleri
+      case "admin/forum/post/delete/success":
+        return "✅ Forum gönderisi başarıyla silindi";
+      case "admin/forum/post/delete/failed":
+        return "❌ Forum gönderisi silinirken bir hata oluştu";
+      case "admin/forum/comment/delete/success":
+        return "Forum yorumu başarıyla silindi";
+      case "admin/forum/comment/delete/failed":
+        return "Forum yorumu silinirken bir hata oluştu";
+      case "admin/password/change/success":
+        return "Şifre başarıyla değiştirildi";
+      case "admin/password/change/failed":
+        return "Şifre değiştirilirken bir hata oluştu";
+      case "admin/user/type/update/success":
+        return "Kullanıcı tipi başarıyla güncellendi";
+      case "admin/user/type/update/failed":
+        return "Kullanıcı tipi güncellenirken bir hata oluştu";
+      case "admin/stats/error":
+        return "İstatistikler alınırken bir hata oluştu";
+      case "admin/logs/error":
+        return "Kullanıcı logları alınırken bir hata oluştu";
 
-    // Dosya yükleme hataları
-    "upload/size": "Dosya boyutu çok büyük. Maksimum 5MB olmalıdır.",
-    "upload/format":
-      "Desteklenmeyen dosya formatı. Sadece JPG, PNG ve WEBP kabul edilir.",
-    "upload/failed": "Dosya yüklenirken bir hata oluştu.",
-    "upload/limit": "Maksimum 5 fotoğraf yükleyebilirsiniz.",
-
-    // Forum işlemleri hataları
-    "forum/post/create/success": "Gönderi başarıyla oluşturuldu.",
-    "forum/post/create/failed": "Gönderi oluşturulurken bir hata oluştu.",
-    "forum/post/update/success": "Gönderi başarıyla güncellendi.",
-    "forum/post/update/failed": "Gönderi güncellenirken bir hata oluştu.",
-    "forum/post/delete/success": "Gönderi başarıyla silindi.",
-    "forum/post/delete/failed": "Gönderi silinirken bir hata oluştu.",
-    "forum/post/not-found": "Gönderi bulunamadı.",
-    "forum/post/unauthorized": "Bu işlem için yetkiniz bulunmuyor.",
-
-    // Forum yorum hataları
-    "forum/comment/create/success": "Yorum başarıyla eklendi.",
-    "forum/comment/create/failed": "Yorum eklenirken bir hata oluştu.",
-    "forum/comment/update/success": "Yorum başarıyla güncellendi.",
-    "forum/comment/update/failed": "Yorum güncellenirken bir hata oluştu.",
-    "forum/comment/delete/success": "Yorum başarıyla silindi.",
-    "forum/comment/delete/failed": "Yorum silinirken bir hata oluştu.",
-    "forum/comment/not-found": "Yorum bulunamadı.",
-    "forum/comment/unauthorized": "Bu işlem için yetkiniz bulunmuyor.",
-
-    // Forum doğrulama hataları
-    "forum/validation/content": "Gönderi içeriği boş olamaz.",
-    "forum/validation/comment": "Yorum içeriği boş olamaz.",
-    "forum/validation/length":
-      "İçerik çok uzun. Maksimum 1000 karakter olmalıdır.",
-
-    // Varsayılan hata mesajı
-    default: "Bir hata oluştu. Lütfen tekrar deneyin.",
-  };
-
-  const getMessage = () => {
-    return errorMessages[message] || errorMessages.default;
+      // Varsayılan mesaj
+      default:
+        return message || "❌ Bir hata oluştu. Lütfen tekrar deneyin";
+    }
   };
 
   const getIcon = () => {
     switch (severity) {
       case "success":
-        return <CheckCircle className="w-5 h-5" />;
+        return <CheckCircle className="w-5 h-5 text-green-500" />;
       case "info":
-        return <Info className="w-5 h-5" />;
+        return <Info className="w-5 h-5 text-blue-500" />;
       case "warning":
-        return <AlertCircle className="w-5 h-5" />;
+        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
       default:
-        return <AlertCircle className="w-5 h-5" />;
+        return <AlertCircle className="w-5 h-5 text-red-500" />;
+    }
+  };
+
+  const getBgColor = () => {
+    switch (severity) {
+      case "success":
+        return "bg-green-50 border-green-200";
+      case "info":
+        return "bg-blue-50 border-blue-200";
+      case "warning":
+        return "bg-yellow-50 border-yellow-200";
+      default:
+        return "bg-red-50 border-red-200";
+    }
+  };
+
+  const getTextColor = () => {
+    switch (severity) {
+      case "success":
+        return "text-green-800";
+      case "info":
+        return "text-blue-800";
+      case "warning":
+        return "text-yellow-800";
+      default:
+        return "text-red-800";
     }
   };
 
   return (
-    <Box sx={{ position: "relative", width: "100%", mb: 2 }}>
-      <Alert
-        severity={severity}
-        sx={{
-          borderRadius: "8px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          "& .MuiAlert-icon": {
-            display: "flex",
-            alignItems: "center",
-          },
-        }}
-        action={
-          onClose && (
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded-full"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )
-        }
-      >
-        <AlertTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          {getIcon()}
-          {severity === "error"
-            ? "Hata"
-            : severity === "success"
-            ? "Başarılı"
-            : severity === "warning"
-            ? "Uyarı"
-            : "Bilgi"}
-        </AlertTitle>
-        {getMessage()}
-      </Alert>
-    </Box>
+    <div
+      className={`relative w-full mb-4 ${getBgColor()} border rounded-lg p-4`}
+    >
+      <div className="flex items-start">
+        <div className="flex-shrink-0">{getIcon()}</div>
+        <div className={`ml-3 ${getTextColor()}`}>
+          <p className="text-sm font-medium">{getMessage(message)}</p>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="ml-auto flex-shrink-0 p-1 hover:bg-gray-100 rounded-full"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    </div>
   );
 };
 

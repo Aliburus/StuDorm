@@ -51,7 +51,7 @@ const User = {
   },
 
   updateProfile: async (userId, updateData) => {
-    const { password, resetToken } = updateData;
+    const { password, resetToken, name, surname, email, phone } = updateData;
     const updates = [];
     const values = [];
 
@@ -63,6 +63,26 @@ const User = {
     if (resetToken !== undefined) {
       updates.push("resetToken = ?");
       values.push(resetToken);
+    }
+
+    if (name) {
+      updates.push("name = ?");
+      values.push(name);
+    }
+
+    if (surname) {
+      updates.push("surname = ?");
+      values.push(surname);
+    }
+
+    if (email) {
+      updates.push("email = ?");
+      values.push(email);
+    }
+
+    if (phone) {
+      updates.push("phone = ?");
+      values.push(phone);
     }
 
     if (updates.length === 0) {
