@@ -1,4 +1,7 @@
 const db = require("../config/db");
+const YurtAd = require("../models/YurtAd");
+const PartTimeAdvert = require("../models/PartTimeAdvert");
+const InternAd = require("../models/InternAd");
 const AdminModel = {
   getAllUsers: async () => {
     const query = `SELECT id, name, surname, email, user_type, premium_price, created_at FROM users`;
@@ -8,69 +11,62 @@ const AdminModel = {
 
   getAllListings: async () => {
     try {
-      const [rows] = await db.query(`
-      SELECT
-        CONCAT('yurtads-', y.id) AS unique_id,
-        'yurtads' AS source,
-        y.title,
-        'Yurt İlanı' AS category,
-        y.province,
-        y.district,
-        NULL AS contact,
-        y.description,
-        NULL AS duration,
-        NULL AS requirements,
-        y.created_at,
-        y.user_id,
-        y.price,
-        'active' AS status,
-        (
-          SELECT GROUP_CONCAT(photo_url)
-          FROM YurtAdPhotos
-          WHERE yurt_ad_id = y.id
-        ) as photos
-      FROM yurtads y
-
-      UNION ALL
-
-      SELECT
-        CONCAT('parttimeads-', id) AS unique_id,
-        'parttimeads' AS source,
-        title,
-        'Part-time İş' AS category,
-        province,
-        district,
-        NULL AS contact,
-        description,
-        duration,
-        requirements,
-        created_at,
-        user_id,
-        price,
-        'active' AS status,
-        NULL as photos
-      FROM parttimeads
-
-      UNION ALL
-
-      SELECT
-        CONCAT('interns-', id) AS unique_id,
-        'interns' AS source,
-        title,
-        'Staj İlanı' AS category,
-        province,
-        district,
-        NULL AS contact,
-        description,
-        duration,
-        requirements,
-        created_at,
-        user_id,
-        NULL AS price,
-        'active' AS status,
-        NULL as photos
-      FROM interns
-    `);
+      const yurtAds = await YurtAd.getAllAdmin();
+      const partTimeAds = await PartTimeAdvert.getAllAdmin();
+      const internAds = await InternAd.getAllAdmin();
+      const rows = [
+        ...yurtAds.map((y) => ({
+          unique_id: `yurtads-${y.id}`,
+          source: "yurtads",
+          title: y.title,
+          category: "Yurt İlanı",
+          province: y.province,
+          district: y.district,
+          contact: null,
+          description: y.description,
+          duration: null,
+          requirements: null,
+          created_at: y.created_at,
+          user_id: y.user_id,
+          price: y.price,
+          status: y.status,
+          photos: null, // YurtAdPhotos için ayrıca GROUP_CONCAT yapılabilir
+        })),
+        ...partTimeAds.map((p) => ({
+          unique_id: `parttimeads-${p.id}`,
+          source: "parttimeads",
+          title: p.title,
+          category: "Part-time İş",
+          province: p.province,
+          district: p.district,
+          contact: null,
+          description: p.description,
+          duration: p.duration,
+          requirements: p.requirements,
+          created_at: p.created_at,
+          user_id: p.user_id,
+          price: p.price,
+          status: p.status,
+          photos: null,
+        })),
+        ...internAds.map((i) => ({
+          unique_id: `interns-${i.id}`,
+          source: "interns",
+          title: i.title,
+          category: "Staj İlanı",
+          province: i.province,
+          district: i.district,
+          contact: null,
+          description: i.description,
+          duration: i.duration,
+          requirements: i.requirements,
+          created_at: i.created_at,
+          user_id: i.user_id,
+          price: null,
+          status: i.status,
+          photos: null,
+        })),
+      ];
       console.log(
         "AdminModel getAllListings result:",
         JSON.stringify(rows, null, 2)
@@ -135,7 +131,7 @@ const AdminModel = {
     else if (source === "interns") table = "interns";
     else throw new Error("Invalid source");
 
-    const query = `DELETE FROM ${table} WHERE id = ?`;
+    const query = `UPDATE ${table} SET status = 'deleted' WHERE id = ?`;
     await db.query(query, [id]);
   },
 

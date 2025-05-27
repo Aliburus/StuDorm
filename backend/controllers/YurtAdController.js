@@ -6,11 +6,19 @@ const User = require("../models/User");
 const createYurtAd = async (req, res) => {
   const userId = req.user.id;
   const uploadedFiles = req.files || [];
+
+  // Yeni fotoğraf kontrolü
   if (uploadedFiles.length < 5) {
     return res
       .status(400)
       .json({ message: "En az 5 fotoğraf yüklemelisiniz." });
   }
+  if (uploadedFiles.length > 15) {
+    return res
+      .status(400)
+      .json({ message: "En fazla 15 fotoğraf yükleyebilirsiniz." });
+  }
+
   const {
     title,
     description,
@@ -38,20 +46,29 @@ const createYurtAd = async (req, res) => {
       const end = new Date(user.premium_end);
       isPremium = now >= start && now <= end;
     }
-    // Son 6 ayda eklenen ilan sayısı
-    const [countRows] = await db.query(
-      "SELECT COUNT(*) as count FROM yurtads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH)",
+
+    // Tüm ilan türlerinin toplamını kontrol et (soft deleted dahil)
+    const [parttimeCount] = await db.query(
+      "SELECT COUNT(*) as count FROM parttimeads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH) AND status IN ('active', 'inactive', 'deleted')",
       [userId]
     );
-    const adCount = countRows[0].count;
-    if ((isPremium && adCount >= 6) || (!isPremium && adCount >= 1)) {
+    const [yurtCount] = await db.query(
+      "SELECT COUNT(*) as count FROM yurtads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH) AND status IN ('active', 'inactive', 'deleted')",
+      [userId]
+    );
+    const [internCount] = await db.query(
+      "SELECT COUNT(*) as count FROM interns WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH) AND status IN ('active', 'inactive', 'deleted')",
+      [userId]
+    );
+    const totalAdCount =
+      parttimeCount[0].count + yurtCount[0].count + internCount[0].count;
+    if (!isPremium && totalAdCount >= 1) {
       return res.status(400).json({
-        message: isPremium
-          ? "6 ayda en fazla 6 ilan ekleyebilirsiniz (Premium)!"
-          : "6 ayda en fazla 1 ilan ekleyebilirsiniz (Normal)!",
+        message:
+          "Normal üyeler 6 ayda sadece 1 ilan ekleyebilir (parttime/yurt/staj toplamı).",
       });
     }
-    // expires_at hesapla
+
     const expiresAt = new Date(
       now.getTime() + (isPremium ? 45 : 7) * 24 * 60 * 60 * 1000
     );
@@ -90,6 +107,7 @@ const createYurtAd = async (req, res) => {
       .json({ message: "İlan oluşturulamadı", error: err.message });
   }
 };
+
 // Get all ads with optional filters and photos
 const getAllYurtAdsWithPhotos = async (req, res) => {
   const { minPrice, maxPrice, province, district, roomType } = req.query;
@@ -181,6 +199,26 @@ const updateYurtAd = async (req, res) => {
         .json({ message: "Bu ilanı güncelleme yetkiniz yok" });
     }
 
+    // Premium kontrolü
+    const [userRows] = await db.query(
+      "SELECT premium_start, premium_end FROM users WHERE id = ?",
+      [userId]
+    );
+    const user = userRows[0];
+    const now = new Date();
+    let isPremium = false;
+    if (user.premium_start && user.premium_end) {
+      const start = new Date(user.premium_start);
+      const end = new Date(user.premium_end);
+      isPremium = now >= start && now <= end;
+    }
+
+    // Yeni expires_at hesapla
+    const expiresAt = new Date(
+      now.getTime() + (isPremium ? 45 : 7) * 24 * 60 * 60 * 1000
+    );
+    const expiresAtStr = expiresAt.toISOString().slice(0, 19).replace("T", " ");
+
     const {
       title,
       description,
@@ -208,12 +246,19 @@ const updateYurtAd = async (req, res) => {
     const existingPhotos = await YurtAdPhoto.getPhotosByYurtAdId(yurtAdId);
     const totalPhotos = existingPhotos.length + uploadedFiles.length;
 
-    // Fotoğraf sayısı kontrolü
+    // Toplam fotoğraf kontrolü
     if (totalPhotos < 5) {
       return res.status(400).json({ message: "En az 5 fotoğraf olmalıdır" });
     }
     if (totalPhotos > 15) {
       return res.status(400).json({ message: "En fazla 15 fotoğraf olabilir" });
+    }
+
+    // Yeni fotoğraf kontrolü
+    if (uploadedFiles.length > 15) {
+      return res.status(400).json({
+        message: "Bir seferde en fazla 15 fotoğraf yükleyebilirsiniz",
+      });
     }
 
     // İlanı güncelle
@@ -225,6 +270,7 @@ const updateYurtAd = async (req, res) => {
       province,
       district,
       room_type,
+      expires_at: expiresAtStr,
     });
 
     // Yeni fotoğraflar varsa ekle
@@ -265,6 +311,9 @@ const deleteYurtAd = async (req, res) => {
     if (ad.user_id !== userId) {
       return res.status(403).json({ message: "Bu ilanı silme yetkiniz yok" });
     }
+    // Önce fotoğrafları sil
+    await YurtAdPhoto.deletePhotosByYurtAdId(yurtAdId);
+    // Sonra ilanı sil
     await YurtAd.delete(yurtAdId);
     await User.logUserAction(userId, "YURT_AD_DELETE", {
       ilan_id: yurtAdId,

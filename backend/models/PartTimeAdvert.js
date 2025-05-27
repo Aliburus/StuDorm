@@ -14,12 +14,13 @@ const PartTimeAdvert = {
         requirements,
         price, // Add price here
         user_id,
+        expires_at,
       } = advert;
 
       const query = `
         INSERT INTO parttimeads 
-        (title, category, province, district,  description, duration, requirements, price, created_at, user_id) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
+        (title, category, province, district,  description, duration, requirements, price, created_at, user_id, expires_at, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)
       `;
 
       const [result] = await db.query(query, [
@@ -33,6 +34,8 @@ const PartTimeAdvert = {
         requirements,
         price, // Pass price value here
         user_id,
+        expires_at,
+        "active",
       ]);
 
       return result.insertId;
@@ -46,6 +49,7 @@ const PartTimeAdvert = {
       const query = `
         SELECT id, title, category, province, district,  description, duration, requirements, price, created_at, user_id 
         FROM parttimeads 
+        WHERE status = 'active'
         ORDER BY created_at DESC
       `;
       const [rows] = await db.query(query);
@@ -72,7 +76,7 @@ const PartTimeAdvert = {
 
   deleteById: async (id) => {
     try {
-      const query = "DELETE FROM parttimeads WHERE id = ?";
+      const query = "UPDATE parttimeads SET status = 'deleted' WHERE id = ?";
       const [result] = await db.query(query, [id]);
       return result.affectedRows;
     } catch (err) {
@@ -81,7 +85,7 @@ const PartTimeAdvert = {
   },
   getByUserId: async (userId) => {
     const [rows] = await db.query(
-      "SELECT * FROM parttimeads WHERE user_id = ?",
+      "SELECT * FROM parttimeads WHERE user_id = ? AND status = 'active'",
       [userId]
     );
     return rows;
@@ -115,6 +119,28 @@ const PartTimeAdvert = {
     } catch (err) {
       throw err;
     }
+  },
+  // expires_at geçmiş ilanları inaktif yap
+  setExpiredInactive: async () => {
+    await db.query(
+      "UPDATE parttimeads SET status = 'inactive' WHERE expires_at < NOW() AND status = 'active'"
+    );
+  },
+  // Admin için tüm ilanlar (status filtresi yok)
+  getAllAdmin: async () => {
+    const [rows] = await db.query(
+      "SELECT * FROM parttimeads ORDER BY created_at DESC"
+    );
+    return rows;
+  },
+
+  // Admin status güncelleme
+  updateStatus: async (id, status) => {
+    const [result] = await db.query(
+      "UPDATE parttimeads SET status = ? WHERE id = ?",
+      [status, id]
+    );
+    return result.affectedRows;
   },
 };
 

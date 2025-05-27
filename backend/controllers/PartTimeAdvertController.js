@@ -43,17 +43,25 @@ const createAdvert = async (req, res) => {
       isPremium = now >= start && now <= end;
     }
 
-    // Son 6 ayda eklenen ilan sayısı
-    const [countRows] = await db.query(
-      "SELECT COUNT(*) as count FROM parttimeads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH)",
+    // Tüm ilan türlerinin toplamını kontrol et (soft deleted dahil)
+    const [parttimeCount] = await db.query(
+      "SELECT COUNT(*) as count FROM parttimeads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH) AND status IN ('active', 'inactive', 'deleted')",
       [userId]
     );
-    const adCount = countRows[0].count;
-    if ((isPremium && adCount >= 6) || (!isPremium && adCount >= 1)) {
+    const [yurtCount] = await db.query(
+      "SELECT COUNT(*) as count FROM yurtads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH) AND status IN ('active', 'inactive', 'deleted')",
+      [userId]
+    );
+    const [internCount] = await db.query(
+      "SELECT COUNT(*) as count FROM interns WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 6 MONTH) AND status IN ('active', 'inactive', 'deleted')",
+      [userId]
+    );
+    const totalAdCount =
+      parttimeCount[0].count + yurtCount[0].count + internCount[0].count;
+    if (!isPremium && totalAdCount >= 1) {
       return res.status(400).json({
-        message: isPremium
-          ? "6 ayda en fazla 6 ilan ekleyebilirsiniz (Premium)!"
-          : "6 ayda en fazla 1 ilan ekleyebilirsiniz (Normal)!",
+        message:
+          "Normal üyeler 6 ayda sadece 1 ilan ekleyebilir (parttime/yurt/staj toplamı).",
       });
     }
 

@@ -17,6 +17,7 @@ const getUserProfile = async (req, res) => {
       name: user.name,
       surname: user.surname,
       email: user.email,
+      phone: user.phone,
       isPremium: user.user_type === "premium", // `user_type` premium ise true dönecek
     });
   } catch (err) {
@@ -200,8 +201,7 @@ const checkAdEligibility = async (req, res) => {
     let isEligible = false;
     let message = "";
     if (isPremium) {
-      isEligible = adCount < 6;
-      if (!isEligible) message = "Premium ilan ekleme limitinize ulaştınız.";
+      isEligible = true;
     } else {
       isEligible = adCount < 1;
       if (!isEligible && adCount >= 1)

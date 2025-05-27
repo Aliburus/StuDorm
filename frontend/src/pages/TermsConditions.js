@@ -83,7 +83,7 @@ const TermsConditions = () => {
             </p>
 
             <div className="border-t pt-4 mt-8 text-sm text-gray-500">
-              <p>Son güncelleme tarihi: 10 Kasım 2023</p>
+              <p>Son güncelleme tarihi: 25 Mayıs 2025</p>
             </div>
           </div>
         </div>

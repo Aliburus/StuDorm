@@ -47,6 +47,14 @@ function LoginPage() {
     return () => clearTimeout(timer);
   }, [error, success]);
 
+  useEffect(() => {
+    const loginError = localStorage.getItem("loginError");
+    if (loginError) {
+      setError(loginError);
+      localStorage.removeItem("loginError");
+    }
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -75,7 +83,7 @@ function LoginPage() {
         window.location.href = "/admin";
       } else {
         setIsAuthenticated(true);
-        navigate("/");
+        window.location.href = "/";
       }
     } catch (error) {
       const errorCode = error.response?.data?.error || "auth/wrong-password";

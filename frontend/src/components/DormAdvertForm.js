@@ -196,7 +196,16 @@ const DormAdvertForm = () => {
       });
       setPreviewImages([]);
     } catch (error) {
-      setError(error.response?.data?.error || "listing/create/failed");
+      const backendMsg =
+        error.response?.data?.error || error.response?.data?.message;
+      if (
+        backendMsg &&
+        backendMsg.includes("Normal üyeler 6 ayda sadece 1 ilan ekleyebilir")
+      ) {
+        setPremiumError(backendMsg);
+        setShowPremiumModal(true);
+      }
+      setError(backendMsg || "listing/create/failed");
     } finally {
       setIsSubmitting(false);
     }

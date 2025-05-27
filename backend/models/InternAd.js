@@ -43,18 +43,19 @@ const InternAd = {
   create: async (internData) => {
     const [result] = await db.query(
       `INSERT INTO interns 
-       (title, province, district, category, description, duration, requirements, user_id) 
-       VALUES (?, ?, ?, ?, ?, ?, ?,  ?)`,
+       (title, province, district, category, description, duration, requirements, user_id, expires_at, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         internData.title,
         internData.province,
         internData.district,
         internData.category,
-
         internData.description,
         internData.duration,
         internData.requirements,
         internData.user_id,
+        internData.expires_at,
+        "active",
       ]
     );
     return result.insertId;
@@ -94,8 +95,35 @@ const InternAd = {
 
   // İlanı siler
   delete: async (id) => {
-    const result = await db.query("DELETE FROM interns WHERE id = ?", [id]);
+    const result = await db.query(
+      "UPDATE interns SET status = 'deleted' WHERE id = ?",
+      [id]
+    );
     return result[0].affectedRows;
+  },
+
+  // expires_at geçmiş ilanları inaktif yap
+  setExpiredInactive: async () => {
+    await db.query(
+      "UPDATE interns SET status = 'inactive' WHERE expires_at < NOW() AND status = 'active'"
+    );
+  },
+
+  // Admin için tüm ilanlar (status filtresi yok)
+  getAllAdmin: async () => {
+    const [rows] = await db.query(
+      "SELECT * FROM interns ORDER BY created_at DESC"
+    );
+    return rows;
+  },
+
+  // Admin status güncelleme
+  updateStatus: async (id, status) => {
+    const [result] = await db.query(
+      "UPDATE interns SET status = ? WHERE id = ?",
+      [status, id]
+    );
+    return result.affectedRows;
   },
 };
 

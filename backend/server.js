@@ -31,11 +31,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Rotalar
-app.use("/api/auth", authRoutes); // Yetkilendirme rotaları
-app.use("/api", yurtAdRoutes); // Yurt ilanı rotaları
+app.use("/api/auth", authRoutes);
+app.use("/api", yurtAdRoutes);
 app.use("/api/parttimeads", partTimeAdvertRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/admin", adminRoutes); // Admin API rotasını tanımla
+app.use("/api/admin", adminRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/interns", internRoutes);
 app.use("/api", paymentRoutes);

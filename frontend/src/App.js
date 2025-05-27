@@ -73,18 +73,15 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<TermsConditions />} />
-
           <Route path="/login" element={<Login />} />
           <Route path="/dormAdForm" element={<DormAdvertForm />} />
           <Route path="/find" element={<FindAll />} />
-
           <Route
             path="/admin"
             element={
               <AdminPageRoute element={<DashboardPage />} isAdmin={isAdmin} />
             }
           />
-
           <Route
             path="/account"
             element={
@@ -95,7 +92,6 @@ function App() {
               />
             }
           />
-
           <Route
             path="/payment"
             element={
@@ -106,7 +102,6 @@ function App() {
               />
             }
           />
-
           <Route path="/forumpage" element={<ForumPage />} />
           <Route
             path="/listing-details/:type/:id"

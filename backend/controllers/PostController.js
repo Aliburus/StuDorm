@@ -146,7 +146,7 @@ const updatePost = async (req, res) => {
     }
 
     // Postu güncelleme
-    const updated = await ForumPost.updateContent(postId, content);
+    const updated = await ForumPost.update(postId, content);
     if (updated === 0) {
       return res.status(500).json({ message: "Post güncellenemedi." });
     }

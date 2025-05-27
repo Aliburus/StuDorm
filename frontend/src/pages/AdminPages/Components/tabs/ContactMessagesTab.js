@@ -27,7 +27,11 @@ function ContactMessagesTab() {
             },
           }
         );
-        setMessages(response.data);
+        // Mesajları tarihe göre sırala (en yeni en üstte)
+        const sortedMessages = response.data.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+        setMessages(sortedMessages);
         setLoading(false);
       } catch (error) {
         console.error("Mesajlar alınamadı:", error);

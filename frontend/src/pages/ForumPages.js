@@ -418,6 +418,13 @@ function ForumPages() {
                                     <div>
                                       <span className="font-medium text-gray-900">
                                         {comment.name} {comment.surname}
+                                        {(comment.isPremium ||
+                                          comment.user_type === "premium") && (
+                                          <Star
+                                            className="w-3 h-3 ml-1 text-yellow-500"
+                                            fill="currentColor"
+                                          />
+                                        )}
                                       </span>
                                       <span className="mx-2 text-gray-300">
                                         •

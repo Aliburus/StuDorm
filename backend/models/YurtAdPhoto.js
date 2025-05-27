@@ -41,6 +41,18 @@ const YurtAdPhoto = {
       throw new Error("Error while fetching all photos.");
     }
   },
+
+  // Yurt ilanına ait fotoğrafları sil
+  deletePhotosByYurtAdId: async (yurtAdId) => {
+    try {
+      await db.query("DELETE FROM YurtAdPhotos WHERE yurt_ad_id = ?", [
+        yurtAdId,
+      ]);
+    } catch (error) {
+      console.error("Error while deleting photos:", error);
+      throw new Error("Error while deleting photos.");
+    }
+  },
 };
 
 module.exports = YurtAdPhoto;

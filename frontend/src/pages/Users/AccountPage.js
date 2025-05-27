@@ -40,6 +40,10 @@ const AccountPage = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
+        localStorage.setItem(
+          "loginError",
+          "Oturum süreniz doldu veya geçersiz. Lütfen tekrar giriş yapın."
+        );
         navigate("/login");
         return;
       }
@@ -51,6 +55,10 @@ const AccountPage = () => {
 
         if (isTokenExpired) {
           localStorage.removeItem("token");
+          localStorage.setItem(
+            "loginError",
+            "Oturum süreniz doldu. Lütfen tekrar giriş yapın."
+          );
           navigate("/login");
           return;
         }
@@ -61,6 +69,10 @@ const AccountPage = () => {
         setFormData(userData);
       } catch (err) {
         localStorage.removeItem("token");
+        localStorage.setItem(
+          "loginError",
+          "Oturum doğrulama hatası. Lütfen tekrar giriş yapın."
+        );
         navigate("/login");
       }
     };

@@ -13,22 +13,24 @@ const YurtAd = {
     room_type,
     status,
     is_hidden,
+    expires_at,
   }) => {
     const [result] = await db.query(
       `INSERT INTO YurtAds 
-        (user_id, title, description, price, gender_required, status, is_hidden, province, district, room_type) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (user_id, title, description, price, gender_required, status, is_hidden, province, district, room_type, expires_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         user_id,
         title,
         description,
         price,
         gender_required,
-        status,
+        "active",
         is_hidden,
         province,
         district,
         room_type,
+        expires_at,
       ]
     );
     return result.insertId;
@@ -37,7 +39,7 @@ const YurtAd = {
   // Get all ads with optional filters
   getAll: async ({ minPrice, maxPrice, province, district, roomType }) => {
     let query =
-      "SELECT id, user_id, title, description, price, gender_required, province, district, room_type, status, is_hidden, created_at, updated_at FROM YurtAds WHERE 1=1";
+      "SELECT id, user_id, title, description, price, gender_required, province, district, room_type, status, is_hidden, created_at, updated_at FROM YurtAds WHERE status = 'active'";
     const params = [];
 
     if (minPrice) {
@@ -66,9 +68,10 @@ const YurtAd = {
   },
 
   getByUserId: async (userId) => {
-    const [rows] = await db.query("SELECT * FROM YurtAds WHERE user_id = ?", [
-      userId,
-    ]);
+    const [rows] = await db.query(
+      "SELECT * FROM YurtAds WHERE user_id = ? AND status = 'active'",
+      [userId]
+    );
     return rows;
   },
 
@@ -118,8 +121,35 @@ const YurtAd = {
   },
 
   delete: async (id) => {
-    const [result] = await db.query("DELETE FROM YurtAds WHERE id = ?", [id]);
+    const [result] = await db.query(
+      "UPDATE YurtAds SET status = 'deleted' WHERE id = ?",
+      [id]
+    );
     return result;
+  },
+
+  // expires_at geçmiş ilanları inaktif yap
+  setExpiredInactive: async () => {
+    await db.query(
+      "UPDATE YurtAds SET status = 'inactive' WHERE expires_at < NOW() AND status = 'active'"
+    );
+  },
+
+  // Admin için tüm ilanlar (status filtresi yok)
+  getAllAdmin: async () => {
+    const [rows] = await db.query(
+      "SELECT * FROM YurtAds ORDER BY created_at DESC"
+    );
+    return rows;
+  },
+
+  // Admin status güncelleme
+  updateStatus: async (id, status) => {
+    const [result] = await db.query(
+      "UPDATE YurtAds SET status = ? WHERE id = ?",
+      [status, id]
+    );
+    return result.affectedRows;
   },
 };
 
