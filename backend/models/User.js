@@ -51,59 +51,16 @@ const User = {
   },
 
   updateProfile: async (userId, updateData) => {
-    const { password, resetToken, name, surname, email, phone } = updateData;
-    const updates = [];
-    const values = [];
-
-    if (password) {
-      updates.push("password = ?");
-      values.push(password);
-    }
-
-    if (resetToken !== undefined) {
-      updates.push("resetToken = ?");
-      values.push(resetToken);
-    }
-
-    if (name) {
-      updates.push("name = ?");
-      values.push(name);
-    }
-
-    if (surname) {
-      updates.push("surname = ?");
-      values.push(surname);
-    }
-
-    if (email) {
-      updates.push("email = ?");
-      values.push(email);
-    }
-
-    if (phone) {
-      updates.push("phone = ?");
-      values.push(phone);
-    }
-
-    if (updates.length === 0) {
-      throw new Error("No fields to update");
-    }
-
-    values.push(userId);
-
     try {
-      const [result] = await db.query(
-        `UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
-        values
-      );
+      const fields = Object.keys(updateData)
+        .map((key) => `${key} = ?`)
+        .join(", ");
+      const values = Object.values(updateData);
+      values.push(userId);
 
-      if (result.affectedRows === 0) {
-        throw new Error("User not found");
-      }
-
-      // Güncellenmiş kullanıcıyı tekrar çek
-      const updatedUser = await User.getUserById(userId);
-      return updatedUser;
+      const sql = `UPDATE users SET ${fields} WHERE id = ?`;
+      await db.query(sql, values);
+      return true;
     } catch (error) {
       console.error("Profile update error:", error);
       throw new Error("Error updating profile");
@@ -205,6 +162,24 @@ const User = {
       console.error("Log kayıtları alınırken hata:", error);
       throw new Error("Log kayıtları alınamadı.");
     }
+  },
+
+  createTable: async () => {
+    const sql = `
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        surname VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        phone VARCHAR(20) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        user_type ENUM('user', 'admin') DEFAULT 'user',
+        resetToken VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `;
+    // ... existing code ...
   },
 };
 

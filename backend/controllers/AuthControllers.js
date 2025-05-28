@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { sendPasswordResetEmail } = require("../services/EmailService");
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_secret_key";
 const JWT_EXPIRES_IN = "24h";
@@ -209,7 +210,7 @@ const logoutUser = async (req, res) => {
 };
 
 const forgotPassword = async (req, res) => {
-  const { email, newPassword, confirmPassword } = req.body;
+  const { email } = req.body;
 
   try {
     const user = await User.findByEmail(email);
@@ -219,19 +220,25 @@ const forgotPassword = async (req, res) => {
         .json({ error: "Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı." });
     }
 
-    // Şifre kontrolü
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({ error: "Şifreler eşleşmiyor!" });
+    // Şifre sıfırlama token'ı oluştur
+    const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // Token'ı veritabanına kaydet
+    await User.updateProfile(user.id, { resetToken });
+
+    // E-posta gönder
+    const emailSent = await sendPasswordResetEmail(email, resetToken);
+    if (!emailSent) {
+      return res.status(500).json({
+        error:
+          "E-posta gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
+      });
     }
 
-    // Şifreyi hashle
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Şifreyi güncelle
-    await User.updateProfile(user.id, { password: hashedPassword });
-
     res.status(200).json({
-      message: "Şifreniz başarıyla güncellendi.",
+      message: "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.",
     });
   } catch (error) {
     console.error("Şifre sıfırlama hatası:", error);
