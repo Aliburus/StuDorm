@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+
 const GoPremiumBox = ({ user }) => {
   const [benefits, setBenefits] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -11,9 +13,7 @@ const GoPremiumBox = ({ user }) => {
   useEffect(() => {
     const fetchBenefits = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5000/api/premium-benefits"
-        );
+        const response = await axios.get(`${BASE_URL}/api/premium-benefits`);
         if (!response.data || response.data.length === 0) {
           setError("Premium bilgileri bulunamadı");
           setLoading(false);

@@ -220,24 +220,15 @@ function LoginPage() {
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      setError("password/validation/match");
-      return;
-    }
-
     try {
       const response = await axios.post(
         `${BASE_URL}/api/auth/forgot-password`,
         {
           email: modalEmail,
-          newPassword,
-          confirmPassword,
         }
       );
-      setSuccess("password/reset/success");
+      setSuccess("password/reset/email/sent");
       setShowForgotPassword(false);
-      setNewPassword("");
-      setConfirmPassword("");
       setModalEmail("");
     } catch (error) {
       setError("password/reset/failed");
@@ -497,30 +488,6 @@ function LoginPage() {
                     onChange={(e) => setModalEmail(e.target.value)}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Yeni Şifre
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Şifre Tekrarı
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
 
                 {error && <ErrorMessage message={error} />}
                 {success && (
@@ -539,7 +506,7 @@ function LoginPage() {
                     type="submit"
                     className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
                   >
-                    Şifreyi Güncelle
+                    Şifre Sıfırlama Bağlantısı Gönder
                   </button>
                 </div>
               </form>

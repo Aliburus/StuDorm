@@ -20,8 +20,28 @@ function ResetPasswordPage() {
     setError("");
     setSuccess("");
 
+    if (!newPassword || !confirmPassword) {
+      setError("password/validation/empty");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setError("password/validation/match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError("Şifre en az 6 karakter olmalıdır");
+      return;
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      setError("Şifre en az bir büyük harf içermelidir");
+      return;
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      setError("Şifre en az bir rakam içermelidir");
       return;
     }
 

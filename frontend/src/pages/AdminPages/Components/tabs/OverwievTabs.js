@@ -31,41 +31,41 @@ import {
 import axios from "axios";
 import { format as d3format } from "d3-format";
 
-function OverviewTab({ stats }) {
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+
+function OverviewTab() {
   const [monthlyRevenue, setMonthlyRevenue] = useState([]);
   const [cityStats, setCityStats] = useState([]);
   const [trendData, setTrendData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const headers = {
+          Authorization: `Bearer ${token}`,
         };
 
         const [revenueRes, cityRes, trendRes] = await Promise.all([
-          axios.get(
-            "http://localhost:5000/api/admin/premium-revenue-by-month",
-            config
-          ),
-          axios.get(
-            "http://localhost:5000/api/admin/listing-stats-by-city",
-            config
-          ),
-          axios.get(
-            "http://localhost:5000/api/admin/user-listing-trends-by-month",
-            config
-          ),
+          axios.get(`${BASE_URL}/api/admin/premium-revenue-by-month`, {
+            headers,
+          }),
+          axios.get(`${BASE_URL}/api/admin/listing-stats-by-city`, { headers }),
+          axios.get(`${BASE_URL}/api/admin/user-listing-trends-by-month`, {
+            headers,
+          }),
         ]);
 
         setMonthlyRevenue(revenueRes.data);
         setCityStats(cityRes.data);
         setTrendData(trendRes.data);
-      } catch (error) {
-        console.error("Veri alınamadı:", error);
+        setLoading(false);
+      } catch (err) {
+        console.error("Veri yüklenirken hata:", err);
+        setError("Veriler yüklenirken bir hata oluştu");
+        setLoading(false);
       }
     };
 

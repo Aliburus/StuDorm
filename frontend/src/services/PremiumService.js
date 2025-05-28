@@ -1,7 +1,9 @@
 // services/PremiumService.js
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/homepage";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+const API_URL = `${BASE_URL}/api/homepage`;
+
 const getPremiumListings = async (limit = 10) => {
   try {
     const res = await axios.get(`${API_URL}/premium-listings`, {
@@ -15,6 +17,7 @@ const getPremiumListings = async (limit = 10) => {
     );
   }
 };
+
 export const PremiumService = {
   getPremiumListings,
 };

@@ -39,6 +39,8 @@ const ErrorMessage = ({ message, severity = "error", onClose }) => {
         return "✅ Şifreniz başarıyla sıfırlandı. Yeni şifrenizle giriş yapabilirsiniz";
       case "password/reset/failed":
         return "❌ Şifre sıfırlama işlemi başarısız oldu";
+      case "password/reset/email/sent":
+        return "✅ Şifre sıfırlama bağlantısı e-posta adresinize gönderildi";
 
       // İlan İşlemleri
       case "listing/validation/title":
